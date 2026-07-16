@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨ Glow Up 2026 ✨</title>
+    
+    <!-- CUTE ICON SETUP -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png"> <!-- For iPhones -->
+    <meta name="apple-mobile-web-app-title" content="Glow Up 26"> <!-- Short title -->
+
+    <!-- Adding a cute Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Adding Canvas Confetti for the reward animation -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --bg-color: #ffe6ea;
+            --card-bg: #ffffff;
+            --primary-pink: #ff6b81;
+            --secondary-pink: #ff9eaa;
+            --text-dark: #4a4a4a;
+            --text-light: #8a8a8a;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 450px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(255, 107, 129, 0.15);
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-pink);
+            font-weight: 900;
+            margin-top: 0;
+            font-size: 28px;
+        }
+
+        .date-display {
+            text-align: center;
+            font-size: 18px;
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .day-selector {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            margin: 0 5px;
+            padding: 12px 10px;
+            background-color: var(--secondary-pink);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            background-color: var(--primary-pink);
+        }
+
+        .btn.active {
+            background-color: var(--primary-pink);
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.2);
+        }
+
+        .time-inputs {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+            background-color: #fff0f2;
+            padding: 15px;
+            border-radius: 15px;
+        }
+
+        .time-inputs input {
+            padding: 8px;
+            border: 2px solid var(--secondary-pink);
+            border-radius: 10px;
+            margin: 0 5px;
+            font-family: 'Nunito', sans-serif;
+            color: var(--primary-pink);
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: var(--primary-pink);
+            border-bottom: 2px dashed var(--secondary-pink);
+            padding-bottom: 5px;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .task-item.completed {
+            background-color: #e8f5e9;
+            opacity: 0.7;
+        }
+
+        .task-item input[type="checkbox"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-pink);
+            cursor: pointer;
+        }
+
+        .task-text {
+            flex-grow: 1;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .food-box {
+            background-color: #fff0f2;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .food-box span {
+            color: var(--primary-pink);
+            font-size: 18px;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .big-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--primary-pink);
+            color: white;
+            font-size: 18px;
+            border: none;
+            border-radius: 15px;
+            font-weight: 900;
+            margin-top: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 129, 0.4);
+            transition: transform 0.2s;
+        }
+
+        .big-btn:hover {
+            transform: scale(1.02);
+        }
+        
+        #loading {
+            text-align: center;
+            color: var(--primary-pink);
+            font-weight: 700;
+            display: none;
+            margin-top: 15px;
+        }
+
+        /* Sound Elements */
+        audio {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cute game sounds! -->
+    <audio id="checkSound" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3"></audio>
+    <audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
+
+    <div class="app-container">
+        <h1>✨ Glow Up 2026 ✨</h1>
+        <div class="date-display" id="dateDisplay">Loading Date...</div>
+
+        <div class="day-selector">
+            <button class="btn active" id="btnWork" onclick="setDayType('Work')">💼 Work Day</button>
+            <button class="btn" id="btnOff" onclick="setDayType('Off')">🌿 Day Off</button>
+            <button class="btn" id="btnTravel" onclick="setDayType('Travel')">✈️ Travel</button>
+        </div>
+
+        <div class="time-inputs" id="timeInputs">
+            <label>Work Hours:</label><br>
+            <input type="time" id="startTime" value="09:00"> to 
+            <input type="time" id="endTime" value="19:00">
+        </div>
+
+        <div class="section-title">🥗 Today's Menu</div>
+        <div class="food-box">
+            Lunch: <span id="lunchRandom">Loading...</span>
+        </div>
+        <div class="food-box">
+            Dinner: <span id="dinnerRandom">Loading...</span>
+        </div>
+
+        <div class="section-title">🏆 Daily Quests</div>
+        <ul class="task-list" id="dailyTasks">
+            <!-- Tasks will be injected here via JS -->
+        </ul>
+
+        <div class="section-title" id="weeklyTitle">📅 Weekly & Beauty Quests</div>
+        <ul class="task-list" id="weeklyTasks">
+            <!-- Weekly/Beauty tasks injected here -->
+        </ul>
+
+        <button class="big-btn" onclick="saveProgress()">Complete My Day! 💖</button>
+        <div id="loading">Saving to your Google Sheet...</div>
+    </div>
+
+    <script>
+        // Your API Link!
+        const API_URL = "https://script.google.com/macros/s/AKfycbzHoRsT8_lE2KIAj6712zOmLC4RIlJyRHkKoaunL2iC_2bIoRHobcrXY-sMb4Rt8boQQg/exec";
+        
+        let currentDayType = 'Work';
+        let dbData = null; // Will hold restaurants and configs from Google Sheet
+        let todayLunch = "";
+        let todayDinner = "";
+
+        // Audio setup
+        const checkSfx = document.getElementById('checkSound');
+        const winSfx = document.getElementById('winSound');
+
+        // 1. Set Today's Date
+        function setupDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date();
+            document.getElementById('dateDisplay').innerText = today.toLocaleDateString('en-US', options);
+            return today;
+        }
+
+        // 2. Fetch Data from Google Sheets
+        async function fetchDatabase() {
+            try {
+                const response = await fetch(API_URL);
+                dbData = await response.json();
+                generateMeals();
+                generateTasks();
+            } catch (error) {
+                console.error("Error fetching data", error);
+                document.getElementById('lunchRandom').innerText = "플랜트 식당 (Fallback)";
+                document.getElementById('dinnerRandom').innerText = "슬로우캘리 두부 (Fallback)";
+            }
+        }
+
+        // 3. Handle Day Type Selection
+        function setDayType(type) {
+            currentDayType = type;
+            document.getElementById('btnWork').classList.remove('active');
+            document.getElementById('btnOff').classList.remove('active');
+            document.getElementById('btnTravel').classList.remove('active');
+            
+            document.getElementById('btn' + type).classList.add('active');
+            
+            if(type === 'Work') {
+                document.getElementById('timeInputs').style.display = 'block';
+            } else {
+                document.getElementById('timeInputs').style.display = 'none';
+            }
+            
+            generateMeals();
+            generateTasks();
+        }
+
+        // 4. Randomize Meals based on Day Type
+        function generateMeals() {
+            if (!dbData) return;
+            
+            const weekSpots = dbData.restaurants.Weekday;
+            const weekendSpots = dbData.restaurants.Weekend;
+            
+            if (currentDayType === 'Work') {
+                todayLunch = weekSpots[Math.floor(Math.random() * weekSpots.length)];
+                todayDinner = weekSpots[Math.floor(Math.random() * weekSpots.length)];
+            } else if (currentDayType === 'Off') {
+                todayLunch = weekendSpots[Math.floor(Math.random() * weekendSpots.length)];
+                todayDinner = weekendSpots[Math.floor(Math.random() * weekendSpots.length)];
+            } else {
+                todayLunch = "Explore & Eat Good Vegan Food!";
+                todayDinner = "Explore & Eat Good Vegan Food!";
+            }
+            
+            document.getElementById('lunchRandom').innerText = todayLunch;
+            document.getElementById('dinnerRandom').innerText = todayDinner;
+        }
+
+        // 5. Generate Dynamic Tasks
+        function generateTasks() {
+            const dailyList = document.getElementById('dailyTasks');
+            const weeklyList = document.getElementById('weeklyTasks');
+            const today = new Date();
+            const dateNumber = today.getDate(); // e.g., 16 or 17
+            
+            dailyList.innerHTML = "";
+            weeklyList.innerHTML = "";
+
+            // --- Daily Quests ---
+            if (currentDayType !== 'Travel') {
+                dailyList.innerHTML += createTaskHTML("gym", "💪 Gym Session (Min 10 mins!)");
+                dailyList.innerHTML += createTaskHTML("edit", "💻 Edit/Voiceover (Min 2 mins!)");
+                dailyList.innerHTML += createTaskHTML("video", "🧠 Watch 1 Motivational Video");
+            } else {
+                dailyList.innerHTML += createTaskHTML("travel_cardio", "🚶‍♀️ Aesthetic Walk (Cardio!)");
+                dailyList.innerHTML += createTaskHTML("travel_film", "📸 Film B-Roll for YouTube");
+            }
+
+            // --- Weekly / Beauty Quests (Skipped on Travel Days) ---
+            if (currentDayType !== 'Travel') {
+                // Add Laundry & Clean checks (You can make this smarter with LocalStorage later)
+                weeklyList.innerHTML += createTaskHTML("laundry", "🧺 Weekly Laundry (If pending)");
+                weeklyList.innerHTML += createTaskHTML("clean", "🧹 Weekly Deep Clean (If pending)");
+                
+                // Beauty Reminders (Checking the exact date!)
+                if (dateNumber === 17) {
+                    weeklyList.innerHTML += createTaskHTML("beauty_hair", "💇‍♀️ Haircut & Eyebrow Waxing Appointment!");
+                }
+                if (dateNumber === 21) {
+                    weeklyList.innerHTML += createTaskHTML("beauty_laser", "✨ Potenza / Laser Hair Removal!");
+                }
+                
+                weeklyList.innerHTML += createTaskHTML("savings", "💰 Transfer 375,000 KRW to Savings (Weekly)");
+            } else {
+                document.getElementById('weeklyTitle').style.display = 'none';
+            }
+        }
+
+        // Helper to create task HTML with sound effect
+        function createTaskHTML(id, text) {
+            return `
+                <li class="task-item" id="item_${id}">
+                    <input type="checkbox" id="${id}" onchange="playSoundAndStyle(this, 'item_${id}')">
+                    <span class="task-text">${text}</span>
+                </li>
+            `;
+        }
+
+        // Play sound and cross off item
+        function playSoundAndStyle(checkbox, itemId) {
+            if(checkbox.checked) {
+                checkSfx.currentTime = 0;
+                checkSfx.play();
+                document.getElementById(itemId).classList.add('completed');
+            } else {
+                document.getElementById(itemId).classList.remove('completed');
+            }
+        }
+
+        // 6. Save Progress to Google Sheets
+        async function saveProgress() {
+            // Trigger Confetti and Win Sound!
+            winSfx.play();
+            confetti({
+                particleCount: 150,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#ff6b81', '#ff9eaa', '#ffffff']
+            });
+
+            document.getElementById('loading').style.display = 'block';
+
+            // Gather all the data
+            const payload = {
+                Date: document.getElementById('dateDisplay').innerText,
+                Day_Type: currentDayType,
+                Start_Time: currentDayType === 'Work' ? document.getElementById('startTime').value : "N/A",
+                End_Time: currentDayType === 'Work' ? document.getElementById('endTime').value : "N/A",
+                Lunch: todayLunch,
+                Dinner: todayDinner,
+                Gym_10min: document.getElementById('gym') ? document.getElementById('gym').checked : false,
+                Edit_2min: document.getElementById('edit') ? document.getElementById('edit').checked : false,
+                Video_Watched: document.getElementById('video') ? document.getElementById('video').checked : false,
+                Laundry_Done: document.getElementById('laundry') ? document.getElementById('laundry').checked : false,
+                DeepClean_Done: document.getElementById('clean') ? document.getElementById('clean').checked : false,
+                Beauty_Done: false, // You can make this more specific later
+                Savings_KRW: document.getElementById('savings') && document.getElementById('savings').checked ? 375000 : 0
+            };
+
+            // Send to Apps Script via POST
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Required for sending JSON without complex CORS setup
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                document.getElementById('loading').innerText = "✨ Saved Successfully! See you tomorrow! ✨";
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                }, 3000);
+                
+            } catch(e) {
+                document.getElementById('loading').innerText = "Error saving. Please try again.";
+                console.error(e);
+            }
+        }
+
+        // Initialize App
+        setupDate();
+        setDayType('Work'); // Default to work day
+        fetchDatabase(); // Load restaurants from Google Sheet
+
+    </script>
+</body>
+</html>

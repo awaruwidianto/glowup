@@ -86,7 +86,7 @@
     </div>
 
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbzHoRsT8_lE2KIAj6712zOmLC4RIlJyRHkKoaunL2iC_2bIoRHobcrXY-sMb4Rt8boQQg/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbwbGMBs2GJoySlJh8ukXk9n_m3wvMehXn0xCbIU3UMFcgp4Oi7ycZwKhmzr4dfUI4Pm/exec";
         
         let currentDayType = 'Work';
         let dbData = null; 
@@ -107,7 +107,6 @@
                 const response = await fetch(API_URL);
                 dbData = await response.json();
                 
-                // Update the Interface text from the database!
                 if(dbData.ui) {
                     document.getElementById('appTitle').innerText = dbData.ui['app_title'] || "Glow Up Planner";
                     document.getElementById('btnWork').innerText = dbData.ui['btn_work'] || "Work Day";

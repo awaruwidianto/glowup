@@ -18,59 +18,34 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
-        /* === AWARU THEME VARIABLES === */
         :root {
-            --ink: #27213f;
-            --ink-soft: #5f5684;
-            --cream: #fff9f1;
+            --ink: #27213f; --ink-soft: #5f5684; --cream: #fff9f1;
             --glass: rgba(255, 255, 255, 0.68);
-            --purple: #a78bfa;
-            --pink: #ff94cf;
-            --mint: #b5f7d3;
-            --yellow: #ffe58f;
+            --purple: #a78bfa; --pink: #ff94cf; --mint: #b5f7d3; --yellow: #ffe58f;
             --shadow: 0 24px 70px rgba(46, 24, 98, 0.28);
-            --pixel-shadow: 0 5px 0 rgba(70, 49, 117, 0.55), 0 18px 32px rgba(70, 49, 117, 0.22);
-            --radius: 26px;
-            --font-title: "Nunito", sans-serif;
-            --font-body: "Nunito", sans-serif;
+            --font-title: "Nunito", sans-serif; --font-body: "Nunito", sans-serif;
         }
 
-        * { box-sizing: border-box; }
-        html { min-height: 100%; }
+        * { box-sizing: border-box; } html { min-height: 100%; }
         
         body {
-            margin: 0;
-            min-height: 100vh;
-            overflow-x: hidden;
-            color: var(--ink);
-            font-family: var(--font-body);
-            background:
-                radial-gradient(circle at 18% 16%, rgba(255, 201, 238, .72), transparent 28%),
-                radial-gradient(circle at 82% 26%, rgba(142, 231, 255, .58), transparent 24%),
-                radial-gradient(circle at 45% 88%, rgba(181, 247, 211, .45), transparent 30%),
-                linear-gradient(130deg, #c9b6ff, #ffbbdb, #7f83ff, #7fe7ff, #cfb7ff);
-            background-size: 200% 200%;
-            animation: galaxyShift 22s ease-in-out infinite;
+            margin: 0; min-height: 100vh; overflow-x: hidden;
+            color: var(--ink); font-family: var(--font-body);
+            background: radial-gradient(circle at 18% 16%, rgba(255, 201, 238, .72), transparent 28%),
+                        radial-gradient(circle at 82% 26%, rgba(142, 231, 255, .58), transparent 24%),
+                        radial-gradient(circle at 45% 88%, rgba(181, 247, 211, .45), transparent 30%),
+                        linear-gradient(130deg, #c9b6ff, #ffbbdb, #7f83ff, #7fe7ff, #cfb7ff);
+            background-size: 200% 200%; animation: galaxyShift 22s ease-in-out infinite;
         }
 
-        body::before, body::after {
-            content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-        }
         body::before {
-            background-image:
-                radial-gradient(circle, rgba(255,255,255,.92) 0 1px, transparent 1.5px),
-                radial-gradient(circle, rgba(255,255,255,.72) 0 1px, transparent 1.6px);
-            background-size: 44px 44px, 72px 72px;
-            animation: starDrift 34s linear infinite;
+            content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,.92) 0 1px, transparent 1.5px),
+                              radial-gradient(circle, rgba(255,255,255,.72) 0 1px, transparent 1.6px);
+            background-size: 44px 44px, 72px 72px; animation: starDrift 34s linear infinite;
         }
 
-        /* === GALAXY LOADER === */
-        .galaxy-loader {
-            position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px;
-            background: radial-gradient(circle at 20% 20%, rgba(255,148,207,.55), transparent 28%),
-                        linear-gradient(135deg, #33285b, #6d5dfc, #ff94cf);
-            transition: opacity .45s ease, visibility .45s ease;
-        }
+        .galaxy-loader { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: radial-gradient(circle at 20% 20%, rgba(255,148,207,.55), transparent 28%), linear-gradient(135deg, #33285b, #6d5dfc, #ff94cf); transition: opacity .45s ease, visibility .45s ease; }
         .galaxy-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .ufo-loader { position: relative; width: 132px; height: 132px; animation: ufoLoaderFloat 2.2s ease-in-out infinite; }
         .ufo-loader-dome { position: absolute; left: 38px; top: 18px; width: 56px; height: 42px; border-radius: 56px 56px 18px 18px; background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(142,231,255,.68)); border: 3px solid rgba(255,255,255,.88); z-index: 2; }
@@ -78,113 +53,44 @@
         .ufo-loader-body span { width: 9px; height: 9px; border-radius: 50%; background: #ffe58f; animation: ufoLight 1s ease-in-out infinite alternate; }
         .ufo-loader-beam { position:absolute; left:34px; top:80px; width:64px; height:50px; background: linear-gradient(180deg, rgba(181,247,211,.48), rgba(142,231,255,0)); clip-path: polygon(28% 0,72% 0,100% 100%,0 100%); animation: beamPulse 1.4s ease-in-out infinite; }
 
-        /* === APP SHELL & LAYOUT === */
-        .galaxy-stage {
-            position: relative; z-index: 1; min-height: 100vh; display: grid; place-items: center; padding: clamp(12px, 3vw, 36px); perspective: 1200px;
-        }
+        .galaxy-stage { position: relative; z-index: 1; min-height: 100vh; display: grid; place-items: center; padding: clamp(12px, 3vw, 36px); perspective: 1200px; }
 
-        .app-shell {
-            width: min(100%, 550px);
-            border: 4px solid rgba(66, 43, 108, .92);
-            border-radius: 34px;
-            background: linear-gradient(145deg, rgba(255,255,255,.77), rgba(255,255,255,.46));
-            box-shadow: var(--shadow), inset 0 0 0 4px rgba(255,255,255,.58);
-            backdrop-filter: blur(22px);
-            transform-style: preserve-3d;
-            transition: transform 0.1s ease-out;
-            padding-bottom: 20px;
-        }
-
-        .topbar {
-            display: flex; align-items: center; gap: 12px; padding: 20px;
-            background: rgba(255,255,255,.38); border-bottom: 3px solid rgba(86,65,121,.20);
-            border-radius: 30px 30px 0 0;
-        }
-
-        .brand-badge {
-            width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center;
-            background: linear-gradient(145deg, #fff, #ffd8ec); border: 3px solid rgba(86,65,121,.68);
-            box-shadow: 0 5px 0 rgba(86,65,121,.23); padding: 5px;
-        }
+        .app-shell { width: min(100%, 550px); border: 4px solid rgba(66, 43, 108, .92); border-radius: 34px; background: linear-gradient(145deg, rgba(255,255,255,.77), rgba(255,255,255,.46)); box-shadow: var(--shadow), inset 0 0 0 4px rgba(255,255,255,.58); backdrop-filter: blur(22px); transform-style: preserve-3d; transition: transform 0.1s ease-out; padding-bottom: 20px; }
+        .topbar { display: flex; align-items: center; gap: 12px; padding: 20px; background: rgba(255,255,255,.38); border-bottom: 3px solid rgba(86,65,121,.20); border-radius: 30px 30px 0 0; }
+        .brand-badge { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(145deg, #fff, #ffd8ec); border: 3px solid rgba(86,65,121,.68); box-shadow: 0 5px 0 rgba(86,65,121,.23); padding: 5px; }
         .brand-badge img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
-        
         h1 { margin: 0; font-family: var(--font-title); font-size: 26px; font-weight: 900; color: #5140b8; text-transform: uppercase; }
         
         .screen-content { padding: 20px; }
-
         .date-display { text-align: center; font-size: 16px; color: var(--ink-soft); margin-bottom: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* === BUTTONS & INPUTS === */
         .day-selector { display: flex; gap: 10px; margin-bottom: 20px; }
-        
-        .game-button {
-            flex: 1; display: inline-flex; align-items: center; justify-content: center;
-            min-height: 42px; padding: 8px 14px; font-size: 14px; border-radius: 14px;
-            border: 3px solid rgba(69,44,109,.82);
-            background: linear-gradient(180deg, #fff7bf, #ffbfde);
-            color: #4b3970; font-weight: 900; font-family: var(--font-title); cursor: pointer;
-            box-shadow: 0 4px 0 rgba(70, 49, 117, .34); transition: transform .15s, box-shadow .15s;
-        }
+        .game-button { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 8px 14px; font-size: 14px; border-radius: 14px; border: 3px solid rgba(69,44,109,.82); background: linear-gradient(180deg, #fff7bf, #ffbfde); color: #4b3970; font-weight: 900; font-family: var(--font-title); cursor: pointer; box-shadow: 0 4px 0 rgba(70, 49, 117, .34); transition: transform .15s, box-shadow .15s; white-space: nowrap; }
         .game-button:hover { transform: translateY(-3px); filter: brightness(1.05); }
         .game-button:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(70,49,117,.34); }
         .game-button.active { background: linear-gradient(180deg, #aef2ff, #aa93ff); color: white; }
 
         .primary-button { background: linear-gradient(180deg, #ff94cf, #ff6b81); color: white; width: 100%; font-size: 18px; padding: 14px; margin-top: 20px; }
-
         .time-inputs { display: none; text-align: center; margin-bottom: 20px; background: rgba(255,255,255,.5); padding: 15px; border-radius: 18px; border: 2px dashed rgba(86,65,121,.25); font-weight: 800; color: var(--ink-soft); }
         .time-inputs input { padding: 8px; border: 3px solid rgba(86,65,121,.3); border-radius: 12px; margin: 0 5px; font-family: var(--font-title); font-weight: 700; color: #5140b8; background: white; }
 
-        /* === QUEST CARDS & LISTS === */
-        .window-label {
-            display: inline-block; padding: 4px 12px; border-radius: 999px;
-            border: 3px solid rgba(69,44,109,.8); background: #fff7bf;
-            font-family: var(--font-title); color: #6a4ddb; font-size: 12px; font-weight: 900;
-            box-shadow: 0 4px 0 rgba(86,65,121,.22); margin-bottom: 10px; text-transform: uppercase;
-        }
-
+        .window-label { display: inline-block; padding: 4px 12px; border-radius: 999px; border: 3px solid rgba(69,44,109,.8); background: #fff7bf; font-family: var(--font-title); color: #6a4ddb; font-size: 12px; font-weight: 900; box-shadow: 0 4px 0 rgba(86,65,121,.22); margin-bottom: 10px; text-transform: uppercase; }
         .food-box { background: rgba(255,255,255,.7); padding: 15px; border-radius: 16px; border: 3px solid rgba(86,65,121,.28); text-align: center; font-weight: 800; margin-bottom: 10px; color: var(--ink-soft); }
         .food-box span { color: #5844c9; font-size: 18px; display: block; margin-top: 5px; font-weight: 900; }
 
         .task-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
         .task-item { display: flex; align-items: center; background: rgba(255,249,241,.86); padding: 14px; border-radius: 18px; border: 3px solid rgba(70,49,117,.62); margin-bottom: 10px; transition: all 0.3s; box-shadow: inset 0 0 0 3px rgba(255,255,255,.6); }
         .task-item.completed { background: #b5f7d3; opacity: 0.8; }
-        .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: #ff94cf; cursor: pointer; }
-        .task-text { flex-grow: 1; font-size: 16px; font-weight: 800; color: #3d315f; }
+        .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: #ff94cf; cursor: pointer; flex-shrink: 0; }
+        .task-text { flex-grow: 1; font-size: 16px; font-weight: 800; color: #3d315f; line-height: 1.3; }
 
         #loading { text-align: center; color: #5844c9; font-weight: 900; display: none; margin-top: 15px; background: #ffe58f; padding: 10px; border-radius: 12px; border: 2px solid #5844c9; font-size: 14px; }
 
-        /* === MOBILE SHRINK HOTFIX (80% SCALE EFFECT) === */
+        /* === MOBILE SHRINK HOTFIX === */
         @media (max-width: 500px) {
-            .galaxy-stage { padding: 10px; }
-            .app-shell { border-width: 3px; border-radius: 26px; padding-bottom: 15px; }
-            .topbar { padding: 15px; gap: 10px; border-radius: 24px 24px 0 0; }
-            h1 { font-size: 20px; }
-            .brand-badge { width: 36px; height: 36px; padding: 4px; border-width: 2px; }
-            
-            .screen-content { padding: 14px; }
-            .date-display { font-size: 13px; margin-bottom: 14px; }
-            
-            .day-selector { gap: 6px; margin-bottom: 15px; }
-            .game-button { min-height: 36px; padding: 6px 8px; font-size: 12px; border-width: 2px; border-radius: 12px; }
-            
-            .window-label { font-size: 10px; padding: 3px 10px; border-width: 2px; }
-            
-            .food-box { padding: 10px; font-size: 13px; border-radius: 14px; border-width: 2px; margin-bottom: 8px; }
-            .food-box span { font-size: 15px; margin-top: 2px; }
-            
-            .task-item { padding: 10px 12px; margin-bottom: 8px; border-radius: 14px; border-width: 2px; }
-            .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; }
-            .task-text { font-size: 14px; }
-            
-            .task-list { margin-bottom: 15px; }
-            
-            .primary-button { font-size: 15px; padding: 12px; margin-top: 12px; min-height: 44px; }
-            
-            .time-inputs { padding: 12px; font-size: 14px; }
-            .time-inputs input { padding: 6px; font-size: 13px; border-width: 2px; }
+            .galaxy-stage { padding: 10px; } .app-shell { border-width: 3px; border-radius: 26px; padding-bottom: 15px; } .topbar { padding: 15px; gap: 10px; border-radius: 24px 24px 0 0; } h1 { font-size: 20px; } .brand-badge { width: 36px; height: 36px; padding: 4px; border-width: 2px; } .screen-content { padding: 14px; } .date-display { font-size: 13px; margin-bottom: 14px; } .day-selector { gap: 6px; margin-bottom: 15px; } .game-button { min-height: 36px; padding: 6px 4px; font-size: 11px; border-width: 2px; border-radius: 12px; } .window-label { font-size: 10px; padding: 3px 10px; border-width: 2px; } .food-box { padding: 10px; font-size: 13px; border-radius: 14px; border-width: 2px; margin-bottom: 8px; } .food-box span { font-size: 15px; margin-top: 2px; } .task-item { padding: 10px 12px; margin-bottom: 8px; border-radius: 14px; border-width: 2px; } .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; } .task-text { font-size: 14px; } .task-list { margin-bottom: 15px; } .primary-button { font-size: 15px; padding: 12px; margin-top: 12px; min-height: 44px; } .time-inputs { padding: 12px; font-size: 14px; } .time-inputs input { padding: 6px; font-size: 13px; border-width: 2px; }
         }
 
-        /* === COSMIC DECORATIONS === */
         .cosmic-decoration { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
         .planet { position: absolute; border-radius: 50%; animation: planetFloat 9s ease-in-out infinite; }
         .planet.one { width: 86px; height: 86px; left: 7%; top: 10%; background: radial-gradient(circle at 35% 28%, #fff4be, #ff9ece 48%, #8d82ff); box-shadow: 0 16px 28px rgba(61, 38, 104, .26); }
@@ -196,14 +102,10 @@
         @keyframes ufoLight { from { opacity:.45; transform:scale(.8); } to { opacity:1; transform:scale(1.15); } }
         @keyframes beamPulse { 0%,100% { opacity:.35; transform:scaleY(.88); } 50% { opacity:.8; transform:scaleY(1.08); } }
         @keyframes planetFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-14px) rotate(3deg)} }
-
-        /* Audio elements hidden */
-        audio { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- Awaru UFO Loader -->
     <div class="galaxy-loader" id="galaxy-loader">
         <div class="ufo-loader">
             <div class="ufo-loader-dome"></div>
@@ -214,7 +116,6 @@
         </div>
     </div>
 
-    <!-- Cosmic Background Decorations -->
     <div class="cosmic-decoration">
         <div class="planet one"></div>
         <div class="planet two"></div>
@@ -269,13 +170,8 @@
     </main>
 
     <script>
-        // === AUDIO SYNTHESIZER (FROM AWARU) ===
-        const audioState = {
-            soundEnabled: true,
-            audioContext: null,
-            masterGain: null
-        };
-
+        // === AUDIO SYNTHESIZER ===
+        const audioState = { soundEnabled: true, audioContext: null, masterGain: null };
         function initAudio() {
             if (audioState.audioContext) return;
             const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -285,30 +181,13 @@
             audioState.masterGain.gain.value = 0.2;
             audioState.masterGain.connect(audioState.audioContext.destination);
         }
-
-        function forceUnlockAudioContext() {
-            initAudio();
-            if (audioState.audioContext && audioState.audioContext.state === "suspended") {
-                audioState.audioContext.resume();
-            }
-        }
-
+        function forceUnlockAudioContext() { initAudio(); if (audioState.audioContext && audioState.audioContext.state === "suspended") { audioState.audioContext.resume(); } }
         function playTone(frequency, duration, type = "sine", gain = 0.08, delay = 0) {
-            initAudio();
-            if (!audioState.audioContext) return;
-            if (audioState.audioContext.state === "suspended") audioState.audioContext.resume();
-            const now = audioState.audioContext.currentTime + delay;
-            const osc = audioState.audioContext.createOscillator();
-            const vol = audioState.audioContext.createGain();
-            osc.type = type;
-            osc.frequency.setValueAtTime(frequency, now);
-            vol.gain.setValueAtTime(gain, now);
-            vol.gain.exponentialRampToValueAtTime(0.001, now + duration);
-            osc.connect(vol).connect(audioState.masterGain);
-            osc.start(now);
-            osc.stop(now + duration + 0.02);
+            initAudio(); if (!audioState.audioContext) return; if (audioState.audioContext.state === "suspended") audioState.audioContext.resume();
+            const now = audioState.audioContext.currentTime + delay; const osc = audioState.audioContext.createOscillator(); const vol = audioState.audioContext.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(frequency, now); vol.gain.setValueAtTime(gain, now); vol.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            osc.connect(vol).connect(audioState.masterGain); osc.start(now); osc.stop(now + duration + 0.02);
         }
-
         function playPixelSound(name) {
             const g = 0.07;
             if (name === "click") playTone(520, .06, "square", g);
@@ -316,7 +195,6 @@
             if (name === "coin") { playTone(880, .08, "triangle", g); playTone(1320, .1, "triangle", g, .06); }
             if (name === "success") { playTone(659, .12, "sine", g); playTone(988, .18, "sine", g, .1); }
         }
-
         function attachSoundEvents() {
             document.querySelectorAll(".game-button, input[type='checkbox']").forEach(el => {
                 if (!el.hasAttribute('data-sound-bound')) {
@@ -326,29 +204,32 @@
                 }
             });
         }
+        window.addEventListener("click", forceUnlockAudioContext); window.addEventListener("touchstart", forceUnlockAudioContext);
 
-        window.addEventListener("click", forceUnlockAudioContext);
-        window.addEventListener("touchstart", forceUnlockAudioContext);
+        // === SMART CLOUD WEEK CALCULATOR ===
+        function getISOWeekKey(d = new Date()) {
+            const date = new Date(d.getTime());
+            date.setHours(0, 0, 0, 0);
+            date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+            const week1 = new Date(date.getFullYear(), 0, 4);
+            const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+            return `${date.getFullYear()}_W${weekNum}`;
+        }
 
-        // === APP LOGIC ===
         const API_URL = "https://script.google.com/macros/s/AKfycbwbGMBs2GJoySlJh8ukXk9n_m3wvMehXn0xCbIU3UMFcgp4Oi7ycZwKhmzr4dfUI4Pm/exec";
         
         let currentDayType = 'Work';
         let dbData = null; 
         let todayLunch = "";
         let todayDinner = "";
+        let currentWeekKey = getISOWeekKey();
 
-        // Hide Loader
         document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => {
-                document.getElementById("galaxy-loader").classList.add("hidden");
-                attachSoundEvents(); 
-            }, 1800); 
+            setTimeout(() => { document.getElementById("galaxy-loader").classList.add("hidden"); attachSoundEvents(); }, 1800); 
         });
 
-        // 3D Tilt Effect on Mouse Move
         document.addEventListener("mousemove", event => {
-            if (window.innerWidth < 768) return; // Disable tilt on phones for better touch experience
+            if (window.innerWidth < 768) return; 
             const x = (event.clientX / window.innerWidth - .5) * 2;
             const y = (event.clientY / window.innerHeight - .5) * 2;
             document.getElementById("app-shell").style.transform = `rotateY(${x * 3}deg) rotateX(${-y * 3}deg)`;
@@ -356,8 +237,7 @@
 
         function setupDate() {
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const today = new Date();
-            document.getElementById('dateDisplay').innerText = today.toLocaleDateString('en-US', options);
+            document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', options);
         }
 
         async function fetchDatabase() {
@@ -377,51 +257,32 @@
                 }
                 generateMeals();
                 generateTasks();
-            } catch (error) {
-                console.error("Error fetching data", error);
-            }
+            } catch (error) { console.error("Error fetching data", error); }
         }
 
         function setDayType(type) {
             currentDayType = type;
-            document.getElementById('btnWork').classList.remove('active');
-            document.getElementById('btnOff').classList.remove('active');
-            document.getElementById('btnTravel').classList.remove('active');
+            document.getElementById('btnWork').classList.remove('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
             document.getElementById('btn' + type).classList.add('active');
-            
             document.getElementById('timeInputs').style.display = (type === 'Work') ? 'block' : 'none';
-            generateMeals();
-            generateTasks();
+            generateMeals(); generateTasks();
         }
 
         function generateMeals() {
             if (!dbData) return;
-            const weekSpots = dbData.restaurants.Weekday;
-            const weekendSpots = dbData.restaurants.Weekend;
-            
-            if (currentDayType === 'Work') {
-                todayLunch = weekSpots[Math.floor(Math.random() * weekSpots.length)];
-                todayDinner = weekSpots[Math.floor(Math.random() * weekSpots.length)];
-            } else if (currentDayType === 'Off') {
-                todayLunch = weekendSpots[Math.floor(Math.random() * weekendSpots.length)];
-                todayDinner = weekendSpots[Math.floor(Math.random() * weekendSpots.length)];
-            } else {
-                todayLunch = "Explore Local Vegan Food!";
-                todayDinner = "Explore Local Vegan Food!";
-            }
-            document.getElementById('lunchRandom').innerText = todayLunch;
-            document.getElementById('dinnerRandom').innerText = todayDinner;
+            const weekSpots = dbData.restaurants.Weekday; const weekendSpots = dbData.restaurants.Weekend;
+            if (currentDayType === 'Work') { todayLunch = weekSpots[Math.floor(Math.random() * weekSpots.length)]; todayDinner = weekSpots[Math.floor(Math.random() * weekSpots.length)]; } 
+            else if (currentDayType === 'Off') { todayLunch = weekendSpots[Math.floor(Math.random() * weekendSpots.length)]; todayDinner = weekendSpots[Math.floor(Math.random() * weekendSpots.length)]; } 
+            else { todayLunch = "Explore Local Vegan Food!"; todayDinner = "Explore Local Vegan Food!"; }
+            document.getElementById('lunchRandom').innerText = todayLunch; document.getElementById('dinnerRandom').innerText = todayDinner;
         }
 
         function generateTasks() {
             if (!dbData || !dbData.ui) return;
-            const dailyList = document.getElementById('dailyTasks');
-            const weeklyList = document.getElementById('weeklyTasks');
-            const today = new Date();
-            const dateNumber = today.getDate();
+            const dailyList = document.getElementById('dailyTasks'); const weeklyList = document.getElementById('weeklyTasks');
+            const dateNumber = new Date().getDate();
             
-            dailyList.innerHTML = "";
-            weeklyList.innerHTML = "";
+            dailyList.innerHTML = ""; weeklyList.innerHTML = "";
 
             if (currentDayType !== 'Travel') {
                 dailyList.innerHTML += createTaskHTML("gym", dbData.ui['task_gym']);
@@ -434,34 +295,42 @@
 
             if (currentDayType !== 'Travel') {
                 document.getElementById('weeklyContainer').style.display = 'block';
-                weeklyList.innerHTML += createTaskHTML("laundry", dbData.ui['task_laundry']);
-                weeklyList.innerHTML += createTaskHTML("clean", dbData.ui['task_clean']);
-                if (dateNumber === 17) weeklyList.innerHTML += createTaskHTML("beauty_hair", dbData.ui['task_beauty_hair']);
-                if (dateNumber === 21) weeklyList.innerHTML += createTaskHTML("beauty_laser", dbData.ui['task_beauty_laser']);
-                weeklyList.innerHTML += createTaskHTML("savings", dbData.ui['task_savings']);
+                
+                // Read from Cloud Database (Google Sheet Logs)
+                let doneLaundry = false; let doneClean = false; let doneSavings = false;
+                
+                if (dbData.logs) {
+                    dbData.logs.forEach(log => {
+                        let logDate = new Date(log.Date);
+                        if (!isNaN(logDate) && getISOWeekKey(logDate) === currentWeekKey) {
+                            if (String(log.Laundry_Done).toLowerCase() === "true") doneLaundry = true;
+                            if (String(log.DeepClean_Done).toLowerCase() === "true") doneClean = true;
+                            if (Number(log.Savings_KRW) > 0) doneSavings = true;
+                        }
+                    });
+                }
+
+                let weeklyTasksAdded = 0;
+                if (!doneLaundry) { weeklyList.innerHTML += createTaskHTML("laundry", dbData.ui['task_laundry']); weeklyTasksAdded++; }
+                if (!doneClean) { weeklyList.innerHTML += createTaskHTML("clean", dbData.ui['task_clean']); weeklyTasksAdded++; }
+                if (!doneSavings) { weeklyList.innerHTML += createTaskHTML("savings", dbData.ui['task_savings']); weeklyTasksAdded++; }
+                if (dateNumber === 17) { weeklyList.innerHTML += createTaskHTML("beauty_hair", dbData.ui['task_beauty_hair']); weeklyTasksAdded++; }
+                if (dateNumber === 21) { weeklyList.innerHTML += createTaskHTML("beauty_laser", dbData.ui['task_beauty_laser']); weeklyTasksAdded++; }
+                
+                if (weeklyTasksAdded === 0) { weeklyList.innerHTML = `<li style="text-align:center; color: var(--ink-soft); font-weight:800; font-size:14px; padding: 10px;">✨ All weekly quests complete! ✨</li>`; }
             } else {
                 document.getElementById('weeklyContainer').style.display = 'none';
             }
-
             attachSoundEvents(); 
         }
 
         function createTaskHTML(id, text) {
-            return `
-                <li class="task-item" id="item_${id}">
-                    <input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')">
-                    <span class="task-text">${text || 'Task'}</span>
-                </li>
-            `;
+            return `<li class="task-item" id="item_${id}"><input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')"><span class="task-text">${text || 'Task'}</span></li>`;
         }
 
         function styleCheckbox(checkbox, itemId) {
-            if(checkbox.checked) {
-                playPixelSound("coin");
-                document.getElementById(itemId).classList.add('completed');
-            } else {
-                document.getElementById(itemId).classList.remove('completed');
-            }
+            if(checkbox.checked) { playPixelSound("coin"); document.getElementById(itemId).classList.add('completed'); } 
+            else { document.getElementById(itemId).classList.remove('completed'); }
         }
 
         async function saveProgress() {
@@ -469,39 +338,33 @@
             confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#ff94cf', '#b5f7d3', '#8ee7ff', '#ffe58f'] });
             document.getElementById('loading').style.display = 'block';
 
+            const isLaundryDone = document.getElementById('laundry') ? document.getElementById('laundry').checked : false;
+            const isCleanDone = document.getElementById('clean') ? document.getElementById('clean').checked : false;
+            const isSavingsDone = document.getElementById('savings') ? document.getElementById('savings').checked : false;
+
             const payload = {
                 Date: document.getElementById('dateDisplay').innerText,
-                Day_Type: currentDayType,
-                Start_Time: currentDayType === 'Work' ? document.getElementById('startTime').value : "N/A",
-                End_Time: currentDayType === 'Work' ? document.getElementById('endTime').value : "N/A",
-                Lunch: todayLunch,
-                Dinner: todayDinner,
+                Day_Type: currentDayType, Start_Time: currentDayType === 'Work' ? document.getElementById('startTime').value : "N/A", End_Time: currentDayType === 'Work' ? document.getElementById('endTime').value : "N/A",
+                Lunch: todayLunch, Dinner: todayDinner,
                 Gym_10min: document.getElementById('gym') ? document.getElementById('gym').checked : false,
                 Edit_2min: document.getElementById('edit') ? document.getElementById('edit').checked : false,
                 Video_Watched: document.getElementById('video') ? document.getElementById('video').checked : false,
-                Laundry_Done: document.getElementById('laundry') ? document.getElementById('laundry').checked : false,
-                DeepClean_Done: document.getElementById('clean') ? document.getElementById('clean').checked : false,
-                Beauty_Done: false, 
-                Savings_KRW: document.getElementById('savings') && document.getElementById('savings').checked ? 375000 : 0
+                Laundry_Done: isLaundryDone, DeepClean_Done: isCleanDone, Beauty_Done: false, 
+                Savings_KRW: isSavingsDone ? 375000 : 0
             };
 
+            // Update local memory so it disappears instantly without a full page reload!
+            if (!dbData.logs) dbData.logs = [];
+            dbData.logs.push({ Date: payload.Date, Laundry_Done: payload.Laundry_Done, DeepClean_Done: payload.DeepClean_Done, Savings_KRW: payload.Savings_KRW });
+
             try {
-                await fetch(API_URL, {
-                    method: 'POST', mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                document.getElementById('loading').innerText = "✨ Saved to the Galaxy! See you tomorrow! ✨";
-                setTimeout(() => { document.getElementById('loading').style.display = 'none'; }, 3000);
-            } catch(e) {
-                document.getElementById('loading').innerText = "Error saving. Connection lost in space.";
-            }
+                await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                document.getElementById('loading').innerText = "✨ Saved to the Galaxy! ✨";
+                setTimeout(() => { document.getElementById('loading').style.display = 'none'; generateTasks(); }, 2000);
+            } catch(e) { document.getElementById('loading').innerText = "Error saving. Connection lost in space."; }
         }
 
-        setupDate();
-        setDayType('Work'); 
-        fetchDatabase(); 
-
+        setupDate(); setDayType('Work'); fetchDatabase(); 
     </script>
 </body>
 </html>

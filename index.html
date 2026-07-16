@@ -342,6 +342,28 @@
                     }
                 }
 
+                // === SMART BROWS LOGIC (17th) ===
+                let isBrowsDone = dbData.beautyDone ? dbData.beautyDone.brows : false;
+                let browsTaskName = dbData.ui['task_beauty_brows'] || "Eyebrow Waxing & Bleach";
+
+                if (isBrowsDone) {
+                    weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${browsTaskName} (Completed)</span></li>`;
+                    weeklyTasksAdded++;
+                } else {
+                    if (dateNumber >= 17) {
+                        weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_brows">
+                            <input type="checkbox" id="beauty_brows" onchange="styleCheckbox(this, 'item_beauty_brows')">
+                            <span class="task-text">🚨 ${browsTaskName} (OVERDUE!)</span>
+                        </li>`;
+                        weeklyTasksAdded++;
+                    } else {
+                        weeklyList.innerHTML += `<li class="task-item upcoming">
+                            <span class="task-text">⏳ ${browsTaskName} (Upcoming on 17th)</span>
+                        </li>`;
+                        weeklyTasksAdded++;
+                    }
+                }
+
                 // === SMART LASER LOGIC (21st) ===
                 let isLaserDone = dbData.beautyDone ? dbData.beautyDone.laser : false;
                 let laserTaskName = dbData.ui['task_beauty_laser'] || "Laser Treatment";
@@ -389,12 +411,15 @@
             const isCleanDone = document.getElementById('clean') ? document.getElementById('clean').checked : false;
             const isSavingsDone = document.getElementById('savings') ? document.getElementById('savings').checked : false;
             const isHairChecked = document.getElementById('beauty_hair') ? document.getElementById('beauty_hair').checked : false;
+            const isBrowsChecked = document.getElementById('beauty_brows') ? document.getElementById('beauty_brows').checked : false;
             const isLaserChecked = document.getElementById('beauty_laser') ? document.getElementById('beauty_laser').checked : false;
 
-            // Updated to pass actual beauty strings so your GAS can read it
-            let beautyStatus = false;
-            if (isLaserChecked) beautyStatus = "LaserDone"; 
-            if (isHairChecked) beautyStatus = "HaircutDone"; 
+            // Updated to pass actual beauty strings safely as a combined list so GAS can read it
+            let beautyArr = [];
+            if (isLaserChecked) beautyArr.push("LaserDone"); 
+            if (isHairChecked) beautyArr.push("HaircutDone"); 
+            if (isBrowsChecked) beautyArr.push("BrowsDone");
+            let beautyStatus = beautyArr.length > 0 ? beautyArr.join(", ") : false;
             
             const payload = {
                 Date: document.getElementById('dateDisplay').innerText,
@@ -414,6 +439,7 @@
             
             // Instantly update the beauty state locally so it shows as completed immediately
             if (isHairChecked && dbData.beautyDone) dbData.beautyDone.hair = true;
+            if (isBrowsChecked && dbData.beautyDone) dbData.beautyDone.brows = true;
             if (isLaserChecked && dbData.beautyDone) dbData.beautyDone.laser = true;
 
             try {

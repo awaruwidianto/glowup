@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>✨ Glow Up Planner ✨</title>
     
     <link rel="icon" type="image/png" href="icon.png">
@@ -151,7 +151,38 @@
         .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: #ff94cf; cursor: pointer; }
         .task-text { flex-grow: 1; font-size: 16px; font-weight: 800; color: #3d315f; }
 
-        #loading { text-align: center; color: #5844c9; font-weight: 900; display: none; margin-top: 15px; background: #ffe58f; padding: 10px; border-radius: 12px; border: 2px solid #5844c9; }
+        #loading { text-align: center; color: #5844c9; font-weight: 900; display: none; margin-top: 15px; background: #ffe58f; padding: 10px; border-radius: 12px; border: 2px solid #5844c9; font-size: 14px; }
+
+        /* === MOBILE SHRINK HOTFIX (80% SCALE EFFECT) === */
+        @media (max-width: 500px) {
+            .galaxy-stage { padding: 10px; }
+            .app-shell { border-width: 3px; border-radius: 26px; padding-bottom: 15px; }
+            .topbar { padding: 15px; gap: 10px; border-radius: 24px 24px 0 0; }
+            h1 { font-size: 20px; }
+            .brand-badge { width: 36px; height: 36px; padding: 4px; border-width: 2px; }
+            
+            .screen-content { padding: 14px; }
+            .date-display { font-size: 13px; margin-bottom: 14px; }
+            
+            .day-selector { gap: 6px; margin-bottom: 15px; }
+            .game-button { min-height: 36px; padding: 6px 8px; font-size: 12px; border-width: 2px; border-radius: 12px; }
+            
+            .window-label { font-size: 10px; padding: 3px 10px; border-width: 2px; }
+            
+            .food-box { padding: 10px; font-size: 13px; border-radius: 14px; border-width: 2px; margin-bottom: 8px; }
+            .food-box span { font-size: 15px; margin-top: 2px; }
+            
+            .task-item { padding: 10px 12px; margin-bottom: 8px; border-radius: 14px; border-width: 2px; }
+            .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; }
+            .task-text { font-size: 14px; }
+            
+            .task-list { margin-bottom: 15px; }
+            
+            .primary-button { font-size: 15px; padding: 12px; margin-top: 12px; min-height: 44px; }
+            
+            .time-inputs { padding: 12px; font-size: 14px; }
+            .time-inputs input { padding: 6px; font-size: 13px; border-width: 2px; }
+        }
 
         /* === COSMIC DECORATIONS === */
         .cosmic-decoration { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
@@ -172,10 +203,6 @@
 </head>
 <body>
 
-    <!-- Cute mixkit sounds -->
-    <audio id="checkSound" src="https://assets.mixkit.co/active_storage/sfx/2018/2018-preview.mp3"></audio>
-    <audio id="winSound" src="https://assets.mixkit.co/active_storage/sfx/2000/2000-preview.mp3"></audio>
-
     <!-- Awaru UFO Loader -->
     <div class="galaxy-loader" id="galaxy-loader">
         <div class="ufo-loader">
@@ -185,7 +212,6 @@
             </div>
             <div class="ufo-loader-beam"></div>
         </div>
-        <h2 style="color: white; font-family: 'Nunito'; margin-top: 30px; text-shadow: 2px 2px 0px #5140b8;">CONNECTING TO GALAXY...</h2>
     </div>
 
     <!-- Cosmic Background Decorations -->
@@ -199,7 +225,6 @@
             
             <header class="topbar">
                 <div class="brand-badge">
-                    <!-- Assuming you uploaded your yellow N icon.png to github! -->
                     <img src="icon.png" alt="Icon" onerror="this.style.display='none'"> 
                 </div>
                 <h1 id="appTitle">Glow Up 2026</h1>
@@ -244,7 +269,68 @@
     </main>
 
     <script>
-        // YOUR API URL
+        // === AUDIO SYNTHESIZER (FROM AWARU) ===
+        const audioState = {
+            soundEnabled: true,
+            audioContext: null,
+            masterGain: null
+        };
+
+        function initAudio() {
+            if (audioState.audioContext) return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            audioState.audioContext = new AudioContext();
+            audioState.masterGain = audioState.audioContext.createGain();
+            audioState.masterGain.gain.value = 0.2;
+            audioState.masterGain.connect(audioState.audioContext.destination);
+        }
+
+        function forceUnlockAudioContext() {
+            initAudio();
+            if (audioState.audioContext && audioState.audioContext.state === "suspended") {
+                audioState.audioContext.resume();
+            }
+        }
+
+        function playTone(frequency, duration, type = "sine", gain = 0.08, delay = 0) {
+            initAudio();
+            if (!audioState.audioContext) return;
+            if (audioState.audioContext.state === "suspended") audioState.audioContext.resume();
+            const now = audioState.audioContext.currentTime + delay;
+            const osc = audioState.audioContext.createOscillator();
+            const vol = audioState.audioContext.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(frequency, now);
+            vol.gain.setValueAtTime(gain, now);
+            vol.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            osc.connect(vol).connect(audioState.masterGain);
+            osc.start(now);
+            osc.stop(now + duration + 0.02);
+        }
+
+        function playPixelSound(name) {
+            const g = 0.07;
+            if (name === "click") playTone(520, .06, "square", g);
+            if (name === "hover") playTone(740, .04, "triangle", 0.025);
+            if (name === "coin") { playTone(880, .08, "triangle", g); playTone(1320, .1, "triangle", g, .06); }
+            if (name === "success") { playTone(659, .12, "sine", g); playTone(988, .18, "sine", g, .1); }
+        }
+
+        function attachSoundEvents() {
+            document.querySelectorAll(".game-button, input[type='checkbox']").forEach(el => {
+                if (!el.hasAttribute('data-sound-bound')) {
+                    el.addEventListener("mouseenter", () => playPixelSound("hover"));
+                    el.addEventListener("click", () => playPixelSound("click"));
+                    el.setAttribute('data-sound-bound', 'true');
+                }
+            });
+        }
+
+        window.addEventListener("click", forceUnlockAudioContext);
+        window.addEventListener("touchstart", forceUnlockAudioContext);
+
+        // === APP LOGIC ===
         const API_URL = "https://script.google.com/macros/s/AKfycbwbGMBs2GJoySlJh8ukXk9n_m3wvMehXn0xCbIU3UMFcgp4Oi7ycZwKhmzr4dfUI4Pm/exec";
         
         let currentDayType = 'Work';
@@ -252,18 +338,17 @@
         let todayLunch = "";
         let todayDinner = "";
 
-        const checkSfx = document.getElementById('checkSound');
-        const winSfx = document.getElementById('winSound');
-
         // Hide Loader
         document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 document.getElementById("galaxy-loader").classList.add("hidden");
-            }, 1800); // 1.8 seconds of cute UFO loading!
+                attachSoundEvents(); 
+            }, 1800); 
         });
 
         // 3D Tilt Effect on Mouse Move
         document.addEventListener("mousemove", event => {
+            if (window.innerWidth < 768) return; // Disable tilt on phones for better touch experience
             const x = (event.clientX / window.innerWidth - .5) * 2;
             const y = (event.clientY / window.innerHeight - .5) * 2;
             document.getElementById("app-shell").style.transform = `rotateY(${x * 3}deg) rotateX(${-y * 3}deg)`;
@@ -357,21 +442,22 @@
             } else {
                 document.getElementById('weeklyContainer').style.display = 'none';
             }
+
+            attachSoundEvents(); 
         }
 
         function createTaskHTML(id, text) {
             return `
                 <li class="task-item" id="item_${id}">
-                    <input type="checkbox" id="${id}" onchange="playSoundAndStyle(this, 'item_${id}')">
+                    <input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')">
                     <span class="task-text">${text || 'Task'}</span>
                 </li>
             `;
         }
 
-        function playSoundAndStyle(checkbox, itemId) {
+        function styleCheckbox(checkbox, itemId) {
             if(checkbox.checked) {
-                checkSfx.currentTime = 0;
-                checkSfx.play();
+                playPixelSound("coin");
                 document.getElementById(itemId).classList.add('completed');
             } else {
                 document.getElementById(itemId).classList.remove('completed');
@@ -379,7 +465,7 @@
         }
 
         async function saveProgress() {
-            winSfx.play();
+            playPixelSound("success");
             confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#ff94cf', '#b5f7d3', '#8ee7ff', '#ffe58f'] });
             document.getElementById('loading').style.display = 'block';
 

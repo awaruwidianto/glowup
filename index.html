@@ -66,11 +66,13 @@
 
         .day-selector { display: flex; gap: 10px; margin-bottom: 20px; }
         .game-button { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 8px 14px; font-size: 14px; border-radius: 14px; border: 3px solid rgba(69,44,109,.82); background: linear-gradient(180deg, #fff7bf, #ffbfde); color: #4b3970; font-weight: 900; font-family: var(--font-title); cursor: pointer; box-shadow: 0 4px 0 rgba(70, 49, 117, .34); transition: transform .15s, box-shadow .15s; white-space: nowrap; }
-        .game-button:hover { transform: translateY(-3px); filter: brightness(1.05); }
-        .game-button:active { transform: translateY(2px); box-shadow: 0 0 0 rgba(70,49,117,.34); }
+        .game-button:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.05); }
+        .game-button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 rgba(70,49,117,.34); }
         .game-button.active { background: linear-gradient(180deg, #aef2ff, #aa93ff); color: white; }
 
         .primary-button { background: linear-gradient(180deg, #ff94cf, #ff6b81); color: white; width: 100%; font-size: 18px; padding: 14px; margin-top: 20px; }
+        .primary-button:disabled { background: #b5f7d3; color: #27213f; cursor: not-allowed; opacity: 0.8; box-shadow: none; transform: none; border-color: #5f5684; }
+        
         .time-inputs { display: none; text-align: center; margin-bottom: 20px; background: rgba(255,255,255,.5); padding: 15px; border-radius: 18px; border: 2px dashed rgba(86,65,121,.25); font-weight: 800; color: var(--ink-soft); }
         .time-inputs input { padding: 8px; border: 3px solid rgba(86,65,121,.3); border-radius: 12px; margin: 0 5px; font-family: var(--font-title); font-weight: 700; color: #5140b8; background: white; }
 
@@ -84,7 +86,6 @@
         .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: #ff94cf; cursor: pointer; flex-shrink: 0; }
         .task-text { flex-grow: 1; font-size: 16px; font-weight: 800; color: #3d315f; line-height: 1.3; }
 
-        /* Specific styles for beauty treatments */
         .task-item.overdue { border-color: #ff6b81; background: #ffe6eb; }
         .task-item.overdue .task-text { color: #d63031; }
         .task-item.upcoming { opacity: 0.6; background: rgba(255,255,255,0.4); border-style: dashed; }
@@ -163,7 +164,7 @@
                 <ul class="task-list" id="dailyTasks"></ul>
 
                 <div id="weeklyContainer">
-                    <div class="window-label" id="titleWeekly">📅 Weekly & Beauty Quests</div>
+                    <div class="window-label" id="titleWeekly">📅 Weekly & Monthly Quests</div>
                     <ul class="task-list" id="weeklyTasks"></ul>
                 </div>
 
@@ -201,7 +202,7 @@
             if (name === "success") { playTone(659, .12, "sine", g); playTone(988, .18, "sine", g, .1); }
         }
         function attachSoundEvents() {
-            document.querySelectorAll(".game-button, input[type='checkbox']").forEach(el => {
+            document.querySelectorAll(".game-button:not(:disabled), input[type='checkbox']").forEach(el => {
                 if (!el.hasAttribute('data-sound-bound')) {
                     el.addEventListener("mouseenter", () => playPixelSound("hover"));
                     el.addEventListener("click", () => playPixelSound("click"));
@@ -260,9 +261,27 @@
                     document.getElementById('titleWeekly').innerText = dbData.ui['title_weekly'] || "Weekly Quests";
                     document.getElementById('btnComplete').innerText = dbData.ui['btn_complete'] || "Complete!";
                 }
+                
+                checkIfAlreadyCompleted();
                 generateMeals();
                 generateTasks();
             } catch (error) { console.error("Error fetching data", error); }
+        }
+
+        function checkIfAlreadyCompleted() {
+            if (!dbData || !dbData.logs) return;
+            const todayStr = document.getElementById('dateDisplay').innerText;
+            const btn = document.getElementById('btnComplete');
+            
+            let alreadyCompleted = false;
+            dbData.logs.forEach(log => {
+                if (log.Date === todayStr) alreadyCompleted = true;
+            });
+
+            if (alreadyCompleted) {
+                btn.disabled = true;
+                btn.innerText = "Already Completed Today! ✨";
+            }
         }
 
         function setDayType(type) {
@@ -286,6 +305,8 @@
             if (!dbData || !dbData.ui) return;
             const dailyList = document.getElementById('dailyTasks'); const weeklyList = document.getElementById('weeklyTasks');
             const dateNumber = new Date().getDate();
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
             
             dailyList.innerHTML = ""; weeklyList.innerHTML = "";
 
@@ -307,10 +328,16 @@
                 if (dbData.logs) {
                     dbData.logs.forEach(log => {
                         let logDate = new Date(log.Date);
-                        if (!isNaN(logDate) && getISOWeekKey(logDate) === currentWeekKey) {
-                            if (String(log.Laundry_Done).toLowerCase() === "true") doneLaundry = true;
-                            if (String(log.DeepClean_Done).toLowerCase() === "true") doneClean = true;
-                            if (Number(log.Savings_KRW) > 0) doneSavings = true;
+                        if (!isNaN(logDate)) {
+                            // Check Weekly chores
+                            if (getISOWeekKey(logDate) === currentWeekKey) {
+                                if (String(log.Laundry_Done).toLowerCase() === "true") doneLaundry = true;
+                                if (String(log.DeepClean_Done).toLowerCase() === "true") doneClean = true;
+                            }
+                            // Check Monthly Savings
+                            if (logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
+                                if (Number(log.Savings_KRW) > 0) doneSavings = true;
+                            }
                         }
                     });
                 }
@@ -318,8 +345,27 @@
                 let weeklyTasksAdded = 0;
                 if (!doneLaundry) { weeklyList.innerHTML += createTaskHTML("laundry", dbData.ui['task_laundry']); weeklyTasksAdded++; }
                 if (!doneClean) { weeklyList.innerHTML += createTaskHTML("clean", dbData.ui['task_clean']); weeklyTasksAdded++; }
-                if (!doneSavings) { weeklyList.innerHTML += createTaskHTML("savings", dbData.ui['task_savings']); weeklyTasksAdded++; }
                 
+                // === SMART SAVINGS LOGIC (12th) ===
+                let savingsTaskName = dbData.ui['task_savings'] || "Monthly Savings";
+                if (doneSavings) {
+                    weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${savingsTaskName} (Completed)</span></li>`;
+                    weeklyTasksAdded++;
+                } else {
+                    if (dateNumber >= 12) {
+                        weeklyList.innerHTML += `<li class="task-item overdue" id="item_savings">
+                            <input type="checkbox" id="savings" onchange="styleCheckbox(this, 'item_savings')">
+                            <span class="task-text">🚨 ${savingsTaskName} (OVERDUE!)</span>
+                        </li>`;
+                        weeklyTasksAdded++;
+                    } else {
+                        weeklyList.innerHTML += `<li class="task-item upcoming">
+                            <span class="task-text">⏳ ${savingsTaskName} (Upcoming on 12th)</span>
+                        </li>`;
+                        weeklyTasksAdded++;
+                    }
+                }
+
                 // === SMART HAIRCUT LOGIC (17th) ===
                 let isHairDone = dbData.beautyDone ? dbData.beautyDone.hair : false;
                 let hairTaskName = dbData.ui['task_beauty_hair'] || "Haircut";
@@ -386,7 +432,7 @@
                     }
                 }
                 
-                if (weeklyTasksAdded === 0) { weeklyList.innerHTML = `<li style="text-align:center; color: var(--ink-soft); font-weight:800; font-size:14px; padding: 10px;">✨ All weekly quests complete! ✨</li>`; }
+                if (weeklyTasksAdded === 0) { weeklyList.innerHTML = `<li style="text-align:center; color: var(--ink-soft); font-weight:800; font-size:14px; padding: 10px;">✨ All weekly & monthly quests complete! ✨</li>`; }
             } else {
                 document.getElementById('weeklyContainer').style.display = 'none';
             }
@@ -403,6 +449,47 @@
         }
 
         async function saveProgress() {
+            // === STRICT HABIT CHECKER ===
+            if (currentDayType !== 'Travel') {
+                const gym = document.getElementById('gym')?.checked;
+                const edit = document.getElementById('edit')?.checked;
+                const video = document.getElementById('video')?.checked;
+                if (!gym || !edit || !video) {
+                    alert("🌱 Little habits matter! This will shape your future. Discipline is key. Please do it, at least for two minutes! No excuses allowed. 🛑");
+                    return; // Stops the save process completely
+                }
+            } else {
+                const cardio = document.getElementById('travel_cardio')?.checked;
+                const film = document.getElementById('travel_film')?.checked;
+                if (!cardio || !film) {
+                    alert("🌱 Even on vacation, little habits matter! This will shape your future. Discipline is key. No excuses allowed. 🛑");
+                    return;
+                }
+            }
+
+            // === WORKING TIME MOTIVATION ===
+            if (currentDayType === 'Work') {
+                const now = new Date();
+                const endInput = document.getElementById('endTime').value.split(":");
+                const startInput = document.getElementById('startTime').value.split(":");
+                
+                const endTime = new Date(); endTime.setHours(endInput[0], endInput[1], 0);
+                const startTime = new Date(); startTime.setHours(startInput[0], startInput[1], 0);
+
+                if (now >= endTime) {
+                    const hoursWorked = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(1);
+                    alert(`🎉 Congrats, thank you for working! You've crushed it and worked ${hoursWorked} hours today. Time to rest!`);
+                } else {
+                    const hoursLeft = ((endTime - now) / (1000 * 60 * 60)).toFixed(1);
+                    alert(`💪 You got this! ${hoursLeft} more hours before leaving the office. Keep that main character energy going!`);
+                }
+            }
+
+            // Lock button to prevent double-saving
+            const btn = document.getElementById('btnComplete');
+            btn.disabled = true;
+            btn.innerText = "Already Completed Today! ✨";
+
             playPixelSound("success");
             confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#ff94cf', '#b5f7d3', '#8ee7ff', '#ffe58f'] });
             document.getElementById('loading').style.display = 'block';
@@ -414,7 +501,6 @@
             const isBrowsChecked = document.getElementById('beauty_brows') ? document.getElementById('beauty_brows').checked : false;
             const isLaserChecked = document.getElementById('beauty_laser') ? document.getElementById('beauty_laser').checked : false;
 
-            // Updated to pass actual beauty strings safely as a combined list so GAS can read it
             let beautyArr = [];
             if (isLaserChecked) beautyArr.push("LaserDone"); 
             if (isHairChecked) beautyArr.push("HaircutDone"); 
@@ -430,14 +516,13 @@
                 Video_Watched: document.getElementById('video') ? document.getElementById('video').checked : false,
                 Laundry_Done: isLaundryDone, DeepClean_Done: isCleanDone, 
                 Beauty_Done: beautyStatus, 
-                Savings_KRW: isSavingsDone ? 375000 : 0
+                Savings_KRW: isSavingsDone ? 400000 : 0
             };
 
-            // Update local memory so it disappears instantly without a full page reload!
+            // Update local memory so it disappears instantly
             if (!dbData.logs) dbData.logs = [];
             dbData.logs.push({ Date: payload.Date, Laundry_Done: payload.Laundry_Done, DeepClean_Done: payload.DeepClean_Done, Savings_KRW: payload.Savings_KRW });
             
-            // Instantly update the beauty state locally so it shows as completed immediately
             if (isHairChecked && dbData.beautyDone) dbData.beautyDone.hair = true;
             if (isBrowsChecked && dbData.beautyDone) dbData.beautyDone.brows = true;
             if (isLaserChecked && dbData.beautyDone) dbData.beautyDone.laser = true;

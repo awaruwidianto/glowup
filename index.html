@@ -248,7 +248,6 @@
 
         async function fetchDatabase() {
             try {
-                // FIXED: Cache buster appended below!
                 const response = await fetch(API_URL + "?t=" + new Date().getTime());
                 dbData = await response.json();
                 
@@ -269,16 +268,23 @@
             } catch (error) { console.error("Error fetching data", error); }
         }
 
+        // 🛠 SAFARI/IOS HOTFIX APPLIED HERE!
         function checkIfAlreadyCompleted() {
             if (!dbData || !dbData.logs) return;
             const btn = document.getElementById('btnComplete');
-            
             let alreadyCompleted = false;
             const today = new Date();
             
-            dbData.logs.forEach(log => {
-                let logDate = new Date(log.Date);
-                // Smart check: Compare the actual day, month, and year!
+            dbData.logs.forEach(rawLog => {
+                // Look for Date key no matter how Google Sheets formatted it
+                const dateKey = Object.keys(rawLog).find(k => k.toLowerCase().trim() === 'date');
+                let dateStr = dateKey ? rawLog[dateKey] : null;
+
+                // Safari hates "Friday, July 17, 2026", so we strip out "Friday, " to make it "July 17, 2026"
+                if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
+                
+                let logDate = new Date(dateStr);
+
                 if (!isNaN(logDate) && 
                     logDate.getDate() === today.getDate() && 
                     logDate.getMonth() === today.getMonth() && 
@@ -331,34 +337,46 @@
             if (currentDayType !== 'Travel') {
                 document.getElementById('weeklyContainer').style.display = 'block';
                 
-                // Read from Cloud Database (Google Sheet Logs)
                 let doneLaundry = false; let doneClean = false; let doneSavings = false;
                 let isHairDone = false; let isBrowsDone = false; let isLaserDone = false;
                 
+                // 🛠 BULLETPROOF DATA GRABBER APPLIED HERE!
                 if (dbData.logs) {
-                    dbData.logs.forEach(log => {
-                        let logDate = new Date(log.Date);
+                    dbData.logs.forEach(rawLog => {
+                        // Helper to find data no matter the casing or spacing!
+                        const getVal = (key) => {
+                            const found = Object.keys(rawLog).find(k => k.toLowerCase().trim() === key.toLowerCase());
+                            return found ? rawLog[found] : undefined;
+                        };
+
+                        let dateStr = getVal('Date');
+                        if (!dateStr) return; // Skip empty rows
+                        
+                        // Fix for strict browsers (Safari)
+                        if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
+                        
+                        let logDate = new Date(dateStr);
+                        
                         if (!isNaN(logDate)) {
                             // Check Weekly chores
                             if (getISOWeekKey(logDate) === currentWeekKey) {
-                                if (String(log.Laundry_Done).toLowerCase() === "true") doneLaundry = true;
-                                if (String(log.DeepClean_Done).toLowerCase() === "true") doneClean = true;
+                                if (String(getVal('Laundry_Done')).toLowerCase() === "true") doneLaundry = true;
+                                if (String(getVal('DeepClean_Done')).toLowerCase() === "true") doneClean = true;
                             }
                             
                             // Check Monthly tasks (Savings & Beauty)
                             if (logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
                                 
-                                // Bulletproof Savings check (handles true/false or older numbers > 0)
-                                let savingsVal = log.Savings_KRW;
+                                let savingsVal = getVal('Savings_KRW');
                                 if (String(savingsVal).toLowerCase() === "true" || String(savingsVal).toLowerCase() === "done" || Number(savingsVal) > 0) {
                                     doneSavings = true;
                                 }
                                 
-                                // Read Beauty tasks from the log string!
-                                if (log.Beauty_Done && typeof log.Beauty_Done === 'string') {
-                                    if (log.Beauty_Done.includes("HaircutDone")) isHairDone = true;
-                                    if (log.Beauty_Done.includes("BrowsDone")) isBrowsDone = true;
-                                    if (log.Beauty_Done.includes("LaserDone")) isLaserDone = true;
+                                let beautyVal = getVal('Beauty_Done');
+                                if (beautyVal && typeof beautyVal === 'string') {
+                                    if (beautyVal.includes("HaircutDone")) isHairDone = true;
+                                    if (beautyVal.includes("BrowsDone")) isBrowsDone = true;
+                                    if (beautyVal.includes("LaserDone")) isLaserDone = true;
                                 }
                             }
                         }
@@ -369,7 +387,6 @@
                 if (!doneLaundry) { weeklyList.innerHTML += createTaskHTML("laundry", dbData.ui['task_laundry']); weeklyTasksAdded++; }
                 if (!doneClean) { weeklyList.innerHTML += createTaskHTML("clean", dbData.ui['task_clean']); weeklyTasksAdded++; }
                 
-                // === SMART SAVINGS LOGIC (12th) ===
                 let savingsTaskName = dbData.ui['task_savings'] || "Monthly Savings";
                 if (doneSavings) {
                     weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${savingsTaskName} (Completed)</span></li>`;
@@ -389,7 +406,6 @@
                     }
                 }
 
-                // === SMART HAIRCUT LOGIC (17th) ===
                 let hairTaskName = dbData.ui['task_beauty_hair'] || "Haircut";
                 if (isHairDone) {
                     weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${hairTaskName} (Completed)</span></li>`;
@@ -409,7 +425,6 @@
                     }
                 }
 
-                // === SMART BROWS LOGIC (17th) ===
                 let browsTaskName = dbData.ui['task_beauty_brows'] || "Eyebrow Waxing & Bleach";
                 if (isBrowsDone) {
                     weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${browsTaskName} (Completed)</span></li>`;
@@ -429,7 +444,6 @@
                     }
                 }
 
-                // === SMART LASER LOGIC (21st) ===
                 let laserTaskName = dbData.ui['task_beauty_laser'] || "Laser Treatment";
                 if (isLaserDone) {
                     weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laserTaskName} (Completed)</span></li>`;
@@ -466,14 +480,13 @@
         }
 
         async function saveProgress() {
-            // === STRICT HABIT CHECKER ===
             if (currentDayType !== 'Travel') {
                 const gym = document.getElementById('gym')?.checked;
                 const edit = document.getElementById('edit')?.checked;
                 const video = document.getElementById('video')?.checked;
                 if (!gym || !edit || !video) {
                     alert("🌱 Little habits matter! This will shape your future. Discipline is key. Please do it, at least for two minutes! No excuses allowed. 🛑");
-                    return; // Stops the save process completely
+                    return;
                 }
             } else {
                 const cardio = document.getElementById('travel_cardio')?.checked;
@@ -484,7 +497,6 @@
                 }
             }
 
-            // === WORKING TIME MOTIVATION ===
             if (currentDayType === 'Work') {
                 const now = new Date();
                 const endInput = document.getElementById('endTime').value.split(":");
@@ -502,7 +514,6 @@
                 }
             }
 
-            // Lock button to prevent double-saving
             const btn = document.getElementById('btnComplete');
             btn.disabled = true;
             btn.innerText = "Already Completed Today! ✨";
@@ -524,7 +535,6 @@
             if (isBrowsChecked) beautyArr.push("BrowsDone");
             let beautyStatus = beautyArr.length > 0 ? beautyArr.join(", ") : false;
             
-            // FIXED: Added Travel_Cardio and Travel_Film to payload!
             const payload = {
                 Date: document.getElementById('dateDisplay').innerText,
                 Day_Type: currentDayType, Start_Time: currentDayType === 'Work' ? document.getElementById('startTime').value : "N/A", End_Time: currentDayType === 'Work' ? document.getElementById('endTime').value : "N/A",
@@ -536,10 +546,9 @@
                 Travel_Film: document.getElementById('travel_film') ? document.getElementById('travel_film').checked : false,
                 Laundry_Done: isLaundryDone, DeepClean_Done: isCleanDone, 
                 Beauty_Done: beautyStatus, 
-                Savings_KRW: isSavingsDone // Now just saves a boolean true/false instead of a hardcoded amount!
+                Savings_KRW: isSavingsDone 
             };
 
-            // FIXED: Added Travel_Cardio and Travel_Film to local push!
             if (!dbData.logs) dbData.logs = [];
             dbData.logs.push({ 
                 Date: payload.Date, 

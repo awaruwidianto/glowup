@@ -222,7 +222,8 @@
             return `${date.getFullYear()}_W${weekNum}`;
         }
 
-        const API_URL = "https://script.google.com/macros/s/AKfycbwbGMBs2GJoySlJh8ukXk9n_m3wvMehXn0xCbIU3UMFcgp4Oi7ycZwKhmzr4dfUI4Pm/exec";
+        // NEW DEPLOYMENT LINK CONNECTED BELOW!
+        const API_URL = "https://script.google.com/macros/s/AKfycbznwaD5tsRC_YfMr9x8r6ih3zH-2400LK30BiFqFzrzsvyZV9loz8rAqJEqxnFxDsjuJw/exec";
         
         let currentDayType = 'Work';
         let dbData = null; 
@@ -248,6 +249,7 @@
 
         async function fetchDatabase() {
             try {
+                // FIXED: Cache buster appended below!
                 const response = await fetch(API_URL + "?t=" + new Date().getTime());
                 dbData = await response.json();
                 

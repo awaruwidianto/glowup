@@ -222,8 +222,8 @@
             return `${date.getFullYear()}_W${weekNum}`;
         }
 
-        // NEW DEPLOYMENT LINK CONNECTED BELOW!
-        const API_URL = "https://script.google.com/macros/s/AKfycbznwaD5tsRC_YfMr9x8r6ih3zH-2400LK30BiFqFzrzsvyZV9loz8rAqJEqxnFxDsjuJw/exec";
+        // NEW DEPLOYMENT LINK CONNECTED BELOW![cite: 3]
+        const API_URL = "https://script.google.com/macros/s/AKfycbweFv7jDeZCRc7ibqwDF3kxYhwMY9BsOPps_8sHs-b3SLcO8Fj4z7ljeNORvAVhxKf4_Q/exec";
         
         let currentDayType = 'Work';
         let dbData = null; 
@@ -249,7 +249,7 @@
 
         async function fetchDatabase() {
             try {
-                // FIXED: Cache buster appended below!
+                // FIXED: Cache buster appended below![cite: 3]
                 const response = await fetch(API_URL + "?t=" + new Date().getTime());
                 dbData = await response.json();
                 
@@ -270,7 +270,7 @@
             } catch (error) { console.error("Error fetching data", error); }
         }
 
-        // 🛠 SAFARI/IOS HOTFIX APPLIED HERE!
+        // 🛠 SAFARI/IOS HOTFIX APPLIED HERE![cite: 3]
         function checkIfAlreadyCompleted() {
             if (!dbData || !dbData.logs) return;
             const btn = document.getElementById('btnComplete');
@@ -278,11 +278,11 @@
             const today = new Date();
             
             dbData.logs.forEach(rawLog => {
-                // Look for Date key no matter how Google Sheets formatted it
+                // Look for Date key no matter how Google Sheets formatted it[cite: 3]
                 const dateKey = Object.keys(rawLog).find(k => k.toLowerCase().trim() === 'date');
                 let dateStr = dateKey ? rawLog[dateKey] : null;
 
-                // Safari hates "Friday, July 17, 2026", so we strip out "Friday, " to make it "July 17, 2026"
+                // Safari hates "Friday, July 17, 2026", so we strip out "Friday, " to make it "July 17, 2026"[cite: 3]
                 if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
                 
                 let logDate = new Date(dateStr);
@@ -342,31 +342,31 @@
                 let doneLaundry = false; let doneClean = false; let doneSavings = false;
                 let isHairDone = false; let isBrowsDone = false; let isLaserDone = false;
                 
-                // 🛠 BULLETPROOF DATA GRABBER APPLIED HERE!
+                // 🛠 BULLETPROOF DATA GRABBER APPLIED HERE![cite: 3]
                 if (dbData.logs) {
                     dbData.logs.forEach(rawLog => {
-                        // Helper to find data no matter the casing or spacing!
+                        // Helper to find data no matter the casing or spacing![cite: 3]
                         const getVal = (key) => {
                             const found = Object.keys(rawLog).find(k => k.toLowerCase().trim() === key.toLowerCase());
                             return found ? rawLog[found] : undefined;
                         };
 
                         let dateStr = getVal('Date');
-                        if (!dateStr) return; // Skip empty rows
+                        if (!dateStr) return; // Skip empty rows[cite: 3]
                         
-                        // Fix for strict browsers (Safari)
+                        // Fix for strict browsers (Safari)[cite: 3]
                         if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
                         
                         let logDate = new Date(dateStr);
                         
                         if (!isNaN(logDate)) {
-                            // Check Weekly chores
+                            // Check Weekly chores[cite: 3]
                             if (getISOWeekKey(logDate) === currentWeekKey) {
                                 if (String(getVal('Laundry_Done')).toLowerCase() === "true") doneLaundry = true;
                                 if (String(getVal('DeepClean_Done')).toLowerCase() === "true") doneClean = true;
                             }
                             
-                            // Check Monthly tasks (Savings & Beauty)
+                            // Check Monthly tasks (Savings & Beauty)[cite: 3]
                             if (logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
                                 
                                 let savingsVal = getVal('Savings_KRW');
@@ -537,6 +537,7 @@
             if (isBrowsChecked) beautyArr.push("BrowsDone");
             let beautyStatus = beautyArr.length > 0 ? beautyArr.join(", ") : false;
             
+            // FIXED: Added Travel_Cardio and Travel_Film to payload![cite: 3]
             const payload = {
                 Date: document.getElementById('dateDisplay').innerText,
                 Day_Type: currentDayType, Start_Time: currentDayType === 'Work' ? document.getElementById('startTime').value : "N/A", End_Time: currentDayType === 'Work' ? document.getElementById('endTime').value : "N/A",
@@ -551,6 +552,7 @@
                 Savings_KRW: isSavingsDone 
             };
 
+            // FIXED: Added Travel_Cardio and Travel_Film to local push![cite: 3]
             if (!dbData.logs) dbData.logs = [];
             dbData.logs.push({ 
                 Date: payload.Date, 

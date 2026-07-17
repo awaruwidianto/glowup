@@ -270,12 +270,20 @@
 
         function checkIfAlreadyCompleted() {
             if (!dbData || !dbData.logs) return;
-            const todayStr = document.getElementById('dateDisplay').innerText;
             const btn = document.getElementById('btnComplete');
             
             let alreadyCompleted = false;
+            const today = new Date();
+            
             dbData.logs.forEach(log => {
-                if (log.Date === todayStr) alreadyCompleted = true;
+                let logDate = new Date(log.Date);
+                // Smart check: Compare the actual day, month, and year!
+                if (!isNaN(logDate) && 
+                    logDate.getDate() === today.getDate() && 
+                    logDate.getMonth() === today.getMonth() && 
+                    logDate.getFullYear() === today.getFullYear()) {
+                    alreadyCompleted = true;
+                }
             });
 
             if (alreadyCompleted) {
@@ -324,6 +332,7 @@
                 
                 // Read from Cloud Database (Google Sheet Logs)
                 let doneLaundry = false; let doneClean = false; let doneSavings = false;
+                let isHairDone = false; let isBrowsDone = false; let isLaserDone = false;
                 
                 if (dbData.logs) {
                     dbData.logs.forEach(log => {
@@ -334,9 +343,22 @@
                                 if (String(log.Laundry_Done).toLowerCase() === "true") doneLaundry = true;
                                 if (String(log.DeepClean_Done).toLowerCase() === "true") doneClean = true;
                             }
-                            // Check Monthly Savings
+                            
+                            // Check Monthly tasks (Savings & Beauty)
                             if (logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
-                                if (Number(log.Savings_KRW) > 0) doneSavings = true;
+                                
+                                // Bulletproof Savings check (handles true/false or older numbers > 0)
+                                let savingsVal = log.Savings_KRW;
+                                if (String(savingsVal).toLowerCase() === "true" || String(savingsVal).toLowerCase() === "done" || Number(savingsVal) > 0) {
+                                    doneSavings = true;
+                                }
+                                
+                                // Read Beauty tasks from the log string!
+                                if (log.Beauty_Done && typeof log.Beauty_Done === 'string') {
+                                    if (log.Beauty_Done.includes("HaircutDone")) isHairDone = true;
+                                    if (log.Beauty_Done.includes("BrowsDone")) isBrowsDone = true;
+                                    if (log.Beauty_Done.includes("LaserDone")) isLaserDone = true;
+                                }
                             }
                         }
                     });
@@ -367,9 +389,7 @@
                 }
 
                 // === SMART HAIRCUT LOGIC (17th) ===
-                let isHairDone = dbData.beautyDone ? dbData.beautyDone.hair : false;
                 let hairTaskName = dbData.ui['task_beauty_hair'] || "Haircut";
-
                 if (isHairDone) {
                     weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${hairTaskName} (Completed)</span></li>`;
                     weeklyTasksAdded++;
@@ -389,9 +409,7 @@
                 }
 
                 // === SMART BROWS LOGIC (17th) ===
-                let isBrowsDone = dbData.beautyDone ? dbData.beautyDone.brows : false;
                 let browsTaskName = dbData.ui['task_beauty_brows'] || "Eyebrow Waxing & Bleach";
-
                 if (isBrowsDone) {
                     weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${browsTaskName} (Completed)</span></li>`;
                     weeklyTasksAdded++;
@@ -411,9 +429,7 @@
                 }
 
                 // === SMART LASER LOGIC (21st) ===
-                let isLaserDone = dbData.beautyDone ? dbData.beautyDone.laser : false;
                 let laserTaskName = dbData.ui['task_beauty_laser'] || "Laser Treatment";
-
                 if (isLaserDone) {
                     weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laserTaskName} (Completed)</span></li>`;
                     weeklyTasksAdded++;
@@ -516,17 +532,19 @@
                 Video_Watched: document.getElementById('video') ? document.getElementById('video').checked : false,
                 Laundry_Done: isLaundryDone, DeepClean_Done: isCleanDone, 
                 Beauty_Done: beautyStatus, 
-                Savings_KRW: isSavingsDone ? 400000 : 0
+                Savings_KRW: isSavingsDone // Now just saves a boolean true/false instead of a hardcoded amount!
             };
 
             // Update local memory so it disappears instantly
             if (!dbData.logs) dbData.logs = [];
-            dbData.logs.push({ Date: payload.Date, Laundry_Done: payload.Laundry_Done, DeepClean_Done: payload.DeepClean_Done, Savings_KRW: payload.Savings_KRW });
+            dbData.logs.push({ 
+                Date: payload.Date, 
+                Laundry_Done: payload.Laundry_Done, 
+                DeepClean_Done: payload.DeepClean_Done, 
+                Savings_KRW: payload.Savings_KRW,
+                Beauty_Done: payload.Beauty_Done
+            });
             
-            if (isHairChecked && dbData.beautyDone) dbData.beautyDone.hair = true;
-            if (isBrowsChecked && dbData.beautyDone) dbData.beautyDone.brows = true;
-            if (isLaserChecked && dbData.beautyDone) dbData.beautyDone.laser = true;
-
             try {
                 await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 document.getElementById('loading').innerText = "✨ Saved to the Galaxy! ✨";

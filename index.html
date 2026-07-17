@@ -248,7 +248,8 @@
 
         async function fetchDatabase() {
             try {
-                const response = await fetch(API_URL);
+                // FIXED: Cache buster appended below!
+                const response = await fetch(API_URL + "?t=" + new Date().getTime());
                 dbData = await response.json();
                 
                 if(dbData.ui) {
@@ -523,6 +524,7 @@
             if (isBrowsChecked) beautyArr.push("BrowsDone");
             let beautyStatus = beautyArr.length > 0 ? beautyArr.join(", ") : false;
             
+            // FIXED: Added Travel_Cardio and Travel_Film to payload!
             const payload = {
                 Date: document.getElementById('dateDisplay').innerText,
                 Day_Type: currentDayType, Start_Time: currentDayType === 'Work' ? document.getElementById('startTime').value : "N/A", End_Time: currentDayType === 'Work' ? document.getElementById('endTime').value : "N/A",
@@ -530,19 +532,23 @@
                 Gym_10min: document.getElementById('gym') ? document.getElementById('gym').checked : false,
                 Edit_2min: document.getElementById('edit') ? document.getElementById('edit').checked : false,
                 Video_Watched: document.getElementById('video') ? document.getElementById('video').checked : false,
+                Travel_Cardio: document.getElementById('travel_cardio') ? document.getElementById('travel_cardio').checked : false,
+                Travel_Film: document.getElementById('travel_film') ? document.getElementById('travel_film').checked : false,
                 Laundry_Done: isLaundryDone, DeepClean_Done: isCleanDone, 
                 Beauty_Done: beautyStatus, 
                 Savings_KRW: isSavingsDone // Now just saves a boolean true/false instead of a hardcoded amount!
             };
 
-            // Update local memory so it disappears instantly
+            // FIXED: Added Travel_Cardio and Travel_Film to local push!
             if (!dbData.logs) dbData.logs = [];
             dbData.logs.push({ 
                 Date: payload.Date, 
                 Laundry_Done: payload.Laundry_Done, 
                 DeepClean_Done: payload.DeepClean_Done, 
                 Savings_KRW: payload.Savings_KRW,
-                Beauty_Done: payload.Beauty_Done
+                Beauty_Done: payload.Beauty_Done,
+                Travel_Cardio: payload.Travel_Cardio,
+                Travel_Film: payload.Travel_Film
             });
             
             try {

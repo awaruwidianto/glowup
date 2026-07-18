@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>✨ Glow Up Planner ✨</title>
+    <title>✨ Glow Up Planner — Fixed ✨</title>
     
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
@@ -92,6 +92,18 @@
 
         #loading { text-align: center; color: #5844c9; font-weight: 900; display: none; margin-top: 15px; background: #ffe58f; padding: 10px; border-radius: 12px; border: 2px solid #5844c9; font-size: 14px; }
 
+        .catchup-banner { display:none; margin: 0 0 16px; padding: 12px 14px; border: 3px solid #ff6b81; border-radius: 16px; background: linear-gradient(180deg, #fff7bf, #ffd8ec); color:#5a3868; font-weight:900; text-align:center; box-shadow:0 5px 0 rgba(70,49,117,.18); }
+        .catchup-banner.show { display:block; }
+        .locked-control { opacity:.58 !important; cursor:not-allowed !important; pointer-events:none !important; }
+        .game-toast { position:fixed; left:50%; top:18%; transform:translate(-50%,-12px) scale(.9); z-index:120; min-width:220px; max-width:86vw; padding:14px 18px; border:3px solid rgba(69,44,109,.85); border-radius:18px; background:linear-gradient(180deg,#fff7bf,#ffbfde); color:#4b3970; font-family:var(--font-title); font-weight:900; text-align:center; box-shadow:0 14px 40px rgba(46,24,98,.28); opacity:0; pointer-events:none; transition:opacity .22s ease, transform .22s ease; }
+        .game-toast.show { opacity:1; transform:translate(-50%,0) scale(1); }
+        .ufo-celebration { position:fixed; z-index:119; left:-170px; top:28%; width:150px; height:90px; pointer-events:none; opacity:0; }
+        .ufo-celebration.fly { animation:ufoFlyAcross 2.4s ease-in-out forwards; }
+        .ufo-mini-dome { position:absolute; left:49px; top:4px; width:52px; height:35px; border-radius:50px 50px 14px 14px; background:linear-gradient(145deg,#fff,#8ee7ff); border:3px solid white; }
+        .ufo-mini-body { position:absolute; left:18px; top:31px; width:114px; height:42px; border-radius:50%; background:linear-gradient(180deg,#fff9f1,#ff94cf 54%,#8b7dff); border:3px solid white; box-shadow:0 8px 18px rgba(46,24,98,.28); }
+        .ufo-mini-beam { position:absolute; left:48px; top:65px; width:55px; height:26px; background:linear-gradient(180deg,rgba(181,247,211,.7),rgba(142,231,255,0)); clip-path:polygon(25% 0,75% 0,100% 100%,0 100%); }
+        @keyframes ufoFlyAcross { 0%{left:-170px;top:34%;opacity:0;transform:rotate(-8deg)} 10%{opacity:1} 50%{top:18%;transform:rotate(5deg)} 90%{opacity:1} 100%{left:calc(100vw + 30px);top:30%;opacity:0;transform:rotate(-4deg)} }
+
         /* === MOBILE SHRINK HOTFIX === */
         @media (max-width: 500px) {
             .galaxy-stage { padding: 10px; } .app-shell { border-width: 3px; border-radius: 26px; padding-bottom: 15px; } .topbar { padding: 15px; gap: 10px; border-radius: 24px 24px 0 0; } h1 { font-size: 20px; } .brand-badge { width: 36px; height: 36px; padding: 4px; border-width: 2px; } .screen-content { padding: 14px; } .date-display { font-size: 13px; margin-bottom: 14px; } .day-selector { gap: 6px; margin-bottom: 15px; } .game-button { min-height: 36px; padding: 6px 4px; font-size: 11px; border-width: 2px; border-radius: 12px; } .window-label { font-size: 10px; padding: 3px 10px; border-width: 2px; } .food-box { padding: 10px; font-size: 13px; border-radius: 14px; border-width: 2px; margin-bottom: 8px; } .food-box span { font-size: 15px; margin-top: 2px; } .task-item { padding: 10px 12px; margin-bottom: 8px; border-radius: 14px; border-width: 2px; } .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; } .task-text { font-size: 14px; } .task-list { margin-bottom: 15px; } .primary-button { font-size: 15px; padding: 12px; margin-top: 12px; min-height: 44px; } .time-inputs { padding: 12px; font-size: 14px; } .time-inputs input { padding: 6px; font-size: 13px; border-width: 2px; }
@@ -122,6 +134,9 @@
         </div>
     </div>
 
+    <div class="game-toast" id="gameToast"></div>
+    <div class="ufo-celebration" id="ufoCelebration"><div class="ufo-mini-dome"></div><div class="ufo-mini-body"></div><div class="ufo-mini-beam"></div></div>
+
     <div class="cosmic-decoration">
         <div class="planet one"></div>
         <div class="planet two"></div>
@@ -139,6 +154,7 @@
 
             <div class="screen-content">
                 <div class="date-display" id="dateDisplay">Loading Date...</div>
+                <div class="catchup-banner" id="catchupBanner"></div>
 
                 <div class="day-selector">
                     <button class="game-button active" id="btnWork" onclick="setDayType('Work')">💼 Work Day</button>
@@ -229,7 +245,61 @@
         let dbData = null; 
         let todayLunch = "";
         let todayDinner = "";
-        let currentWeekKey = getISOWeekKey();
+        let activeEntryDate = startOfDay(new Date());
+        let pendingDates = [];
+        let entryLocked = false;
+        let toastTimer = null;
+
+        function startOfDay(value) { const d = new Date(value); d.setHours(0,0,0,0); return d; }
+        function addDays(value, amount) { const d = startOfDay(value); d.setDate(d.getDate() + amount); return d; }
+        function sameDate(a,b) { return startOfDay(a).getTime() === startOfDay(b).getTime(); }
+        function parseLogDate(rawLog) {
+            const dateKey = Object.keys(rawLog || {}).find(k => k.toLowerCase().trim() === 'date');
+            let dateStr = dateKey ? rawLog[dateKey] : null;
+            if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
+            const parsed = new Date(dateStr);
+            return isNaN(parsed) ? null : startOfDay(parsed);
+        }
+        function formatEntryDate(date) {
+            return date.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+        }
+        function currentWeekKey() { return getISOWeekKey(activeEntryDate); }
+        function showToast(message) {
+            const toast = document.getElementById('gameToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 1450);
+        }
+        function flyUFO() {
+            const ufo = document.getElementById('ufoCelebration');
+            ufo.classList.remove('fly'); void ufo.offsetWidth; ufo.classList.add('fly');
+        }
+        function getCompletedDateSet() {
+            return new Set((dbData?.logs || []).map(parseLogDate).filter(Boolean).map(d => d.getTime()));
+        }
+        function buildPendingDates() {
+            const logs = (dbData?.logs || []).map(parseLogDate).filter(Boolean).sort((a,b)=>a-b);
+            const today = startOfDay(new Date());
+            const yesterday = addDays(today,-1);
+            pendingDates = [];
+            if (!logs.length) { activeEntryDate = today; return; }
+            const completed = getCompletedDateSet();
+            const latest = logs[logs.length-1];
+            for (let d = addDays(latest,1); d <= yesterday; d = addDays(d,1)) {
+                if (!completed.has(d.getTime())) pendingDates.push(new Date(d));
+            }
+            activeEntryDate = pendingDates.length ? pendingDates[0] : today;
+        }
+        function updateCatchupUI() {
+            const banner = document.getElementById('catchupBanner');
+            const today = startOfDay(new Date());
+            if (activeEntryDate < today) {
+                const remaining = pendingDates.filter(d => d >= activeEntryDate).length;
+                banner.textContent = `⚠️ Catch-up quest: complete ${formatEntryDate(activeEntryDate)} first${remaining > 1 ? ` (${remaining} missed days remaining)` : ''}.`;
+                banner.classList.add('show');
+            } else { banner.classList.remove('show'); banner.textContent=''; }
+        }
 
         document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => { document.getElementById("galaxy-loader").classList.add("hidden"); attachSoundEvents(); }, 1800); 
@@ -243,8 +313,8 @@
         });
 
         function setupDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('dateDisplay').innerText = new Date().toLocaleDateString('en-US', options);
+            document.getElementById('dateDisplay').innerText = formatEntryDate(activeEntryDate);
+            updateCatchupUI();
         }
 
         async function fetchDatabase() {
@@ -264,6 +334,8 @@
                     document.getElementById('btnComplete').innerText = dbData.ui['btn_complete'] || "Complete!";
                 }
                 
+                buildPendingDates();
+                setupDate();
                 checkIfAlreadyCompleted();
                 generateMeals();
                 generateTasks();
@@ -271,37 +343,27 @@
         }
 
         // 🛠 SAFARI/IOS HOTFIX APPLIED HERE![cite: 3]
-        function checkIfAlreadyCompleted() {
-            if (!dbData || !dbData.logs) return;
+        function setEntryLocked(locked) {
+            entryLocked = locked;
             const btn = document.getElementById('btnComplete');
-            let alreadyCompleted = false;
-            const today = new Date();
-            
-            dbData.logs.forEach(rawLog => {
-                // Look for Date key no matter how Google Sheets formatted it[cite: 3]
-                const dateKey = Object.keys(rawLog).find(k => k.toLowerCase().trim() === 'date');
-                let dateStr = dateKey ? rawLog[dateKey] : null;
-
-                // Safari hates "Friday, July 17, 2026", so we strip out "Friday, " to make it "July 17, 2026"[cite: 3]
-                if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
-                
-                let logDate = new Date(dateStr);
-
-                if (!isNaN(logDate) && 
-                    logDate.getDate() === today.getDate() && 
-                    logDate.getMonth() === today.getMonth() && 
-                    logDate.getFullYear() === today.getFullYear()) {
-                    alreadyCompleted = true;
-                }
+            btn.disabled = locked;
+            document.querySelectorAll('.day-selector button, #startTime, #endTime, input[type="checkbox"]').forEach(el => {
+                el.disabled = locked;
+                el.classList.toggle('locked-control', locked);
             });
+            document.querySelectorAll('.task-item').forEach(el => el.classList.toggle('locked-control', locked));
+            if (locked) btn.innerText = 'Already Completed This Day! ✨';
+            else btn.innerText = dbData?.ui?.['btn_complete'] || 'Complete My Day! 💖';
+        }
 
-            if (alreadyCompleted) {
-                btn.disabled = true;
-                btn.innerText = "Already Completed Today! ✨";
-            }
+        function checkIfAlreadyCompleted() {
+            if (!dbData) return;
+            const alreadyCompleted = getCompletedDateSet().has(activeEntryDate.getTime());
+            setEntryLocked(alreadyCompleted);
         }
 
         function setDayType(type) {
+            if (entryLocked) return;
             currentDayType = type;
             document.getElementById('btnWork').classList.remove('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
             document.getElementById('btn' + type).classList.add('active');
@@ -321,9 +383,9 @@
         function generateTasks() {
             if (!dbData || !dbData.ui) return;
             const dailyList = document.getElementById('dailyTasks'); const weeklyList = document.getElementById('weeklyTasks');
-            const dateNumber = new Date().getDate();
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
+            const dateNumber = activeEntryDate.getDate();
+            const currentMonth = activeEntryDate.getMonth();
+            const currentYear = activeEntryDate.getFullYear();
             
             dailyList.innerHTML = ""; weeklyList.innerHTML = "";
 
@@ -361,7 +423,7 @@
                         
                         if (!isNaN(logDate)) {
                             // Check Weekly chores[cite: 3]
-                            if (getISOWeekKey(logDate) === currentWeekKey) {
+                            if (getISOWeekKey(logDate) === currentWeekKey()) {
                                 if (String(getVal('Laundry_Done')).toLowerCase() === "true") doneLaundry = true;
                                 if (String(getVal('DeepClean_Done')).toLowerCase() === "true") doneClean = true;
                             }
@@ -469,7 +531,8 @@
             } else {
                 document.getElementById('weeklyContainer').style.display = 'none';
             }
-            attachSoundEvents(); 
+            attachSoundEvents();
+            setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
         }
 
         function createTaskHTML(id, text) {
@@ -477,11 +540,17 @@
         }
 
         function styleCheckbox(checkbox, itemId) {
-            if(checkbox.checked) { playPixelSound("coin"); document.getElementById(itemId).classList.add('completed'); } 
-            else { document.getElementById(itemId).classList.remove('completed'); }
+            if (entryLocked) { checkbox.checked = !checkbox.checked; return; }
+            if(checkbox.checked) {
+                playPixelSound('coin');
+                document.getElementById(itemId).classList.add('completed');
+                const cheers = ['✨ Quest cleared!', '🌟 Tiny win unlocked!', '🛸 Cosmic progress!', '💖 You did that!', '🏆 Level up!'];
+                showToast(cheers[Math.floor(Math.random() * cheers.length)]);
+            } else { document.getElementById(itemId).classList.remove('completed'); }
         }
 
         async function saveProgress() {
+            if (entryLocked) return;
             if (currentDayType !== 'Travel') {
                 const gym = document.getElementById('gym')?.checked;
                 const edit = document.getElementById('edit')?.checked;
@@ -520,7 +589,9 @@
             btn.disabled = true;
             btn.innerText = "Already Completed Today! ✨";
 
-            playPixelSound("success");
+            playPixelSound('success');
+            flyUFO();
+            showToast('🛸 Day complete! Galaxy streak saved!');
             confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#ff94cf', '#b5f7d3', '#8ee7ff', '#ffe58f'] });
             document.getElementById('loading').style.display = 'block';
 
@@ -539,7 +610,7 @@
             
             // FIXED: Added Travel_Cardio and Travel_Film to payload![cite: 3]
             const payload = {
-                Date: document.getElementById('dateDisplay').innerText,
+                Date: formatEntryDate(activeEntryDate),
                 Day_Type: currentDayType, Start_Time: currentDayType === 'Work' ? document.getElementById('startTime').value : "N/A", End_Time: currentDayType === 'Work' ? document.getElementById('endTime').value : "N/A",
                 Lunch: todayLunch, Dinner: todayDinner,
                 Gym_10min: document.getElementById('gym') ? document.getElementById('gym').checked : false,
@@ -566,8 +637,26 @@
             
             try {
                 await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                document.getElementById('loading').innerText = "✨ Saved to the Galaxy! ✨";
-                setTimeout(() => { document.getElementById('loading').style.display = 'none'; generateTasks(); }, 2000);
+                document.getElementById('loading').innerText = '✨ Saved to the Galaxy! ✨';
+                setTimeout(() => {
+                    document.getElementById('loading').style.display = 'none';
+                    const completedDate = activeEntryDate.getTime();
+                    pendingDates = pendingDates.filter(d => d.getTime() !== completedDate);
+                    const today = startOfDay(new Date());
+                    activeEntryDate = pendingDates.length ? pendingDates[0] : today;
+                    currentDayType = 'Work';
+                    setupDate();
+                    document.getElementById('startTime').value = '09:00';
+                    document.getElementById('endTime').value = '19:00';
+                    document.getElementById('btnWork').classList.add('active');
+                    document.getElementById('btnOff').classList.remove('active');
+                    document.getElementById('btnTravel').classList.remove('active');
+                    document.getElementById('timeInputs').style.display = 'block';
+                    generateMeals();
+                    generateTasks();
+                    checkIfAlreadyCompleted();
+                    if (pendingDates.length) showToast(`⚠️ Next catch-up day: ${formatEntryDate(activeEntryDate)}`);
+                }, 2000);
             } catch(e) { document.getElementById('loading').innerText = "Error saving. Connection lost in space."; }
         }
 

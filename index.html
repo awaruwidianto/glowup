@@ -77,6 +77,15 @@
         .time-inputs input { padding: 8px; border: 3px solid rgba(86,65,121,.3); border-radius: 12px; margin: 0 5px; font-family: var(--font-title); font-weight: 700; color: #5140b8; background: white; }
 
         .window-label { display: inline-block; padding: 4px 12px; border-radius: 999px; border: 3px solid rgba(69,44,109,.8); background: #fff7bf; font-family: var(--font-title); color: #6a4ddb; font-size: 12px; font-weight: 900; box-shadow: 0 4px 0 rgba(86,65,121,.22); margin-bottom: 10px; text-transform: uppercase; }
+
+        .section-label-special {
+            background: linear-gradient(180deg, #fffdf2, #ffe4f3);
+            border-color: rgba(81, 64, 184, .78);
+            color: #5140b8;
+            letter-spacing: .35px;
+            box-shadow: 0 4px 0 rgba(81, 64, 184, .20), 0 8px 18px rgba(255, 148, 207, .16);
+        }
+
         .food-box { background: rgba(255,255,255,.7); padding: 15px; border-radius: 16px; border: 3px solid rgba(86,65,121,.28); text-align: center; font-weight: 800; margin-bottom: 10px; color: var(--ink-soft); }
         .food-box span { color: #5844c9; font-size: 18px; display: block; margin-top: 5px; font-weight: 900; }
 
@@ -180,7 +189,7 @@
                 <ul class="task-list" id="dailyTasks"></ul>
 
                 <div id="weeklyContainer">
-                    <div class="window-label" id="titleWeekly">📅 Weekly & Monthly Quests</div>
+                    <div class="window-label section-label-special" id="titleWeekly">✨ Life Admin & Monthly Goals</div>
                     <ul class="task-list" id="weeklyTasks"></ul>
                 </div>
 
@@ -330,7 +339,7 @@
                     document.getElementById('btnTravel').innerText = dbData.ui['btn_travel'] || "Travel";
                     document.getElementById('titleMenu').innerText = dbData.ui['title_menu'] || "Today's Menu";
                     document.getElementById('titleDaily').innerText = dbData.ui['title_daily'] || "Daily Quests";
-                    document.getElementById('titleWeekly').innerText = dbData.ui['title_weekly'] || "Weekly Quests";
+                    document.getElementById('titleWeekly').innerText = "✨ Life Admin & Monthly Goals";
                     document.getElementById('btnComplete').innerText = dbData.ui['btn_complete'] || "Complete!";
                 }
                 

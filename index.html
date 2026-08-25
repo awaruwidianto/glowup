@@ -627,7 +627,7 @@
                 document.getElementById('weeklyContainer').style.display = 'block';
                 
                 let doneLaundry = false; let doneClean = false; let doneHabitCheck = false; let doneSavings = false;
-                let isHairDone = false; let isBrowsDone = false; let isLaserDone = false;
+                let isHairDone = false; let isBrowsDone = false; let isLaserDone = false; let isPotenzaDone = false;
                 
                 if (dbData.logs) {
                     dbData.logs.forEach(rawLog => {
@@ -661,6 +661,7 @@
                                     if (beautyVal.includes("HaircutDone")) isHairDone = true;
                                     if (beautyVal.includes("BrowsDone")) isBrowsDone = true;
                                     if (beautyVal.includes("LaserDone")) isLaserDone = true;
+                                    if (beautyVal.includes("PotenzaDone")) isPotenzaDone = true;
                                 }
                             }
                         }
@@ -729,7 +730,26 @@
                     }
                 }
 
-                let laserTaskName = dbData.ui['task_beauty_laser'] || "Laser Treatment";
+                let potenzaTaskName = dbData.ui['task_beauty_potenza'] || "Potenza";
+                if (isPotenzaDone) {
+                    weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${potenzaTaskName} (Completed)</span></li>`;
+                    weeklyTasksAdded++;
+                } else {
+                    if (dateNumber >= 8) {
+                        weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_potenza">
+                            <input type="checkbox" id="beauty_potenza" onchange="styleCheckbox(this, 'item_beauty_potenza')">
+                            <span class="task-text">🚨 ${potenzaTaskName} (OVERDUE!)</span>
+                        </li>`;
+                        weeklyTasksAdded++;
+                    } else {
+                        weeklyList.innerHTML += `<li class="task-item upcoming">
+                            <span class="task-text">⏳ ${potenzaTaskName} (Upcoming on 8th)</span>
+                        </li>`;
+                        weeklyTasksAdded++;
+                    }
+                }
+
+                let laserTaskName = dbData.ui['task_beauty_laser'] || "Laser Hair Removal";
                 if (isLaserDone) {
                     weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laserTaskName} (Completed)</span></li>`;
                     weeklyTasksAdded++;
@@ -837,9 +857,11 @@
             const isHairChecked = document.getElementById('beauty_hair') ? document.getElementById('beauty_hair').checked : false;
             const isBrowsChecked = document.getElementById('beauty_brows') ? document.getElementById('beauty_brows').checked : false;
             const isLaserChecked = document.getElementById('beauty_laser') ? document.getElementById('beauty_laser').checked : false;
+            const isPotenzaChecked = document.getElementById('beauty_potenza') ? document.getElementById('beauty_potenza').checked : false;
 
             let beautyArr = [];
-            if (isLaserChecked) beautyArr.push("LaserDone"); 
+            if (isLaserChecked) beautyArr.push("LaserDone");
+            if (isPotenzaChecked) beautyArr.push("PotenzaDone"); 
             if (isHairChecked) beautyArr.push("HaircutDone"); 
             if (isBrowsChecked) beautyArr.push("BrowsDone");
             let beautyStatus = beautyArr.length > 0 ? beautyArr.join(", ") : false;

@@ -350,9 +350,11 @@
         }
         function loadCloudCountdownSettings() {
             const rows = Array.isArray(dbData?.logs) ? dbData.logs : [];
+            // The newest cloud row that contains Countdown_Settings is the shared source of truth.
+            // This makes a newly opened phone / laptop inherit the same countdown list.
             for (let i = rows.length - 1; i >= 0; i--) {
                 const raw = getFieldLoose(rows[i], 'Countdown_Settings');
-                if (!raw) continue;
+                if (raw === undefined || raw === null || raw === '') continue;
                 try {
                     const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
                     if (Array.isArray(parsed)) {
@@ -391,14 +393,34 @@
         function openWorkSettings() { renderChapterEditors(); document.getElementById('workSettingsModal').classList.add('show'); }
         function closeWorkSettings() { document.getElementById('workSettingsModal').classList.remove('show'); }
         async function syncCountdownSettingsToCloud() {
+            // Write settings as a normal database row so the existing Galaxy Sheet backend
+            // can return it through dbData.logs on every device.
             const cloudPayload = {
-                Date: 'COUNTDOWN_SETTINGS',
+                Date: formatEntryDate(new Date()),
+                Day_Type: 'SETTINGS',
                 Record_Type: 'Countdown_Settings',
+                Start_Time: 'N/A',
+                End_Time: 'N/A',
+                Lunch: '',
+                Dinner: '',
+                Gym_10min: false,
+                Abs_10min: false,
+                Edit_2min: false,
+                Video_Watched: false,
+                Travel_Cardio: false,
+                Travel_Film: false,
+                Laundry_Done: false,
+                DeepClean_Done: false,
+                HabitCheck_Done: false,
+                Beauty_Done: false,
+                Savings_KRW: false,
                 Countdown_Settings: JSON.stringify(workSettings),
                 Updated_At: new Date().toISOString()
             };
             try {
                 await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(cloudPayload) });
+                // no-cors cannot expose the POST response, so refresh the shared database copy.
+                setTimeout(() => fetchDatabase(), 650);
                 return true;
             } catch(e) { console.error('Countdown cloud sync failed', e); return false; }
         }
@@ -457,15 +479,17 @@
         }
         function showWorkCelebration() {
             const infos = getWorkCountdownInfo(new Date());
-            const info = infos.find(item => item.type === 'Work');
-            if (!info || currentDayType !== 'Work') return;
+            if (!infos.length) return;
             const title = document.getElementById('workCelebrationTitle');
             const big = document.getElementById('workCelebrationBig');
             const text = document.getElementById('workCelebrationText');
-            if (info.daysLeft > 1) { title.textContent = `Another day at ${info.name} 🌟`; big.textContent = `${info.daysLeft} MORE DAYS`; text.textContent = `This chapter will not last forever. Notice the little things, make memories, learn something, and don't throw today away.`; }
-            else if (info.daysLeft === 1) { title.textContent = `Almost there at ${info.name} 🥹✨`; big.textContent = '1 MORE DAY'; text.textContent = `One more ordinary day that will someday be a memory. Enjoy it properly.`; }
-            else if (info.daysLeft === 0) { title.textContent = `Last day at ${info.name} 🎓✨`; big.textContent = 'FINAL DAY'; text.textContent = `You made it to the last page of this chapter. Take it in before you turn it.`; }
-            else { title.textContent = `${info.name} chapter complete 🌌`; big.textContent = 'YOU DID IT'; text.textContent = `That season is already part of your story. Keep moving forward.`; }
+
+            title.textContent = infos.length === 1 ? `Your countdown reminder ✨` : `Your ${infos.length} countdown reminders ✨`;
+            big.innerHTML = infos.map(info => {
+                const headline = countdownHeadline(info.daysLeft);
+                return `<div style="margin:8px 0 12px;padding:10px 12px;border:2px solid rgba(81,64,184,.28);border-radius:14px;background:rgba(255,255,255,.55);font-size:18px;line-height:1.25;color:#5140b8">${chapterEmoji(info.type)} ${escapeHTML(info.name)}<br><span style="font-size:26px;color:#ff5f9e">${escapeHTML(headline)}</span></div>`;
+            }).join('');
+            text.textContent = `Another day is complete. These chapters will not last forever — make the ordinary days count too. 💖`;
             document.getElementById('workCelebrationModal').classList.add('show');
             playPixelSound('success');
             confetti({ particleCount: 120, spread: 80, origin: { y: 0.65 } });
@@ -497,11 +521,16 @@
             const ufo = document.getElementById('ufoCelebration');
             ufo.classList.remove('fly'); void ufo.offsetWidth; ufo.classList.add('fly');
         }
+        function isSettingsLog(rawLog) {
+            const recordType = String(getFieldLoose(rawLog, 'Record_Type') || '').toLowerCase();
+            const dayType = String(getFieldLoose(rawLog, 'Day_Type') || '').toLowerCase();
+            return recordType === 'countdown_settings' || dayType === 'settings';
+        }
         function getCompletedDateSet() {
-            return new Set((dbData?.logs || []).map(parseLogDate).filter(Boolean).map(d => d.getTime()));
+            return new Set((dbData?.logs || []).filter(log => !isSettingsLog(log)).map(parseLogDate).filter(Boolean).map(d => d.getTime()));
         }
         function buildPendingDates() {
-            const logs = (dbData?.logs || []).map(parseLogDate).filter(Boolean).sort((a,b)=>a-b);
+            const logs = (dbData?.logs || []).filter(log => !isSettingsLog(log)).map(parseLogDate).filter(Boolean).sort((a,b)=>a-b);
             const today = startOfDay(new Date());
             const yesterday = addDays(today,-1);
             pendingDates = [];
@@ -631,6 +660,7 @@
                 
                 if (dbData.logs) {
                     dbData.logs.forEach(rawLog => {
+                        if (isSettingsLog(rawLog)) return;
                         const getVal = (key) => {
                             const found = Object.keys(rawLog).find(k => k.toLowerCase().trim() === key.toLowerCase());
                             return found ? rawLog[found] : undefined;
@@ -669,9 +699,23 @@
                 }
 
                 let weeklyTasksAdded = 0;
-                if (!doneLaundry) { weeklyList.innerHTML += createTaskHTML("laundry", dbData.ui['task_laundry'] || "Laundry"); weeklyTasksAdded++; }
-                if (!doneClean) { weeklyList.innerHTML += createTaskHTML("clean", dbData.ui['task_clean'] || "Deep Clean"); weeklyTasksAdded++; }
-                if (!doneHabitCheck) { weeklyList.innerHTML += createTaskHTML("habit_check", dbData.ui['task_habit_check'] || "Weekly Habit Check"); weeklyTasksAdded++; }
+                const laundryTaskName = dbData.ui['task_laundry'] || "Weekly Laundry 🧺";
+                if (doneLaundry) {
+                    weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laundryTaskName} (Completed this week)</span></li>`;
+                } else {
+                    weeklyList.innerHTML += createTaskHTML("laundry", laundryTaskName);
+                }
+                weeklyTasksAdded++;
+
+                const cleanTaskName = dbData.ui['task_clean'] || "Deep Clean";
+                if (doneClean) weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${cleanTaskName} (Completed this week)</span></li>`;
+                else weeklyList.innerHTML += createTaskHTML("clean", cleanTaskName);
+                weeklyTasksAdded++;
+
+                const habitTaskName = dbData.ui['task_habit_check'] || "Weekly Habit Check";
+                if (doneHabitCheck) weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${habitTaskName} (Completed this week)</span></li>`;
+                else weeklyList.innerHTML += createTaskHTML("habit_check", habitTaskName);
+                weeklyTasksAdded++;
                 
                 let savingsTaskName = dbData.ui['task_savings'] || "Monthly Savings";
                 if (doneSavings) {
@@ -837,8 +881,8 @@
                 }
             }
 
-            // Keep the original work-day celebration, now powered by the synced Work countdown.
-            if (currentDayType === 'Work') showWorkCelebration();
+            // Show every saved life-chapter countdown after completing any day type.
+            showWorkCelebration();
 
             const btn = document.getElementById('btnComplete');
             btn.disabled = true;

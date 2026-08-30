@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>✨ Glow Up Planner — Fixed ✨</title>
+    <title>GLOW UP</title>
     
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="apple-touch-icon" href="icon.png">
@@ -21,7 +21,7 @@
         :root {
             --ink: #111111; --ink-soft: #555555; --cream: #f4f4f4;
             --glass: rgba(255, 255, 255, 0.9);
-            --purple: #333333; --pink: #ff8c00; --mint: #d1d1d1; --yellow: #fca311;
+            --purple: #333333; --pink: #ff9aab; --mint: #d1d1d1; --yellow: #ffc2d1;
             --shadow: 0 24px 70px rgba(0, 0, 0, 0.08);
             --font-title: "Nunito", sans-serif; --font-body: "Nunito", sans-serif;
         }
@@ -31,9 +31,9 @@
         body {
             margin: 0; min-height: 100vh; overflow-x: hidden;
             color: var(--ink); font-family: var(--font-body);
-            background: radial-gradient(circle at 18% 16%, rgba(255, 140, 0, .08), transparent 28%),
+            background: radial-gradient(circle at 18% 16%, rgba(255, 154, 171, .08), transparent 28%),
                         radial-gradient(circle at 82% 26%, rgba(0, 0, 0, .04), transparent 24%),
-                        radial-gradient(circle at 45% 88%, rgba(255, 140, 0, .05), transparent 30%),
+                        radial-gradient(circle at 45% 88%, rgba(255, 154, 171, .05), transparent 30%),
                         linear-gradient(130deg, #ffffff, #f4f4f4, #eeeeee, #f9f9f9, #ffffff);
             background-size: 200% 200%; animation: galaxyShift 22s ease-in-out infinite;
         }
@@ -45,13 +45,13 @@
             background-size: 44px 44px, 72px 72px; animation: starDrift 34s linear infinite;
         }
 
-        .galaxy-loader { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: radial-gradient(circle at 20% 20%, rgba(255,140,0,.1), transparent 28%), linear-gradient(135deg, #eee, #ddd, #fff); transition: opacity .45s ease, visibility .45s ease; }
+        .galaxy-loader { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: radial-gradient(circle at 20% 20%, rgba(255,154,171,.1), transparent 28%), linear-gradient(135deg, #eee, #ddd, #fff); transition: opacity .45s ease, visibility .45s ease; }
         .galaxy-loader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .ufo-loader { position: relative; width: 132px; height: 132px; animation: ufoLoaderFloat 2.2s ease-in-out infinite; }
         .ufo-loader-dome { position: absolute; left: 38px; top: 18px; width: 56px; height: 42px; border-radius: 56px 56px 18px 18px; background: linear-gradient(145deg, #fff, #eee); border: 3px solid #111; z-index: 2; }
-        .ufo-loader-body { position: absolute; left: 14px; top: 50px; width: 104px; height: 42px; border-radius: 50%; background: linear-gradient(180deg, #fff, #ff8c00 52%, #111); border: 3px solid #111; z-index: 3; display:flex; justify-content:center; align-items:flex-end; gap:12px; padding-bottom:7px; }
+        .ufo-loader-body { position: absolute; left: 14px; top: 50px; width: 104px; height: 42px; border-radius: 50%; background: linear-gradient(180deg, #fff, #ff9aab 52%, #111); border: 3px solid #111; z-index: 3; display:flex; justify-content:center; align-items:flex-end; gap:12px; padding-bottom:7px; }
         .ufo-loader-body span { width: 9px; height: 9px; border-radius: 50%; background: #f4f4f4; animation: ufoLight 1s ease-in-out infinite alternate; }
-        .ufo-loader-beam { position:absolute; left:34px; top:80px; width:64px; height:50px; background: linear-gradient(180deg, rgba(255,140,0,.2), rgba(0,0,0,0)); clip-path: polygon(28% 0,72% 0,100% 100%,0 100%); animation: beamPulse 1.4s ease-in-out infinite; }
+        .ufo-loader-beam { position:absolute; left:34px; top:80px; width:64px; height:50px; background: linear-gradient(180deg, rgba(255,154,171,.2), rgba(0,0,0,0)); clip-path: polygon(28% 0,72% 0,100% 100%,0 100%); animation: beamPulse 1.4s ease-in-out infinite; }
 
         .galaxy-stage { position: relative; z-index: 1; min-height: 100vh; display: grid; place-items: center; padding: clamp(12px, 3vw, 36px); perspective: 1200px; }
 
@@ -70,7 +70,7 @@
         .game-button:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 0 0 #111; }
         .game-button.active { background: #111; color: white; }
 
-        .primary-button { background: linear-gradient(180deg, #ffb04f, #ff8c00); color: white; width: 100%; font-size: 18px; padding: 14px; margin-top: 20px; }
+        .primary-button { background: linear-gradient(180deg, #ffb3c1, #ff9aab); color: white; width: 100%; font-size: 18px; padding: 14px; margin-top: 20px; }
         .primary-button:disabled { background: #d1d1d1; color: #111; cursor: not-allowed; opacity: 0.8; box-shadow: none; transform: none; border-color: #555; }
         
         .time-inputs { display: none; text-align: center; margin-bottom: 20px; background: rgba(255,255,255,.9); padding: 15px; border-radius: 18px; border: 2px dashed rgba(17,17,17,.2); font-weight: 800; color: var(--ink-soft); }
@@ -92,16 +92,16 @@
         .task-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
         .task-item { display: flex; align-items: center; background: #f4f4f4; padding: 14px; border-radius: 18px; border: 3px solid #111; margin-bottom: 10px; transition: all 0.3s; box-shadow: inset 0 0 0 3px rgba(255,255,255,.8); }
         .task-item.completed { background: #e2e2e2; opacity: 0.8; }
-        .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: #ff8c00; cursor: pointer; flex-shrink: 0; }
+        .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: #ff9aab; cursor: pointer; flex-shrink: 0; }
         .task-text { flex-grow: 1; font-size: 16px; font-weight: 800; color: #111; line-height: 1.3; }
 
-        .task-item.overdue { border-color: #ff8c00; background: #fff4e5; }
-        .task-item.overdue .task-text { color: #cc7000; }
+        .task-item.overdue { border-color: #ff9aab; background: #fff0f3; }
+        .task-item.overdue .task-text { color: #d8647c; }
         .task-item.upcoming { opacity: 0.6; background: rgba(255,255,255,0.8); border-style: dashed; }
 
-        #loading { text-align: center; color: #111; font-weight: 900; display: none; margin-top: 15px; background: #fca311; padding: 10px; border-radius: 12px; border: 2px solid #111; font-size: 14px; }
+        #loading { text-align: center; color: #111; font-weight: 900; display: none; margin-top: 15px; background: #ffc2d1; padding: 10px; border-radius: 12px; border: 2px solid #111; font-size: 14px; }
 
-        .catchup-banner { display:none; margin: 0 0 16px; padding: 12px 14px; border: 3px solid #ff8c00; border-radius: 16px; background: linear-gradient(180deg, #fff, #f4f4f4); color:#111; font-weight:900; text-align:center; box-shadow:0 5px 0 rgba(17,17,17,.18); }
+        .catchup-banner { display:none; margin: 0 0 16px; padding: 12px 14px; border: 3px solid #ff9aab; border-radius: 16px; background: linear-gradient(180deg, #fff, #f4f4f4); color:#111; font-weight:900; text-align:center; box-shadow:0 5px 0 rgba(17,17,17,.18); }
         .catchup-banner.show { display:block; }
         .locked-control { opacity:.58 !important; cursor:not-allowed !important; pointer-events:none !important; }
         .game-toast { position:fixed; left:50%; top:18%; transform:translate(-50%,-12px) scale(.9); z-index:120; min-width:220px; max-width:86vw; padding:14px 18px; border:3px solid #111; border-radius:18px; background:linear-gradient(180deg,#fff,#f4f4f4); color:#111; font-family:var(--font-title); font-weight:900; text-align:center; box-shadow:0 14px 40px rgba(0,0,0,.1); opacity:0; pointer-events:none; transition:opacity .22s ease, transform .22s ease; }
@@ -109,8 +109,8 @@
         .ufo-celebration { position:fixed; z-index:119; left:-170px; top:28%; width:150px; height:90px; pointer-events:none; opacity:0; }
         .ufo-celebration.fly { animation:ufoFlyAcross 2.4s ease-in-out forwards; }
         .ufo-mini-dome { position:absolute; left:49px; top:4px; width:52px; height:35px; border-radius:50px 50px 14px 14px; background:linear-gradient(145deg,#fff,#eee); border:3px solid #111; }
-        .ufo-mini-body { position:absolute; left:18px; top:31px; width:114px; height:42px; border-radius:50%; background:linear-gradient(180deg,#fff,#ff8c00 54%,#111); border:3px solid #111; box-shadow:0 8px 18px rgba(0,0,0,.1); }
-        .ufo-mini-beam { position:absolute; left:48px; top:65px; width:55px; height:26px; background:linear-gradient(180deg,rgba(255,140,0,.7),rgba(0,0,0,0)); clip-path:polygon(25% 0,75% 0,100% 100%,0 100%); }
+        .ufo-mini-body { position:absolute; left:18px; top:31px; width:114px; height:42px; border-radius:50%; background:linear-gradient(180deg,#fff,#ff9aab 54%,#111); border:3px solid #111; box-shadow:0 8px 18px rgba(0,0,0,.1); }
+        .ufo-mini-beam { position:absolute; left:48px; top:65px; width:55px; height:26px; background:linear-gradient(180deg,rgba(255,154,171,.7),rgba(0,0,0,0)); clip-path:polygon(25% 0,75% 0,100% 100%,0 100%); }
         @keyframes ufoFlyAcross { 0%{left:-170px;top:34%;opacity:0;transform:rotate(-8deg)} 10%{opacity:1} 50%{top:18%;transform:rotate(5deg)} 90%{opacity:1} 100%{left:calc(100vw + 30px);top:30%;opacity:0;transform:rotate(-4deg)} }
 
         /* === LIFE CHAPTER COUNTDOWN SETTINGS === */
@@ -129,14 +129,14 @@
         .settings-actions .game-button { width:100%; }
         .chapter-editor { border:2px dashed rgba(17,17,17,.2); border-radius:16px; padding:11px; margin-bottom:10px; background:rgba(255,255,255,.9); }
         .chapter-editor-head { display:flex; justify-content:space-between; align-items:center; gap:10px; color:#111; font-weight:900; font-size:13px; }
-        .chapter-remove { border:0; background:transparent; color:#ff8c00; font-weight:900; cursor:pointer; font-size:16px; }
+        .chapter-remove { border:0; background:transparent; color:#ff9aab; font-weight:900; cursor:pointer; font-size:16px; }
         .chapter-fields { display:grid; grid-template-columns:120px 1fr; gap:8px; }
         .chapter-fields .settings-field:last-child { grid-column:1 / -1; }
         .countdown-card { display:none; margin:0 0 14px; }
         .countdown-card.show { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
         .countdown-mini { min-width:0; padding:10px 11px; border:2px solid #111; border-radius:14px; background:linear-gradient(145deg,#fff,#f4f4f4); box-shadow:0 4px 0 #111; text-align:left; }
         .countdown-company { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:var(--font-title); font-size:12px; font-weight:900; color:#111; }
-        .countdown-number { display:block; margin:2px 0 0; font-family:var(--font-title); font-size:18px; line-height:1.05; font-weight:900; color:#ff8c00; }
+        .countdown-number { display:block; margin:2px 0 0; font-family:var(--font-title); font-size:18px; line-height:1.05; font-weight:900; color:#ff9aab; }
         .countdown-sub { margin-top:3px; font-size:9px; font-weight:800; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         @media (max-width:360px) { .countdown-card.show { grid-template-columns:1fr; } .chapter-fields { grid-template-columns:1fr; } .chapter-fields .settings-field:last-child { grid-column:auto; } }
         
@@ -145,7 +145,7 @@
         .work-celebration-card { width:min(100%,430px); text-align:center; border:4px solid #111; border-radius:30px; padding:26px 22px 22px; background:linear-gradient(145deg,#fff,#f4f4f4,#eee); box-shadow:0 28px 80px rgba(0,0,0,.15); animation:countdownPop .38s cubic-bezier(.2,.9,.25,1.2); }
         .work-celebration-emoji { font-size:48px; }
         .work-celebration-card h3 { margin:8px 0 4px; color:#111; font-family:var(--font-title); font-size:24px; }
-        .work-celebration-big { margin:8px 0; font-family:var(--font-title); font-size:34px; font-weight:900; color:#ff8c00; }
+        .work-celebration-big { margin:8px 0; font-family:var(--font-title); font-size:34px; font-weight:900; color:#ff9aab; }
         .work-celebration-card p { margin:8px 0 18px; color:var(--ink-soft); font-weight:800; line-height:1.45; }
         @keyframes countdownPop { from{opacity:0;transform:scale(.78) translateY(18px)} to{opacity:1;transform:scale(1) translateY(0)} }
 
@@ -156,7 +156,7 @@
 
         .cosmic-decoration { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
         .planet { position: absolute; border-radius: 50%; animation: planetFloat 9s ease-in-out infinite; }
-        .planet.one { width: 86px; height: 86px; left: 7%; top: 10%; background: radial-gradient(circle at 35% 28%, #fff, #ff8c00 48%, #111); box-shadow: 0 16px 28px rgba(0, 0, 0, .1); }
+        .planet.one { width: 86px; height: 86px; left: 7%; top: 10%; background: radial-gradient(circle at 35% 28%, #fff, #ff9aab 48%, #111); box-shadow: 0 16px 28px rgba(0, 0, 0, .1); }
         .planet.two { width: 60px; height: 60px; right: 9%; top: 18%; background: radial-gradient(circle at 30% 24%, #fff, #e2e2e2 52%, #555); animation-delay: -2.5s; }
         
         @keyframes galaxyShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
@@ -488,12 +488,12 @@
             title.textContent = infos.length === 1 ? `Your countdown reminder ✨` : `Your ${infos.length} countdown reminders ✨`;
             big.innerHTML = infos.map(info => {
                 const headline = countdownHeadline(info.daysLeft);
-                return `<div style="margin:8px 0 12px;padding:10px 12px;border:2px solid #111;border-radius:14px;background:rgba(255,255,255,.9);font-size:18px;line-height:1.25;color:#111">${chapterEmoji(info.type)} ${escapeHTML(info.name)}<br><span style="font-size:26px;color:#ff8c00">${escapeHTML(headline)}</span></div>`;
+                return `<div style="margin:8px 0 12px;padding:10px 12px;border:2px solid #111;border-radius:14px;background:rgba(255,255,255,.9);font-size:18px;line-height:1.25;color:#111">${chapterEmoji(info.type)} ${escapeHTML(info.name)}<br><span style="font-size:26px;color:#ff9aab">${escapeHTML(headline)}</span></div>`;
             }).join('');
             text.textContent = `Another day is complete. These chapters will not last forever — make the ordinary days count too. 💖`;
             document.getElementById('workCelebrationModal').classList.add('show');
             playPixelSound('success');
-            confetti({ particleCount: 120, spread: 80, origin: { y: 0.65 }, colors: ['#ff8c00', '#111111', '#555555', '#cccccc'] });
+            confetti({ particleCount: 120, spread: 80, origin: { y: 0.65 }, colors: ['#ff9aab', '#111111', '#555555', '#cccccc'] });
         }
         function closeWorkCelebration() { document.getElementById('workCelebrationModal').classList.remove('show'); }
 
@@ -892,7 +892,7 @@
             playPixelSound('success');
             flyUFO();
             showToast('🛸 Day complete! Galaxy streak saved!');
-            confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#ff8c00', '#111111', '#555555', '#cccccc'] });
+            confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#ff9aab', '#111111', '#555555', '#cccccc'] });
             document.getElementById('loading').style.display = 'block';
 
             const isLaundryDone = document.getElementById('laundry') ? document.getElementById('laundry').checked : false;

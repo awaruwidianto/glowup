@@ -18,10 +18,10 @@
     <style>
         :root {
             --ink: #111111; --ink-soft: #555555; --cream: #f4f4f4;
-            --glass: rgba(255, 255, 255, 0.9);
             --purple: #333333; --pink: #ff9aab; --mint: #d1d1d1; --yellow: #ffc2d1;
             --shadow: 0 24px 70px rgba(0, 0, 0, 0.08);
             --font-title: "Nunito", sans-serif; --font-body: "Nunito", sans-serif;
+            --app-width: min(100%, 550px);
         }
 
         * { box-sizing: border-box; } html { min-height: 100%; }
@@ -34,6 +34,12 @@
                         radial-gradient(circle at 45% 88%, rgba(255, 154, 171, .05), transparent 30%),
                         linear-gradient(130deg, #ffffff, #f4f4f4, #eeeeee, #f9f9f9, #ffffff);
             background-size: 200% 200%; animation: galaxyShift 22s ease-in-out infinite;
+        }
+
+        /* 💻 COMPACT DESKTOP DESIGNER MODE */
+        body.desktop-mode { --app-width: min(100%, 950px); }
+        @media (min-width: 768px) {
+            body.desktop-mode .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
         }
 
         body::before {
@@ -53,7 +59,7 @@
 
         .galaxy-stage { position: relative; z-index: 1; min-height: 100vh; display: grid; place-items: center; padding: clamp(12px, 3vw, 36px); perspective: 1200px; }
 
-        .app-shell { width: min(100%, 550px); border: 4px solid #111; border-radius: 34px; background: #ffffff; box-shadow: var(--shadow), inset 0 0 0 4px rgba(0,0,0,.05); backdrop-filter: blur(22px); transform-style: preserve-3d; transition: transform 0.1s ease-out; padding-bottom: 20px; }
+        .app-shell { width: var(--app-width); border: 4px solid #111; border-radius: 34px; background: #ffffff; box-shadow: var(--shadow), inset 0 0 0 4px rgba(0,0,0,.05); backdrop-filter: blur(22px); transform-style: preserve-3d; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding-bottom: 20px; }
         .topbar { display: flex; align-items: center; gap: 12px; padding: 20px; background: rgba(255,255,255,.9); border-bottom: 3px solid rgba(17,17,17,.1); border-radius: 30px 30px 0 0; }
         .brand-badge { width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; background: #fff; border: 3px solid #111; box-shadow: 0 5px 0 rgba(17,17,17,1); padding: 5px; }
         .brand-badge img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
@@ -75,29 +81,34 @@
         .time-inputs input { padding: 8px; border: 3px solid rgba(17,17,17,.2); border-radius: 12px; margin: 0 5px; font-family: var(--font-title); font-weight: 700; color: #111; background: white; }
 
         .window-label { display: inline-block; padding: 4px 12px; border-radius: 999px; border: 3px solid #111; background: #fff; font-family: var(--font-title); color: #111; font-size: 12px; font-weight: 900; box-shadow: 0 4px 0 #111; margin-bottom: 10px; text-transform: uppercase; }
+        .section-label-special { background: linear-gradient(180deg, #fff, #f4f4f4); border-color: #111; color: #111; letter-spacing: .35px; box-shadow: 0 4px 0 #111, 0 8px 18px rgba(0, 0, 0, .05); }
 
-        .section-label-special {
-            background: linear-gradient(180deg, #fff, #f4f4f4);
-            border-color: #111;
-            color: #111;
-            letter-spacing: .35px;
-            box-shadow: 0 4px 0 #111, 0 8px 18px rgba(0, 0, 0, .05);
-        }
+        .tracker-box { background: rgba(255,255,255,.9); padding: 15px; border-radius: 16px; border: 3px solid rgba(17,17,17,.2); margin-bottom: 25px; display: grid; gap: 12px; }
+        .tracker-row { display: flex; flex-direction: column; gap: 6px; }
+        .tracker-row label { font-weight: 900; font-size: 13px; color: #111; }
+        .tracker-row select, .tracker-row textarea { width: 100%; padding: 10px; border: 3px solid rgba(17,17,17,.2); border-radius: 12px; font-family: var(--font-title); font-weight: 700; color: #111; background: white; resize: vertical; }
+        
+        .food-options { display: flex; gap: 10px; flex-wrap: wrap; }
+        .radio-btn { flex: 1; min-width: 90px; }
+        .radio-btn input[type="radio"] { display: none; }
+        .radio-btn label { display: flex; align-items: center; justify-content: center; height: 100%; padding: 8px; border: 3px solid rgba(17,17,17,.2); border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s; background: white; font-size: 13px; text-align: center;}
+        .radio-btn input[type="radio"]:checked + label { background: #111; color: white; border-color: #111; }
 
-        .food-box { background: rgba(255,255,255,.9); padding: 15px; border-radius: 16px; border: 3px solid rgba(17,17,17,.2); text-align: center; font-weight: 800; margin-bottom: 10px; color: var(--ink-soft); }
-        .food-box span { color: #111; font-size: 18px; display: block; margin-top: 5px; font-weight: 900; }
-
-        .task-list { list-style: none; padding: 0; margin: 0 0 20px 0; }
+        .task-list { list-style: none; padding: 0; margin: 0 0 25px 0; }
         .task-item { display: flex; align-items: center; background: #f4f4f4; padding: 14px; border-radius: 18px; border: 3px solid #111; margin-bottom: 10px; transition: all 0.3s; box-shadow: inset 0 0 0 3px rgba(255,255,255,.8); }
         .task-item.completed { background: #e2e2e2; opacity: 0.8; }
         .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: #ff9aab; cursor: pointer; flex-shrink: 0; }
-        .task-text { flex-grow: 1; font-size: 16px; font-weight: 800; color: #111; line-height: 1.3; }
+        .task-text { flex-grow: 1; font-size: 15px; font-weight: 800; color: #111; line-height: 1.3; }
 
-        .task-item.overdue { border-color: #ff9aab; background: #fff0f3; }
+        .task-item.overdue { border-color: #ff9aab; background: #fff0f3; animation: pulseRed 2s infinite alternate; }
         .task-item.overdue .task-text { color: #d8647c; }
         .task-item.upcoming { opacity: 0.6; background: rgba(255,255,255,0.8); border-style: dashed; }
+        @keyframes pulseRed { from { box-shadow: inset 0 0 0 3px rgba(255,255,255,.8), 0 0 0px rgba(255,154,171,0); } to { box-shadow: inset 0 0 0 3px rgba(255,255,255,.8), 0 0 15px rgba(255,154,171,0.6); } }
 
         #loading { text-align: center; color: #111; font-weight: 900; display: none; margin-top: 15px; background: #ffc2d1; padding: 10px; border-radius: 12px; border: 2px solid #111; font-size: 14px; }
+        
+        .animated-feedback { font-weight: 900; text-align: center; margin-top: 15px; font-size: 16px; min-height: 24px; animation: colorChange 4s infinite alternate; }
+        @keyframes colorChange { 0% { color: #ff6b81; } 50% { color: #ff9aab; } 100% { color: #ff4757; } }
 
         .catchup-banner { display:none; margin: 0 0 16px; padding: 12px 14px; border: 3px solid #ff9aab; border-radius: 16px; background: linear-gradient(180deg, #fff, #f4f4f4); color:#111; font-weight:900; text-align:center; box-shadow:0 5px 0 rgba(17,17,17,.18); }
         .catchup-banner.show { display:block; }
@@ -111,7 +122,6 @@
         .ufo-mini-beam { position:absolute; left:48px; top:65px; width:55px; height:26px; background:linear-gradient(180deg,rgba(255,154,171,.7),rgba(0,0,0,0)); clip-path:polygon(25% 0,75% 0,100% 100%,0 100%); }
         @keyframes ufoFlyAcross { 0%{left:-170px;top:34%;opacity:0;transform:rotate(-8deg)} 10%{opacity:1} 50%{top:18%;transform:rotate(5deg)} 90%{opacity:1} 100%{left:calc(100vw + 30px);top:30%;opacity:0;transform:rotate(-4deg)} }
 
-        /* === LIFE CHAPTER COUNTDOWN SETTINGS === */
         .settings-button { margin-left:auto; flex:0 0 auto; width:42px; height:42px; padding:0; border-radius:14px; font-size:20px; }
         .settings-modal { position:fixed; inset:0; z-index:150; display:none; place-items:center; padding:18px; background:rgba(0,0,0,.46); backdrop-filter:blur(10px); }
         .settings-modal.show { display:grid; }
@@ -122,7 +132,6 @@
         .settings-field { margin:10px 0; }
         .settings-field label { display:block; margin-bottom:6px; color:var(--ink-soft); font-weight:900; font-size:12px; }
         .settings-field input, .settings-field select { width:100%; min-height:42px; padding:9px 10px; border:3px solid rgba(17,17,17,.2); border-radius:13px; background:white; color:#111; font-family:var(--font-title); font-weight:800; }
-        .settings-note { font-size:12px; line-height:1.5; color:var(--ink-soft); font-weight:700; background:rgba(0,0,0,.05); border:2px dashed rgba(17,17,17,.2); border-radius:14px; padding:10px 12px; }
         .settings-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
         .settings-actions .game-button { width:100%; }
         .chapter-editor { border:2px dashed rgba(17,17,17,.2); border-radius:16px; padding:11px; margin-bottom:10px; background:rgba(255,255,255,.9); }
@@ -130,49 +139,39 @@
         .chapter-remove { border:0; background:transparent; color:#ff9aab; font-weight:900; cursor:pointer; font-size:16px; }
         .chapter-fields { display:grid; grid-template-columns:120px 1fr; gap:8px; }
         .chapter-fields .settings-field:last-child { grid-column:1 / -1; }
+        
         .countdown-card { display:none; margin:0 0 14px; }
         .countdown-card.show { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
         .countdown-mini { min-width:0; padding:10px 11px; border:2px solid #111; border-radius:14px; background:linear-gradient(145deg,#fff,#f4f4f4); box-shadow:0 4px 0 #111; text-align:left; }
         .countdown-company { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-family:var(--font-title); font-size:12px; font-weight:900; color:#111; }
         .countdown-number { display:block; margin:2px 0 0; font-family:var(--font-title); font-size:18px; line-height:1.05; font-weight:900; color:#ff9aab; }
         .countdown-sub { margin-top:3px; font-size:9px; font-weight:800; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        @media (max-width:360px) { .countdown-card.show { grid-template-columns:1fr; } .chapter-fields { grid-template-columns:1fr; } .chapter-fields .settings-field:last-child { grid-column:auto; } }
         
         .work-celebration-modal { position:fixed; inset:0; z-index:145; display:none; place-items:center; padding:18px; background:rgba(0,0,0,.46); backdrop-filter:blur(8px); }
         .work-celebration-modal.show { display:grid; }
-        .work-celebration-card { width:min(100%,430px); text-align:center; border:4px solid #111; border-radius:30px; padding:26px 22px 22px; background:linear-gradient(145deg,#fff,#f4f4f4,#eee); box-shadow:0 28px 80px rgba(0,0,0,.15); animation:countdownPop .38s cubic-bezier(.2,.9,.25,1.2); }
+        .work-celebration-card { width:min(100%,430px); text-align:center; border:4px solid #111; border-radius:30px; padding:26px 22px 22px; background:linear-gradient(145deg,#fff,#f4f4f4,#eee); box-shadow:0 28px 80px rgba(0,0,0,.15); }
         .work-celebration-emoji { font-size:48px; }
         .work-celebration-card h3 { margin:8px 0 4px; color:#111; font-family:var(--font-title); font-size:24px; }
         .work-celebration-big { margin:8px 0; font-family:var(--font-title); font-size:34px; font-weight:900; color:#ff9aab; }
         .work-celebration-card p { margin:8px 0 18px; color:var(--ink-soft); font-weight:800; line-height:1.45; }
-        @keyframes countdownPop { from{opacity:0;transform:scale(.78) translateY(18px)} to{opacity:1;transform:scale(1) translateY(0)} }
 
-        /* === MOBILE SHRINK HOTFIX === */
         @media (max-width: 500px) {
-            .galaxy-stage { padding: 10px; } .app-shell { border-width: 3px; border-radius: 26px; padding-bottom: 15px; } .topbar { padding: 15px; gap: 10px; border-radius: 24px 24px 0 0; } h1 { font-size: 20px; } .brand-badge { width: 36px; height: 36px; padding: 4px; border-width: 2px; } .screen-content { padding: 14px; } .date-display { font-size: 13px; margin-bottom: 14px; } .day-selector { gap: 6px; margin-bottom: 15px; } .game-button { min-height: 36px; padding: 6px 4px; font-size: 11px; border-width: 2px; border-radius: 12px; } .window-label { font-size: 10px; padding: 3px 10px; border-width: 2px; } .food-box { padding: 10px; font-size: 13px; border-radius: 14px; border-width: 2px; margin-bottom: 8px; } .food-box span { font-size: 15px; margin-top: 2px; } .task-item { padding: 10px 12px; margin-bottom: 8px; border-radius: 14px; border-width: 2px; } .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; } .task-text { font-size: 14px; } .task-list { margin-bottom: 15px; } .primary-button { font-size: 15px; padding: 12px; margin-top: 12px; min-height: 44px; } .time-inputs { padding: 12px; font-size: 14px; } .time-inputs input { padding: 6px; font-size: 13px; border-width: 2px; }
+            .galaxy-stage { padding: 10px; } .app-shell { border-width: 3px; border-radius: 26px; padding-bottom: 15px; } .topbar { padding: 15px; gap: 10px; border-radius: 24px 24px 0 0; } h1 { font-size: 20px; } .brand-badge { width: 36px; height: 36px; padding: 4px; border-width: 2px; } .screen-content { padding: 14px; } .date-display { font-size: 13px; margin-bottom: 14px; } .day-selector { gap: 6px; margin-bottom: 15px; } .game-button { min-height: 36px; padding: 6px 4px; font-size: 11px; border-width: 2px; border-radius: 12px; } .window-label { font-size: 10px; padding: 3px 10px; border-width: 2px; } .tracker-box { padding: 10px; border-radius: 14px; border-width: 2px; margin-bottom: 15px; } .task-item { padding: 10px 12px; margin-bottom: 8px; border-radius: 14px; border-width: 2px; } .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; } .task-text { font-size: 14px; } .primary-button { font-size: 15px; padding: 12px; margin-top: 12px; min-height: 44px; }
         }
 
         .cosmic-decoration { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
         .planet { position: absolute; border-radius: 50%; animation: planetFloat 9s ease-in-out infinite; }
         .planet.one { width: 86px; height: 86px; left: 7%; top: 10%; background: radial-gradient(circle at 35% 28%, #fff, #ff9aab 48%, #111); box-shadow: 0 16px 28px rgba(0, 0, 0, .1); }
         .planet.two { width: 60px; height: 60px; right: 9%; top: 18%; background: radial-gradient(circle at 30% 24%, #fff, #e2e2e2 52%, #555); animation-delay: -2.5s; }
-        
-        @keyframes galaxyShift { 0%,100%{background-position:0% 50%} 50%{background-position:100% 50%} }
-        @keyframes starDrift { from{transform:translate3d(0,0,0)} to{transform:translate3d(-118px,118px,0)} }
-        @keyframes ufoLoaderFloat { 0%,100% { transform: translateY(4px) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
-        @keyframes ufoLight { from { opacity:.45; transform:scale(.8); } to { opacity:1; transform:scale(1.15); } }
-        @keyframes beamPulse { 0%,100% { opacity:.35; transform:scaleY(.88); } 50% { opacity:.8; transform:scaleY(1.08); } }
         @keyframes planetFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-14px) rotate(3deg)} }
     </style>
 </head>
-<body>
+<body id="bodyMain">
 
     <div class="galaxy-loader" id="galaxy-loader">
         <div class="ufo-loader">
             <div class="ufo-loader-dome"></div>
-            <div class="ufo-loader-body">
-                <span></span><span></span><span></span>
-            </div>
+            <div class="ufo-loader-body"><span></span><span></span><span></span></div>
             <div class="ufo-loader-beam"></div>
         </div>
     </div>
@@ -192,239 +191,221 @@
                 <div class="brand-badge">
                     <img src="icon.png" alt="Icon" onerror="this.style.display='none'"> 
                 </div>
-                <h1 id="appTitle">Glow Up 2026</h1>
-                <button class="game-button settings-button" id="settingsButton" type="button" onclick="openWorkSettings()" aria-label="Countdown settings" title="Life chapter countdown settings">⚙️</button>
+                <h1 id="appTitle">GLOW UP</h1>
+                <button class="game-button settings-button" id="settingsButton" type="button" onclick="openWorkSettings()">⚙️</button>
             </header>
 
             <div class="screen-content">
-                <div class="date-display" id="dateDisplay">Loading Date...</div>
-                <div class="catchup-banner" id="catchupBanner"></div>
-                <div class="countdown-card" id="workCountdownCard"></div>
+                
+                <div style="grid-column: 1 / -1;">
+                    <div class="date-display" id="dateDisplay">Loading Date...</div>
+                    <div class="catchup-banner" id="catchupBanner"></div>
+                    <div class="countdown-card" id="workCountdownCard"></div>
 
-                <div class="day-selector">
-                    <button class="game-button active" id="btnWork" onclick="setDayType('Work')">💼 Work Day</button>
-                    <button class="game-button" id="btnOff" onclick="setDayType('Off')">🌿 Day Off</button>
-                    <button class="game-button" id="btnTravel" onclick="setDayType('Travel')">✈️ Travel</button>
+                    <div class="day-selector">
+                        <button class="game-button active" id="btnWork" onclick="setDayType('Work')">💼 Work Day</button>
+                        <button class="game-button" id="btnOff" onclick="setDayType('Off')">🌿 Day Off</button>
+                        <button class="game-button" id="btnTravel" onclick="setDayType('Travel')">✈️ Travel</button>
+                    </div>
+
+                    <div class="time-inputs" id="timeInputs">
+                        <label>Work Hours:</label><br><br>
+                        <input type="time" id="startTime" value="09:00"> to 
+                        <input type="time" id="endTime" value="19:00">
+                    </div>
                 </div>
 
-                <div class="time-inputs" id="timeInputs">
-                    <label>Work Hours:</label><br><br>
-                    <input type="time" id="startTime" value="09:00"> to 
-                    <input type="time" id="endTime" value="19:00">
+                <div class="content-grid">
+                    <!-- LEFT COLUMN (Food & Trackers) -->
+                    <div class="left-col">
+                        <div class="window-label" id="ui_food_title">🥗 What Food I Eat Today</div>
+                        <div class="tracker-box">
+                            <div class="tracker-row">
+                                <label>Diet Type</label>
+                                <div class="food-options">
+                                    <div class="radio-btn"><input type="radio" id="f_opt1" name="foodType" value="Vegan"><label for="f_opt1" id="label_f_opt1">Vegan</label></div>
+                                    <div class="radio-btn"><input type="radio" id="f_opt2" name="foodType" value="Vegetarian"><label for="f_opt2" id="label_f_opt2">Vegetarian</label></div>
+                                    <div class="radio-btn"><input type="radio" id="f_opt3" name="foodType" value="Animal Cruelty"><label for="f_opt3" id="label_f_opt3">Animal Cruelty</label></div>
+                                </div>
+                            </div>
+                            <div class="tracker-row">
+                                <label>Health Level</label>
+                                <div class="food-options">
+                                    <div class="radio-btn"><input type="radio" id="h_opt1" name="foodHealth" value="Healthy"><label for="h_opt1" id="label_h_opt1">Healthy</label></div>
+                                    <div class="radio-btn"><input type="radio" id="h_opt2" name="foodHealth" value="Processed"><label for="h_opt2" id="label_h_opt2">Processed</label></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="window-label">🧠 Daily Trackers</div>
+                        <div class="tracker-box">
+                            <div class="tracker-row">
+                                <label id="ui_mood_title">Mood</label>
+                                <select id="trackMood">
+                                    <option value="">Select Mood...</option>
+                                    <option value="Happy" id="opt_mood_1">Happy ✨</option>
+                                    <option value="Average" id="opt_mood_2">Average 🌤️</option>
+                                    <option value="Sad" id="opt_mood_3">Sad 🌧️</option>
+                                    <option value="Stressed" id="opt_mood_4">Stressed 🌩️</option>
+                                </select>
+                            </div>
+                            <div class="tracker-row" style="flex-direction: row; gap: 10px;">
+                                <div style="flex:1;">
+                                    <label id="ui_med_title">Meditation</label>
+                                    <select id="trackMeditation">
+                                        <option value="Nope" id="opt_med_1">Nope</option>
+                                        <option value="Meditated" id="opt_med_2">Meditated 🧘‍♀️</option>
+                                    </select>
+                                </div>
+                                <div style="flex:1;">
+                                    <label id="ui_alc_title">Alcohol</label>
+                                    <select id="trackAlcohol">
+                                        <option value="Nope" id="opt_alc_1">Nope</option>
+                                        <option value="Happy" id="opt_alc_2">Happy 🥂</option>
+                                        <option value="Regret" id="opt_alc_3">Regret 💧</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tracker-row">
+                                <label id="ui_adult_title">Adult</label>
+                                <select id="trackAdult">
+                                    <option value="">Select...</option>
+                                    <option value="Sigh" id="opt_adult_1">Sigh</option>
+                                    <option value="Strong" id="opt_adult_2">Strong</option>
+                                    <option value="Sex" id="opt_adult_3">Sex</option>
+                                </select>
+                            </div>
+                            <div class="tracker-row">
+                                <label id="ui_journal_title">Highlight of the Day (Journal)</label>
+                                <textarea id="trackJournal" rows="2" placeholder="What's your story today?"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN (Quests) -->
+                    <div class="right-col">
+                        <div class="window-label">🏆 Daily Quests</div>
+                        <ul class="task-list" id="dailyTasks"></ul>
+
+                        <div id="weeklyContainer">
+                            <div class="window-label section-label-special">📅 WEEKLY QUESTS</div>
+                            <ul class="task-list" id="weeklyTasks"></ul>
+                        </div>
+
+                        <div id="monthlyContainer">
+                            <div class="window-label section-label-special">🌙 MONTHLY QUESTS</div>
+                            <ul class="task-list" id="monthlyTasks"></ul>
+                        </div>
+                    </div>
+                </div> <!-- End Grid -->
+
+                <div style="grid-column: 1 / -1;">
+                    <div class="animated-feedback" id="feedbackDisplay"></div>
+                    <button class="game-button primary-button" id="btnComplete" onclick="saveProgress()">Complete My Day! 💖</button>
+                    <div id="loading">🚀 Sending to your Galaxy Sheet...</div>
                 </div>
 
-                <div class="window-label" id="titleMenu">🥗 Today's Menu</div>
-                <div class="food-box">
-                    Lunch: <span id="lunchRandom">Loading...</span>
-                </div>
-                <div class="food-box" style="margin-bottom: 25px;">
-                    Dinner: <span id="dinnerRandom">Loading...</span>
-                </div>
-
-                <div class="window-label" id="titleDaily">🏆 Daily Quests</div>
-                <ul class="task-list" id="dailyTasks"></ul>
-
-                <div id="weeklyContainer">
-                    <div class="window-label section-label-special" id="titleWeekly">✨ WEEKLY & MONTHLY QUESTS</div>
-                    <ul class="task-list" id="weeklyTasks"></ul>
-                </div>
-
-                <button class="game-button primary-button" id="btnComplete" onclick="saveProgress()">Complete My Day! 💖</button>
-                <div id="loading">🚀 Sending to your Galaxy Sheet...</div>
             </div>
-
         </div>
     </main>
 
+    <!-- SETTINGS MODAL -->
     <div class="settings-modal" id="workSettingsModal" onclick="if(event.target===this) closeWorkSettings()">
-        <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="workSettingsTitle">
+        <div class="settings-card">
             <div class="settings-head">
-                <h2 id="workSettingsTitle">🌈 Life Chapter Countdowns</h2>
+                <h2>🌈 Settings & Countdowns</h2>
                 <button class="settings-close" type="button" onclick="closeWorkSettings()">✕</button>
             </div>
+            
+            <div style="margin-bottom: 20px; text-align:center;">
+                <label style="font-weight:900; font-size:14px; margin-bottom:8px; display:block;">View Mode</label>
+                <div style="display:flex; gap:10px;">
+                    <button class="game-button" type="button" onclick="toggleLayout(false)">📱 Mobile Mode</button>
+                    <button class="game-button" type="button" onclick="toggleLayout(true)">💻 Designer Desktop</button>
+                </div>
+            </div>
+
             <div id="chapterEditors"></div>
-            <button class="game-button" id="addChapterButton" type="button" onclick="addChapterEditor()">＋ Add another countdown</button>
-            <div class="settings-note" style="margin-top:12px">☁️ Countdowns are saved through your existing Galaxy database and cached locally as a backup. They recalculate automatically from today's real date on every device.</div>
+            <button class="game-button" id="addChapterButton" type="button" onclick="addChapterEditor()">＋ Add countdown</button>
             <div class="settings-actions">
                 <button class="game-button" type="button" onclick="clearWorkSettings()">Clear All</button>
-                <button class="game-button primary-button" type="button" style="margin-top:0" onclick="saveWorkSettings()">Save & Sync ✨</button>
+                <button class="game-button primary-button" type="button" style="margin-top:0" onclick="saveWorkSettings()">Save ✨</button>
             </div>
         </div>
     </div>
 
+    <!-- CELEBRATION MODAL -->
     <div class="work-celebration-modal" id="workCelebrationModal" onclick="if(event.target===this) closeWorkCelebration()">
         <div class="work-celebration-card">
             <div class="work-celebration-emoji">🌈✨</div>
-            <h3 id="workCelebrationTitle">Another day lived!</h3>
+            <h3 id="workCelebrationTitle">Chapter Completed!</h3>
             <div class="work-celebration-big" id="workCelebrationBig"></div>
-            <p id="workCelebrationText"></p>
-            <button class="game-button primary-button" type="button" onclick="closeWorkCelebration()">LET'S MAKE TODAY COUNT 💖</button>
+            <p id="workCelebrationText">This countdown has reached its end. Time for a new beginning! 💖</p>
+            <button class="game-button primary-button" type="button" onclick="closeWorkCelebration()">YAY! ✨</button>
         </div>
     </div>
 
     <script>
         // === AUDIO SYNTHESIZER ===
         const audioState = { soundEnabled: true, audioContext: null, masterGain: null };
-        function initAudio() {
-            if (audioState.audioContext) return;
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContext) return;
-            audioState.audioContext = new AudioContext();
-            audioState.masterGain = audioState.audioContext.createGain();
-            audioState.masterGain.gain.value = 0.2;
-            audioState.masterGain.connect(audioState.audioContext.destination);
-        }
+        function initAudio() { if (audioState.audioContext) return; const AudioContext = window.AudioContext || window.webkitAudioContext; if (!AudioContext) return; audioState.audioContext = new AudioContext(); audioState.masterGain = audioState.audioContext.createGain(); audioState.masterGain.gain.value = 0.2; audioState.masterGain.connect(audioState.audioContext.destination); }
         function forceUnlockAudioContext() { initAudio(); if (audioState.audioContext && audioState.audioContext.state === "suspended") { audioState.audioContext.resume(); } }
-        function playTone(frequency, duration, type = "sine", gain = 0.08, delay = 0) {
-            initAudio(); if (!audioState.audioContext) return; if (audioState.audioContext.state === "suspended") audioState.audioContext.resume();
-            const now = audioState.audioContext.currentTime + delay; const osc = audioState.audioContext.createOscillator(); const vol = audioState.audioContext.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(frequency, now); vol.gain.setValueAtTime(gain, now); vol.gain.exponentialRampToValueAtTime(0.001, now + duration);
-            osc.connect(vol).connect(audioState.masterGain); osc.start(now); osc.stop(now + duration + 0.02);
-        }
-        function playPixelSound(name) {
-            const g = 0.07;
-            if (name === "click") playTone(520, .06, "square", g);
-            if (name === "hover") playTone(740, .04, "triangle", 0.025);
-            if (name === "coin") { playTone(880, .08, "triangle", g); playTone(1320, .1, "triangle", g, .06); }
-            if (name === "success") { playTone(659, .12, "sine", g); playTone(988, .18, "sine", g, .1); }
-        }
-        function attachSoundEvents() {
-            document.querySelectorAll(".game-button:not(:disabled), input[type='checkbox']").forEach(el => {
-                if (!el.hasAttribute('data-sound-bound')) {
-                    el.addEventListener("mouseenter", () => playPixelSound("hover"));
-                    el.addEventListener("click", () => playPixelSound("click"));
-                    el.setAttribute('data-sound-bound', 'true');
-                }
-            });
-        }
+        function playTone(frequency, duration, type = "sine", gain = 0.08, delay = 0) { initAudio(); if (!audioState.audioContext) return; if (audioState.audioContext.state === "suspended") audioState.audioContext.resume(); const now = audioState.audioContext.currentTime + delay; const osc = audioState.audioContext.createOscillator(); const vol = audioState.audioContext.createGain(); osc.type = type; osc.frequency.setValueAtTime(frequency, now); vol.gain.setValueAtTime(gain, now); vol.gain.exponentialRampToValueAtTime(0.001, now + duration); osc.connect(vol).connect(audioState.masterGain); osc.start(now); osc.stop(now + duration + 0.02); }
+        function playPixelSound(name) { const g = 0.07; if (name === "click") playTone(520, .06, "square", g); if (name === "hover") playTone(740, .04, "triangle", 0.025); if (name === "coin") { playTone(880, .08, "triangle", g); playTone(1320, .1, "triangle", g, .06); } if (name === "success") { playTone(659, .12, "sine", g); playTone(988, .18, "sine", g, .1); } }
+        function attachSoundEvents() { document.querySelectorAll(".game-button:not(:disabled), input[type='checkbox']").forEach(el => { if (!el.hasAttribute('data-sound-bound')) { el.addEventListener("mouseenter", () => playPixelSound("hover")); el.addEventListener("click", () => playPixelSound("click")); el.setAttribute('data-sound-bound', 'true'); } }); }
         window.addEventListener("click", forceUnlockAudioContext); window.addEventListener("touchstart", forceUnlockAudioContext);
 
-        // === SMART CLOUD WEEK CALCULATOR ===
-        function getISOWeekKey(d = new Date()) {
-            const date = new Date(d.getTime());
-            date.setHours(0, 0, 0, 0);
-            date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-            const week1 = new Date(date.getFullYear(), 0, 4);
-            const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-            return `${date.getFullYear()}_W${weekNum}`;
+        // Layout Toggle
+        function toggleLayout(isDesktop) {
+            const body = document.getElementById('bodyMain');
+            if(isDesktop) body.classList.add('desktop-mode'); else body.classList.remove('desktop-mode');
+            localStorage.setItem('glowup_layout', isDesktop ? 'desktop' : 'mobile');
+            showToast(isDesktop ? '💻 Desktop Grid Enabled' : '📱 Mobile Layout Restored');
         }
+        if(localStorage.getItem('glowup_layout') === 'desktop') document.getElementById('bodyMain').classList.add('desktop-mode');
 
-        // 🔴 BRAND NEW API URL
-        const API_URL = "https://script.google.com/macros/s/AKfycbzWp1ZQhhMp1mJBz_dQQYlfIyGuIeoQSs636tMAFB0YdkAyVkkfntpEtoy4qlG49kVovQ/exec"; 
+        function getISOWeekKey(d = new Date()) { const date = new Date(d.getTime()); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7); const week1 = new Date(date.getFullYear(), 0, 4); const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7); return `${date.getFullYear()}_W${weekNum}`; }
+
+        // 🔴 YOUR NEW API URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbzD2H4bXmNc3IJSg2IkvP0R84CRitKcoNU1898tReV8QeNdddg483ej09M8tIZBeo_pTQ/exec"; 
         
         let currentDayType = 'Work';
         let dbData = null; 
-        let todayLunch = "";
-        let todayDinner = "";
         let activeEntryDate = startOfDay(new Date());
         let pendingDates = [];
         let entryLocked = false;
         let toastTimer = null;
 
-        // === CLOUD-SYNCED LIFE CHAPTER COUNTDOWNS ===
+        // Settings / Countdowns (Kept intact)
         const WORK_SETTINGS_KEY = 'glowUpLifeChapterCountdown_v2';
-        const OLD_WORK_SETTINGS_KEY = 'glowUpWorkplaceCountdown_v1';
         let workSettings = loadWorkSettings();
-        let countdownShownForSession = false;
-
-        function normalizeChapter(chapter = {}) {
-            return {
-                type: String(chapter.type || 'Work').slice(0,30),
-                name: String(chapter.name || chapter.company || '').slice(0,80),
-                endDate: String(chapter.endDate || chapter.quitDate || '').slice(0,10)
-            };
-        }
-        function loadWorkSettings() {
-            try {
-                const saved = JSON.parse(localStorage.getItem(WORK_SETTINGS_KEY));
-                if (Array.isArray(saved)) return saved.map(normalizeChapter).filter(c => c.name || c.endDate);
-                const old = JSON.parse(localStorage.getItem(OLD_WORK_SETTINGS_KEY));
-                if (old && (old.company || old.quitDate)) return [normalizeChapter(old)];
-            } catch(e) {}
-            return [];
-        }
+        function normalizeChapter(chapter = {}) { return { type: String(chapter.type || 'Work').slice(0,30), name: String(chapter.name || '').slice(0,80), endDate: String(chapter.endDate || '').slice(0,10) }; }
+        function loadWorkSettings() { try { const saved = JSON.parse(localStorage.getItem(WORK_SETTINGS_KEY)); if (Array.isArray(saved)) return saved.map(normalizeChapter).filter(c => c.name || c.endDate); } catch(e) {} return []; }
         function persistWorkSettings() { localStorage.setItem(WORK_SETTINGS_KEY, JSON.stringify(workSettings)); }
-        function getFieldLoose(obj, wanted) {
-            const key = Object.keys(obj || {}).find(k => k.toLowerCase().trim() === wanted.toLowerCase());
-            return key ? obj[key] : undefined;
-        }
-        function loadCloudCountdownSettings() {
-            const rows = Array.isArray(dbData?.logs) ? dbData.logs : [];
-            for (let i = rows.length - 1; i >= 0; i--) {
-                const raw = getFieldLoose(rows[i], 'Countdown_Settings');
-                if (raw === undefined || raw === null || raw === '') continue;
-                try {
-                    const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
-                    if (Array.isArray(parsed)) {
-                        workSettings = parsed.map(normalizeChapter).filter(c => c.name && c.endDate);
-                        persistWorkSettings();
-                        return true;
-                    }
-                } catch(e) { console.warn('Could not parse cloud countdown settings', e); }
-            }
-            return false;
-        }
+        
         function renderChapterEditors() {
-            const box = document.getElementById('chapterEditors');
-            if (!box) return;
+            const box = document.getElementById('chapterEditors'); if (!box) return;
             const list = workSettings.length ? workSettings : [{ type:'Work', name:'', endDate:'' }];
             box.innerHTML = list.map((chapter,index) => `
                 <div class="chapter-editor" data-index="${index}">
-                    <div class="chapter-editor-head"><span>Countdown ${index + 1}</span>${list.length > 1 ? `<button class="chapter-remove" type="button" onclick="removeChapterEditor(${index})" title="Remove">✕</button>` : ''}</div>
+                    <div class="chapter-editor-head"><span>Countdown ${index + 1}</span>${list.length > 1 ? `<button class="chapter-remove" type="button" onclick="removeChapterEditor(${index})">✕</button>` : ''}</div>
                     <div class="chapter-fields">
-                        <div class="settings-field"><label>Activity</label><select class="chapter-type"><option ${chapter.type==='Work'?'selected':''}>Work</option><option ${chapter.type==='School'?'selected':''}>School</option><option ${chapter.type==='Program'?'selected':''}>Program</option><option ${chapter.type==='Project'?'selected':''}>Project</option><option ${chapter.type==='Other'?'selected':''}>Other</option></select></div>
-                        <div class="settings-field"><label>Name</label><input class="chapter-name" type="text" maxlength="80" value="${escapeHTML(chapter.name || '')}" placeholder="e.g. Forena Clinic / School"></div>
-                        <div class="settings-field"><label>End / Last Date</label><input class="chapter-date" type="date" value="${escapeHTML(chapter.endDate || '')}"></div>
+                        <div class="settings-field"><label>Activity</label><select class="chapter-type"><option ${chapter.type==='Work'?'selected':''}>Work</option><option ${chapter.type==='School'?'selected':''}>School</option><option ${chapter.type==='Project'?'selected':''}>Project</option><option ${chapter.type==='Other'?'selected':''}>Other</option></select></div>
+                        <div class="settings-field"><label>Name</label><input class="chapter-name" type="text" maxlength="80" value="${escapeHTML(chapter.name || '')}"></div>
+                        <div class="settings-field"><label>End Date</label><input class="chapter-date" type="date" value="${escapeHTML(chapter.endDate || '')}"></div>
                     </div>
                 </div>`).join('');
             document.getElementById('addChapterButton').style.display = list.length >= 4 ? 'none' : 'inline-flex';
         }
-        function readChapterEditors() {
-            return [...document.querySelectorAll('.chapter-editor')].map(row => normalizeChapter({
-                type: row.querySelector('.chapter-type')?.value,
-                name: row.querySelector('.chapter-name')?.value.trim(),
-                endDate: row.querySelector('.chapter-date')?.value
-            })).filter(c => c.name || c.endDate);
-        }
+        function readChapterEditors() { return [...document.querySelectorAll('.chapter-editor')].map(row => normalizeChapter({ type: row.querySelector('.chapter-type')?.value, name: row.querySelector('.chapter-name')?.value.trim(), endDate: row.querySelector('.chapter-date')?.value })).filter(c => c.name || c.endDate); }
         function addChapterEditor() { workSettings = readChapterEditors(); if (workSettings.length < 4) workSettings.push({type:'School',name:'',endDate:''}); renderChapterEditors(); }
         function removeChapterEditor(index) { workSettings = readChapterEditors(); workSettings.splice(index,1); renderChapterEditors(); }
         function openWorkSettings() { renderChapterEditors(); document.getElementById('workSettingsModal').classList.add('show'); }
         function closeWorkSettings() { document.getElementById('workSettingsModal').classList.remove('show'); }
-        async function syncCountdownSettingsToCloud() {
-            const cloudPayload = {
-                Date: formatEntryDate(new Date()),
-                Day_Type: 'SETTINGS',
-                Start_Time: 'N/A', End_Time: 'N/A', Lunch: '', Dinner: '',
-                Gym_10min: false, Abs_10min: false, Edit_2min: false,
-                Story_5min: false, Video_Watched: false, Care_Done: false, Message_Sent: false,
-                Travel_Cardio: false, Travel_Film: false, Laundry_Done: false, DeepClean_Done: false,
-                HabitCheck_Done: false, Beauty_Done: false, Savings_KRW: false,
-                Countdown_Settings: JSON.stringify(workSettings)
-            };
-            try {
-                await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(cloudPayload) });
-                setTimeout(() => fetchDatabase(), 650);
-                return true;
-            } catch(e) { console.error('Countdown cloud sync failed', e); return false; }
-        }
-        async function saveWorkSettings() {
-            const chapters = readChapterEditors();
-            if (chapters.some(c => !c.name || !c.endDate)) { alert('✨ Please give each countdown a name and end date, or remove the empty one.'); return; }
-            workSettings = chapters; persistWorkSettings(); updateWorkCountdownCard(); closeWorkSettings(); showToast('☁️ Syncing countdowns...');
-            const ok = await syncCountdownSettingsToCloud();
-            showToast(ok ? '☁️ Countdowns synced!' : '💾 Saved locally — cloud retry later');
-        }
-        async function clearWorkSettings() {
-            workSettings = []; persistWorkSettings(); localStorage.removeItem(OLD_WORK_SETTINGS_KEY); renderChapterEditors(); updateWorkCountdownCard();
-            const ok = await syncCountdownSettingsToCloud();
-            showToast(ok ? '🌱 Countdowns cleared & synced' : '🌱 Countdowns cleared locally');
-        }
-        function parseLocalDate(dateString) {
-            if (!dateString) return null;
-            const parts = dateString.split('-').map(Number);
-            if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
-            return new Date(parts[0], parts[1]-1, parts[2], 0, 0, 0, 0);
-        }
+        function saveWorkSettings() { workSettings = readChapterEditors(); persistWorkSettings(); updateWorkCountdownCard(); closeWorkSettings(); showToast('☁️ Settings saved locally!'); }
+        function clearWorkSettings() { workSettings = []; persistWorkSettings(); renderChapterEditors(); updateWorkCountdownCard(); showToast('🌱 Countdowns cleared'); }
+        function parseLocalDate(dateString) { if (!dateString) return null; const parts = dateString.split('-').map(Number); if (parts.length !== 3 || parts.some(Number.isNaN)) return null; return new Date(parts[0], parts[1]-1, parts[2], 0, 0, 0, 0); }
+        
         function getWorkCountdownInfo(referenceDate = new Date()) {
             const ref = startOfDay(referenceDate || new Date());
             return workSettings.map(chapter => {
@@ -434,61 +415,40 @@
                 return { ...chapter, quitDate:end, daysLeft };
             }).filter(Boolean);
         }
-        function chapterEmoji(type) { return ({Work:'💼',School:'🎓',Program:'🚀',Project:'🛠️',Other:'✨'})[type] || '✨'; }
-        function countdownHeadline(daysLeft) {
-            if (daysLeft > 1) return `${daysLeft} days left`;
-            if (daysLeft === 1) return '1 day left';
-            if (daysLeft === 0) return 'LAST DAY ✨';
-            return `Done ${Math.abs(daysLeft)}d ago`;
-        }
+        function chapterEmoji(type) { return ({Work:'💼',School:'🎓',Project:'🛠️',Other:'✨'})[type] || '✨'; }
+        
         function updateWorkCountdownCard() {
-            const card = document.getElementById('workCountdownCard');
-            if (!card) return;
+            const card = document.getElementById('workCountdownCard'); if (!card) return;
             const infos = getWorkCountdownInfo(new Date());
             if (!infos.length) { card.classList.remove('show'); card.innerHTML=''; return; }
-            card.innerHTML = infos.map(info => `<div class="countdown-mini"><div class="countdown-company">${chapterEmoji(info.type)} ${escapeHTML(info.name)}</div><span class="countdown-number">${countdownHeadline(info.daysLeft)}</span><div class="countdown-sub">${escapeHTML(info.type)} · ${info.endDate}</div></div>`).join('');
+            card.innerHTML = infos.map(info => `<div class="countdown-mini"><div class="countdown-company">${chapterEmoji(info.type)} ${escapeHTML(info.name)}</div><span class="countdown-number">${info.daysLeft > 0 ? info.daysLeft + ' days left' : 'LAST DAY ✨'}</span></div>`).join('');
             card.classList.add('show');
         }
         function escapeHTML(value) { return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch])); }
-        function showWorkCelebration() {
+        function checkCompletedCountdowns() {
             const infos = getWorkCountdownInfo(new Date());
-            if (!infos.length) return;
-            const title = document.getElementById('workCelebrationTitle');
-            const big = document.getElementById('workCelebrationBig');
-            const text = document.getElementById('workCelebrationText');
-            title.textContent = infos.length === 1 ? `Your countdown reminder ✨` : `Your ${infos.length} countdown reminders ✨`;
-            big.innerHTML = infos.map(info => {
-                const headline = countdownHeadline(info.daysLeft);
-                return `<div style="margin:8px 0 12px;padding:10px 12px;border:2px solid #111;border-radius:14px;background:rgba(255,255,255,.9);font-size:18px;line-height:1.25;color:#111">${chapterEmoji(info.type)} ${escapeHTML(info.name)}<br><span style="font-size:26px;color:#ff9aab">${escapeHTML(headline)}</span></div>`;
-            }).join('');
-            text.textContent = `Another day is complete. These chapters will not last forever — make the ordinary days count too. 💖`;
-            document.getElementById('workCelebrationModal').classList.add('show');
-            playPixelSound('success');
-            confetti({ particleCount: 120, spread: 80, origin: { y: 0.65 }, colors: ['#ff9aab', '#111111', '#555555', '#cccccc'] });
+            const finished = infos.filter(info => info.daysLeft <= 0);
+            if (finished.length) {
+                const big = document.getElementById('workCelebrationBig');
+                big.innerHTML = finished.map(info => `<div style="margin:8px 0;padding:10px;border:2px solid #111;border-radius:14px;background:#fff;">${chapterEmoji(info.type)} ${escapeHTML(info.name)}</div>`).join('');
+                document.getElementById('workCelebrationModal').classList.add('show');
+                playPixelSound('success'); confetti({ particleCount: 120, spread: 80, origin: { y: 0.65 } });
+                workSettings = workSettings.filter(chapter => { const end = parseLocalDate(chapter.endDate); return end && Math.ceil((end - startOfDay(new Date())) / 86400000) > 0; });
+                persistWorkSettings(); updateWorkCountdownCard();
+            }
         }
         function closeWorkCelebration() { document.getElementById('workCelebrationModal').classList.remove('show'); }
-
         function startOfDay(value) { const d = new Date(value); d.setHours(0,0,0,0); return d; }
         function addDays(value, amount) { const d = startOfDay(value); d.setDate(d.getDate() + amount); return d; }
-        function parseLogDate(rawLog) {
-            const dateKey = Object.keys(rawLog || {}).find(k => k.toLowerCase().trim() === 'date');
-            let dateStr = dateKey ? rawLog[dateKey] : null;
-            if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
-            const parsed = new Date(dateStr);
-            return isNaN(parsed) ? null : startOfDay(parsed);
-        }
+        
+        function parseLogDate(rawLog) { const dateStr = rawLog['Date']; if(!dateStr) return null; const parsed = new Date(dateStr.replace(/^[A-Za-z]+,\s*/, '')); return isNaN(parsed) ? null : startOfDay(parsed); }
         function formatEntryDate(date) { return date.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }); }
         function currentWeekKey() { return getISOWeekKey(activeEntryDate); }
-        function showToast(message) {
-            const toast = document.getElementById('gameToast');
-            toast.textContent = message; toast.classList.add('show');
-            clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 1450);
-        }
+        function showToast(message) { const toast = document.getElementById('gameToast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 1450); }
         function flyUFO() { const ufo = document.getElementById('ufoCelebration'); ufo.classList.remove('fly'); void ufo.offsetWidth; ufo.classList.add('fly'); }
-        function isSettingsLog(rawLog) { return String(getFieldLoose(rawLog, 'Day_Type') || '').toLowerCase() === 'settings'; }
-        function getCompletedDateSet() { return new Set((dbData?.logs || []).filter(log => !isSettingsLog(log)).map(parseLogDate).filter(Boolean).map(d => d.getTime())); }
+        function getCompletedDateSet() { return new Set((dbData?.logs || []).map(parseLogDate).filter(Boolean).map(d => d.getTime())); }
         function buildPendingDates() {
-            const logs = (dbData?.logs || []).filter(log => !isSettingsLog(log)).map(parseLogDate).filter(Boolean).sort((a,b)=>a-b);
+            const logs = (dbData?.logs || []).map(parseLogDate).filter(Boolean).sort((a,b)=>a-b);
             const today = startOfDay(new Date()); const yesterday = addDays(today,-1);
             pendingDates = [];
             if (!logs.length) { activeEntryDate = today; return; }
@@ -505,274 +465,262 @@
             } else { banner.classList.remove('show'); banner.textContent=''; }
         }
 
-        document.addEventListener("DOMContentLoaded", () => { setTimeout(() => { document.getElementById("galaxy-loader").classList.add("hidden"); attachSoundEvents(); }, 1800); });
-        document.addEventListener("mousemove", event => {
-            if (window.innerWidth < 768) return; 
-            const x = (event.clientX / window.innerWidth - .5) * 2; const y = (event.clientY / window.innerHeight - .5) * 2;
-            document.getElementById("app-shell").style.transform = `rotateY(${x * 3}deg) rotateX(${-y * 3}deg)`;
+        document.addEventListener("DOMContentLoaded", () => { 
+            setTimeout(() => { document.getElementById("galaxy-loader").classList.add("hidden"); attachSoundEvents(); }, 1800); 
+            document.querySelectorAll('input[type="radio"], select').forEach(el => { el.addEventListener('change', updateLiveFeedback); });
         });
-
+        
+        // Setup Date
         function setupDate() { document.getElementById('dateDisplay').innerText = formatEntryDate(activeEntryDate); updateCatchupUI(); updateWorkCountdownCard(); }
 
+        // Fetch & Config Logic
         async function fetchDatabase() {
             try {
                 const response = await fetch(API_URL + "?t=" + new Date().getTime());
-                dbData = await response.json(); loadCloudCountdownSettings(); updateWorkCountdownCard();
+                dbData = await response.json(); 
                 
-                buildPendingDates(); setupDate(); checkIfAlreadyCompleted(); generateMeals(); generateTasks();
+                if(dbData.logs && dbData.logs.length) {
+                    const lastRow = dbData.logs[dbData.logs.length-1];
+                    if(lastRow.Countdown_Settings) { try { const parsed = JSON.parse(lastRow.Countdown_Settings); if(Array.isArray(parsed)) { workSettings = parsed; persistWorkSettings(); } } catch(e) {} }
+                }
+                
+                buildPendingDates(); setupDate(); applyConfigText(); generateTasks(); checkIfAlreadyCompleted();
             } catch (error) { console.error("Error fetching data", error); }
+        }
+
+        // Apply Custom UI Text from Config
+        function applyConfigText() {
+            const c = dbData.config || {};
+            const getT = (key, def) => (c[key] && c[key].text) ? c[key].text : def;
+            const setUI = (id, key, def, isVal = false) => { 
+                const el = document.getElementById(id); 
+                if(el) { if(isVal) el.value = getT(key, def); else el.innerText = getT(key, def); }
+            }
+
+            setUI('ui_food_title', 'UI_Food_Title', '🥗 What Food I Eat Today');
+            setUI('label_f_opt1', 'UI_Food_Opt1', 'Vegan'); setUI('f_opt1', 'UI_Food_Opt1', 'Vegan', true);
+            setUI('label_f_opt2', 'UI_Food_Opt2', 'Vegetarian'); setUI('f_opt2', 'UI_Food_Opt2', 'Vegetarian', true);
+            setUI('label_f_opt3', 'UI_Food_Opt3', 'Animal Cruelty'); setUI('f_opt3', 'UI_Food_Opt3', 'Animal Cruelty', true);
+            setUI('label_h_opt1', 'UI_Health_Opt1', 'Healthy'); setUI('h_opt1', 'UI_Health_Opt1', 'Healthy', true);
+            setUI('label_h_opt2', 'UI_Health_Opt2', 'Processed'); setUI('h_opt2', 'UI_Health_Opt2', 'Processed', true);
+
+            setUI('ui_mood_title', 'UI_Mood_Title', 'Mood');
+            setUI('opt_mood_1', 'UI_Mood_Opt1', 'Happy ✨'); setUI('opt_mood_1', 'UI_Mood_Opt1', 'Happy', true);
+            setUI('opt_mood_2', 'UI_Mood_Opt2', 'Average 🌤️'); setUI('opt_mood_2', 'UI_Mood_Opt2', 'Average', true);
+            setUI('opt_mood_3', 'UI_Mood_Opt3', 'Sad 🌧️'); setUI('opt_mood_3', 'UI_Mood_Opt3', 'Sad', true);
+            setUI('opt_mood_4', 'UI_Mood_Opt4', 'Stressed 🌩️'); setUI('opt_mood_4', 'UI_Mood_Opt4', 'Stressed', true);
+
+            setUI('ui_med_title', 'UI_Meditation_Title', 'Meditation');
+            setUI('opt_med_1', 'UI_Med_Opt1', 'Nope'); setUI('opt_med_1', 'UI_Med_Opt1', 'Nope', true);
+            setUI('opt_med_2', 'UI_Med_Opt2', 'Meditated 🧘‍♀️'); setUI('opt_med_2', 'UI_Med_Opt2', 'Meditated', true);
+
+            setUI('ui_alc_title', 'UI_Alcohol_Title', 'Alcohol');
+            setUI('opt_alc_1', 'UI_Alc_Opt1', 'Nope'); setUI('opt_alc_1', 'UI_Alc_Opt1', 'Nope', true);
+            setUI('opt_alc_2', 'UI_Alc_Opt2', 'Happy 🥂'); setUI('opt_alc_2', 'UI_Alc_Opt2', 'Happy', true);
+            setUI('opt_alc_3', 'UI_Alc_Opt3', 'Regret 💧'); setUI('opt_alc_3', 'UI_Alc_Opt3', 'Regret', true);
+
+            setUI('ui_adult_title', 'UI_Adult_Title', 'Adult');
+            setUI('opt_adult_1', 'UI_Adult_Opt1', 'Sigh'); setUI('opt_adult_1', 'UI_Adult_Opt1', 'Sigh', true);
+            setUI('opt_adult_2', 'UI_Adult_Opt2', 'Strong'); setUI('opt_adult_2', 'UI_Adult_Opt2', 'Strong', true);
+            setUI('opt_adult_3', 'UI_Adult_Opt3', 'Sex'); setUI('opt_adult_3', 'UI_Adult_Opt3', 'Sex', true);
+
+            setUI('ui_journal_title', 'UI_Journal_Title', 'Highlight of the Day (Journal)');
+            const journalArea = document.getElementById('trackJournal');
+            if(journalArea) journalArea.placeholder = getT('UI_Journal_Placeholder', 'What\'s your story today?');
         }
 
         function setEntryLocked(locked) {
             entryLocked = locked; const btn = document.getElementById('btnComplete'); btn.disabled = locked;
-            document.querySelectorAll('.day-selector button, #startTime, #endTime, input[type="checkbox"]').forEach(el => { el.disabled = locked; el.classList.toggle('locked-control', locked); });
+            document.querySelectorAll('input, select, textarea, button:not(.settings-button):not(.settings-close)').forEach(el => { if(el.id !== 'btnComplete') { el.disabled = locked; el.classList.toggle('locked-control', locked); }});
             document.querySelectorAll('.task-item').forEach(el => el.classList.toggle('locked-control', locked));
-            if (locked) btn.innerText = 'Already Completed This Day! ✨';
-            else btn.innerText = 'Complete My Day! 💖';
+            if (locked) btn.innerText = 'Already Completed This Day! ✨'; else btn.innerText = 'Complete My Day! 💖';
         }
 
         function checkIfAlreadyCompleted() { if (!dbData) return; setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime())); }
 
         function setDayType(type) {
-            if (entryLocked) return;
-            currentDayType = type;
+            if (entryLocked) return; currentDayType = type;
             document.getElementById('btnWork').classList.remove('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
             document.getElementById('btn' + type).classList.add('active');
             document.getElementById('timeInputs').style.display = (type === 'Work') ? 'block' : 'none';
-            generateMeals(); generateTasks(); updateWorkCountdownCard();
-        }
-
-        function generateMeals() {
-            if (!dbData) return;
-            const weekSpots = dbData.restaurants.Weekday; const weekendSpots = dbData.restaurants.Weekend;
-            if (currentDayType === 'Work') { todayLunch = weekSpots[Math.floor(Math.random() * weekSpots.length)]; todayDinner = weekSpots[Math.floor(Math.random() * weekSpots.length)]; } 
-            else if (currentDayType === 'Off') { todayLunch = weekendSpots[Math.floor(Math.random() * weekendSpots.length)]; todayDinner = weekendSpots[Math.floor(Math.random() * weekendSpots.length)]; } 
-            else { todayLunch = "Explore Local Vegan Food!"; todayDinner = "Explore Local Vegan Food!"; }
-            document.getElementById('lunchRandom').innerText = todayLunch; document.getElementById('dinnerRandom').innerText = todayDinner;
+            generateTasks();
         }
 
         function generateTasks() {
             if (!dbData) return;
-            const dailyList = document.getElementById('dailyTasks'); const weeklyList = document.getElementById('weeklyTasks');
-            const dateNumber = activeEntryDate.getDate(); const currentMonth = activeEntryDate.getMonth(); const currentYear = activeEntryDate.getFullYear();
-            dailyList.innerHTML = ""; weeklyList.innerHTML = "";
-
-            // Pull settings from sheet, fallback to defaults if missing
-            const conf = dbData.config || {};
-            const dSavings = conf.SavingsDate || 12;
-            const dHair = conf.HaircutDate || 17;
-            const dBrows = conf.BrowsDate || 17;
-            const dPotenza = conf.PotenzaDate || 21;
-            const dLaser = conf.LaserDate || 21;
-
-            if (currentDayType !== 'Travel') {
-                dailyList.innerHTML += createTaskHTML("gym", "💪 Muscle / Cardio (20 minutes)");
-                dailyList.innerHTML += createTaskHTML("abs", "🍫 Abs Training (10 minutes)");
-                dailyList.innerHTML += createTaskHTML("edit", "💻 Video Editing (5 minutes)");
-                dailyList.innerHTML += createTaskHTML("story", "📝 Story Telling (5 minutes)");
-                dailyList.innerHTML += createTaskHTML("motivation", "🧠 One Motivational Video");
-                dailyList.innerHTML += createTaskHTML("care", "🧴 Armpit + Thigh Care + Face Care");
-                dailyList.innerHTML += createTaskHTML("message", "💌 One Intentional Message");
-            } else {
-                dailyList.innerHTML += createTaskHTML("travel_walk", "🚶‍♂️Aesthetic Walk");
-                dailyList.innerHTML += createTaskHTML("travel_film", "📸 Aesthetic Filming");
-                dailyList.innerHTML += createTaskHTML("message", "💌 One Intentional Message");
-                dailyList.innerHTML += createTaskHTML("abs", "🍫 Abs Training (10 minutes)");
-            }
-
-            document.getElementById('weeklyContainer').style.display = 'block';
-                
-            let doneLaundry = false; let doneClean = false; let doneHabitCheck = false; let doneSavings = false;
-            let isHairDone = false; let isBrowsDone = false; let isLaserDone = false; let isPotenzaDone = false;
+            const c = dbData.config || {};
+            const dailyList = document.getElementById('dailyTasks'); 
+            const weeklyList = document.getElementById('weeklyTasks');
+            const monthlyList = document.getElementById('monthlyTasks');
             
+            dailyList.innerHTML = ""; weeklyList.innerHTML = ""; monthlyList.innerHTML = "";
+
+            let doneWeekly = {}; let doneMonthly = {};
             if (dbData.logs) {
-                dbData.logs.forEach(rawLog => {
-                    if (isSettingsLog(rawLog)) return;
-                    const getVal = (key) => { const found = Object.keys(rawLog).find(k => k.toLowerCase().trim() === key.toLowerCase()); return found ? rawLog[found] : undefined; };
-                    let dateStr = getVal('Date'); if (!dateStr) return; 
-                    if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
-                    let logDate = new Date(dateStr);
-                    if (!isNaN(logDate)) {
-                        if (getISOWeekKey(logDate) === currentWeekKey()) {
-                            if (String(getVal('Laundry_Done')).toLowerCase() === "true") doneLaundry = true;
-                            if (String(getVal('DeepClean_Done')).toLowerCase() === "true") doneClean = true;
-                            if (String(getVal('HabitCheck_Done')).toLowerCase() === "true") doneHabitCheck = true; 
-                        }
-                        if (logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
-                            let savingsVal = getVal('Savings_KRW');
-                            if (String(savingsVal).toLowerCase() === "true" || String(savingsVal).toLowerCase() === "done" || Number(savingsVal) > 0) doneSavings = true;
-                            let beautyVal = getVal('Beauty_Done');
-                            if (beautyVal && typeof beautyVal === 'string') {
-                                if (beautyVal.includes("HaircutDone")) isHairDone = true;
-                                if (beautyVal.includes("BrowsDone")) isBrowsDone = true;
-                                if (beautyVal.includes("LaserDone")) isLaserDone = true;
-                                if (beautyVal.includes("PotenzaDone")) isPotenzaDone = true;
-                            }
-                        }
+                dbData.logs.forEach(log => {
+                    let d = parseLogDate(log); if(!d) return;
+                    if (getISOWeekKey(d) === currentWeekKey()) {
+                        for(let i=1; i<=10; i++) if(String(log['Weekly_'+i]).toLowerCase() === "true") doneWeekly['w'+i] = true;
+                    }
+                    if (d.getMonth() === activeEntryDate.getMonth() && d.getFullYear() === activeEntryDate.getFullYear()) {
+                        for(let i=1; i<=10; i++) if(String(log['Weekly_'+i]).toLowerCase() === "true") doneMonthly['w'+i] = true;
                     }
                 });
             }
 
-            let weeklyTasksAdded = 0;
-            const laundryTaskName = "Weekly Laundry";
-            if (doneLaundry) weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laundryTaskName} (Completed this week)</span></li>`;
-            else weeklyList.innerHTML += createTaskHTML("laundry", laundryTaskName);
-            weeklyTasksAdded++;
+            // DAILIES
+            for(let i=1; i<=10; i++) {
+                const key = 'Daily_' + i;
+                if(c[key] && c[key].text) { dailyList.innerHTML += createTaskHTML("d"+i, c[key].text); }
+            }
+            if(dailyList.innerHTML === "") dailyList.innerHTML = `<li style="padding:10px; color:#555; font-weight:800; font-size:14px; text-align:center;">No daily tasks configured in sheet!</li>`;
 
-            const cleanTaskName = "Deep Clean";
-            if (doneClean) weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${cleanTaskName} (Completed this week)</span></li>`;
-            else weeklyList.innerHTML += createTaskHTML("clean", cleanTaskName);
-            weeklyTasksAdded++;
+            // WEEKLIES / MONTHLIES
+            let wCount = 0, mCount = 0;
+            const dateNumber = activeEntryDate.getDate();
 
-            const habitTaskName = "Weekly Habit Check";
-            if (doneHabitCheck) weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${habitTaskName} (Completed this week)</span></li>`;
-            else weeklyList.innerHTML += createTaskHTML("habit_check", habitTaskName);
-            weeklyTasksAdded++;
-            
-            let savingsTaskName = "Monthly Savings";
-            if (doneSavings) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${savingsTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
-            else {
-                if (dateNumber >= dSavings) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_savings"><input type="checkbox" id="savings" onchange="styleCheckbox(this, 'item_savings')"><span class="task-text">🚨 ${savingsTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${savingsTaskName} (Upcoming on ${dSavings}th)</span></li>`; weeklyTasksAdded++; }
+            for(let i=1; i<=10; i++) {
+                const key = 'Weekly_' + i;
+                if(c[key] && c[key].text) {
+                    const isMonthly = (c[key].type === 'Monthly');
+                    const isCompleted = isMonthly ? doneMonthly['w'+i] : doneWeekly['w'+i];
+                    const list = isMonthly ? monthlyList : weeklyList;
+                    
+                    if(isMonthly) mCount++; else wCount++;
+
+                    if(isCompleted) {
+                        list.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${c[key].text} (Completed)</span></li>`;
+                    } else {
+                        let due = parseInt(c[key].dueDate);
+                        let isOverdue = false;
+                        let dueText = "";
+
+                        // Dynamic Overdue Logic! 🚨
+                        if(!isNaN(due) && isMonthly) {
+                            if(dateNumber >= due) {
+                                isOverdue = true; dueText = " 🚨(OVERDUE!)";
+                            } else { dueText = ` (Upcoming on ${due}th)`; }
+                        }
+
+                        if(isOverdue) {
+                            list.innerHTML += `<li class="task-item overdue" id="item_w${i}"><input type="checkbox" id="w${i}" onchange="styleCheckbox(this, 'item_w${i}')"><span class="task-text">${c[key].text}${dueText}</span></li>`;
+                        } else if (!isNaN(due) && isMonthly && dateNumber < due) {
+                            list.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${c[key].text}${dueText}</span></li>`;
+                        } else {
+                            list.innerHTML += createTaskHTML("w"+i, c[key].text);
+                        }
+                    }
+                }
             }
 
-            let hairTaskName = "Haircut";
-            if (isHairDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${hairTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
-            else {
-                if (dateNumber >= dHair) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_hair"><input type="checkbox" id="beauty_hair" onchange="styleCheckbox(this, 'item_beauty_hair')"><span class="task-text">🚨 ${hairTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${hairTaskName} (Upcoming on ${dHair}th)</span></li>`; weeklyTasksAdded++; }
-            }
+            if(wCount === 0) weeklyList.innerHTML = `<li style="padding:10px; color:#555; font-weight:800; font-size:14px; text-align:center;">No weekly tasks configured!</li>`;
+            if(mCount === 0) monthlyList.innerHTML = `<li style="padding:10px; color:#555; font-weight:800; font-size:14px; text-align:center;">No monthly tasks configured!</li>`;
 
-            let browsTaskName = "Eyebrow Waxing & Bleach";
-            if (isBrowsDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${browsTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
-            else {
-                if (dateNumber >= dBrows) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_brows"><input type="checkbox" id="beauty_brows" onchange="styleCheckbox(this, 'item_beauty_brows')"><span class="task-text">🚨 ${browsTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${browsTaskName} (Upcoming on ${dBrows}th)</span></li>`; weeklyTasksAdded++; }
-            }
-
-            let potenzaTaskName = "Potenza";
-            if (isPotenzaDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${potenzaTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
-            else {
-                if (dateNumber >= dPotenza) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_potenza"><input type="checkbox" id="beauty_potenza" onchange="styleCheckbox(this, 'item_beauty_potenza')"><span class="task-text">🚨 ${potenzaTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${potenzaTaskName} (Upcoming on ${dPotenza}th)</span></li>`; weeklyTasksAdded++; }
-            }
-
-            let laserTaskName = "Laser Hair Removal";
-            if (isLaserDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laserTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
-            else {
-                if (dateNumber >= dLaser) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_laser"><input type="checkbox" id="beauty_laser" onchange="styleCheckbox(this, 'item_beauty_laser')"><span class="task-text">🚨 ${laserTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${laserTaskName} (Upcoming on ${dLaser}th)</span></li>`; weeklyTasksAdded++; }
-            }
-            
-            if (weeklyTasksAdded === 0) { weeklyList.innerHTML = `<li style="text-align:center; color: var(--ink-soft); font-weight:800; font-size:14px; padding: 10px;">✨ All weekly & monthly quests complete! ✨</li>`; }
-            
             attachSoundEvents(); setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
         }
 
-        function createTaskHTML(id, text) { return `<li class="task-item" id="item_${id}"><input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')"><span class="task-text">${text || 'Task'}</span></li>`; }
+        function createTaskHTML(id, text) { return `<li class="task-item" id="item_${id}"><input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')"><span class="task-text">${text}</span></li>`; }
 
         function styleCheckbox(checkbox, itemId) {
             if (entryLocked) { checkbox.checked = !checkbox.checked; return; }
             if(checkbox.checked) {
                 playPixelSound('coin'); document.getElementById(itemId).classList.add('completed');
-                const cheers = ['✨ Quest cleared!', '🌟 Tiny win unlocked!', '🛸 Cosmic progress!', '💖 You did that!', '🏆 Level up!'];
-                showToast(cheers[Math.floor(Math.random() * cheers.length)]);
+                showToast(['✨ Quest cleared!', '🌟 Tiny win unlocked!', '🛸 Cosmic progress!'][Math.floor(Math.random() * 3)]);
             } else { document.getElementById(itemId).classList.remove('completed'); }
+        }
+
+        function generateAutomatedFeedback(payload) {
+            let notes = [];
+            const isVegan = payload.Food_Type.toLowerCase().includes('vegan');
+            const isHealthy = payload.Food_Health.toLowerCase().includes('healthy');
+            const isCruelty = payload.Food_Type.toLowerCase().includes('cruelty');
+
+            if(isVegan && isHealthy) notes.push("🦖 Amazing healthy plant-based legend! 🌱");
+            else if(isVegan) notes.push("🦖 Vegan treats are elite! 🧁");
+            if(isCruelty) notes.push("🦕 Tomorrow is a new day for plant power! 🌿");
+            
+            if(payload.Mood.includes('Happy')) notes.push("✨ So glad you are happy today! 💖");
+            if(payload.Meditation.includes('Meditat')) notes.push("🧘‍♀️ Mindful icon!");
+            if(payload.Alcohol.includes('Regret')) notes.push("💦 Drink water right now, dinosaur! 🦕");
+            
+            return notes.length ? notes.join(" ") : "";
+        }
+        
+        function updateLiveFeedback() {
+            if(entryLocked) return;
+            const payload = {
+                Food_Type: document.querySelector('input[name="foodType"]:checked')?.value || "",
+                Food_Health: document.querySelector('input[name="foodHealth"]:checked')?.value || "",
+                Mood: document.getElementById('trackMood').value,
+                Meditation: document.getElementById('trackMeditation').value,
+                Alcohol: document.getElementById('trackAlcohol').value
+            };
+            const msg = generateAutomatedFeedback(payload);
+            document.getElementById('feedbackDisplay').innerText = msg || "✨ Track your day to see magic happen! ✨";
         }
 
         async function saveProgress() {
             if (entryLocked) return;
             
-            if (currentDayType !== 'Travel') {
-                const gym = document.getElementById('gym')?.checked; const abs = document.getElementById('abs')?.checked;
-                const edit = document.getElementById('edit')?.checked; const story = document.getElementById('story')?.checked;
-                const motivation = document.getElementById('motivation')?.checked; const care = document.getElementById('care')?.checked;
-                const message = document.getElementById('message')?.checked;
-                
-                if (!gym || !abs || !edit || !story || !motivation || !care || !message) {
-                    alert("🌱 Little habits matter! This will shape your future. Discipline is key. Please check off all daily quests! No excuses allowed. 🛑"); return;
-                }
-            } else {
-                const walk = document.getElementById('travel_walk')?.checked; const film = document.getElementById('travel_film')?.checked;
-                const message = document.getElementById('message')?.checked; const abs = document.getElementById('abs')?.checked;
-                if (!walk || !film || !message || !abs) {
-                    alert("🌱 Even on vacation, little habits matter! This will shape your future. Discipline is key. No excuses allowed. 🛑"); return;
-                }
-            }
-
-            if (currentDayType === 'Work') {
-                const now = new Date(); const endInput = document.getElementById('endTime').value.split(":"); const startInput = document.getElementById('startTime').value.split(":");
-                const endTime = new Date(); endTime.setHours(endInput[0], endInput[1], 0); const startTime = new Date(); startTime.setHours(startInput[0], startInput[1], 0);
-                const todayStart = startOfDay(new Date());
-
-                if (activeEntryDate < todayStart) {
-                    const hoursWorked = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(1); alert(`🎉 Congrats, thank you for working! You worked hard for ${hoursWorked} hours! Time to rest!`);
-                } else {
-                    if (now >= endTime) {
-                        const hoursWorked = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(1); alert(`🎉 Congrats, thank you for working! You've crushed it and worked ${hoursWorked} hours today. Time to rest!`);
-                    } else {
-                        const hoursLeft = ((endTime - now) / (1000 * 60 * 60)).toFixed(1); alert(`💪 You got this! ${hoursLeft} more hours before leaving the office. Keep that main character energy going!`);
-                    }
-                }
-            }
-
-            showWorkCelebration();
             const btn = document.getElementById('btnComplete'); btn.disabled = true; btn.innerText = "Already Completed Today! ✨";
             playPixelSound('success'); flyUFO(); showToast('🛸 Day complete! Galaxy streak saved!');
-            confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#ff9aab', '#111111', '#555555', '#cccccc'] });
+            confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } });
             document.getElementById('loading').style.display = 'block';
 
-            const isLaundryDone = document.getElementById('laundry')?.checked; const isCleanDone = document.getElementById('clean')?.checked;
-            const isHabitCheckDone = document.getElementById('habit_check')?.checked; const isSavingsDone = document.getElementById('savings')?.checked;
-            const isHairChecked = document.getElementById('beauty_hair')?.checked; const isBrowsChecked = document.getElementById('beauty_brows')?.checked;
-            const isLaserChecked = document.getElementById('beauty_laser')?.checked; const isPotenzaChecked = document.getElementById('beauty_potenza')?.checked;
-
-            let beautyArr = [];
-            if (isLaserChecked) beautyArr.push("LaserDone"); if (isPotenzaChecked) beautyArr.push("PotenzaDone"); 
-            if (isHairChecked) beautyArr.push("HaircutDone"); if (isBrowsChecked) beautyArr.push("BrowsDone");
-            let beautyStatus = beautyArr.length > 0 ? beautyArr.join(", ") : false;
-            
             const payload = {
                 Date: formatEntryDate(activeEntryDate),
-                Day_Type: currentDayType, Start_Time: currentDayType === 'Work' ? document.getElementById('startTime').value : "N/A", End_Time: currentDayType === 'Work' ? document.getElementById('endTime').value : "N/A",
-                Lunch: todayLunch, Dinner: todayDinner,
-                Gym_10min: document.getElementById('gym') ? document.getElementById('gym').checked : false,
-                Abs_10min: document.getElementById('abs') ? document.getElementById('abs').checked : false,
-                Edit_2min: document.getElementById('edit') ? document.getElementById('edit').checked : false,
-                Story_5min: document.getElementById('story') ? document.getElementById('story').checked : false,
-                Video_Watched: document.getElementById('motivation') ? document.getElementById('motivation').checked : false,
-                Care_Done: document.getElementById('care') ? document.getElementById('care').checked : false,
-                Message_Sent: document.getElementById('message') ? document.getElementById('message').checked : false,
-                Travel_Cardio: document.getElementById('travel_walk') ? document.getElementById('travel_walk').checked : false,
-                Travel_Film: document.getElementById('travel_film') ? document.getElementById('travel_film').checked : false,
-                Laundry_Done: isLaundryDone, DeepClean_Done: isCleanDone, HabitCheck_Done: isHabitCheckDone, 
-                Beauty_Done: beautyStatus, Savings_KRW: isSavingsDone,
+                Day_Type: currentDayType, 
+                Food_Type: document.querySelector('input[name="foodType"]:checked')?.value || "",
+                Food_Health: document.querySelector('input[name="foodHealth"]:checked')?.value || "",
+                Adult_Track: document.getElementById('trackAdult').value,
+                Mood: document.getElementById('trackMood').value,
+                Meditation: document.getElementById('trackMeditation').value,
+                Alcohol: document.getElementById('trackAlcohol').value,
+                Journal: document.getElementById('trackJournal').value,
+                
+                Daily_1: document.getElementById('d1')?.checked || false, Daily_2: document.getElementById('d2')?.checked || false,
+                Daily_3: document.getElementById('d3')?.checked || false, Daily_4: document.getElementById('d4')?.checked || false,
+                Daily_5: document.getElementById('d5')?.checked || false, Daily_6: document.getElementById('d6')?.checked || false,
+                Daily_7: document.getElementById('d7')?.checked || false, Daily_8: document.getElementById('d8')?.checked || false, 
+                Daily_9: document.getElementById('d9')?.checked || false, Daily_10: document.getElementById('d10')?.checked || false,
+                
+                Weekly_1: document.getElementById('w1')?.checked || false, Weekly_2: document.getElementById('w2')?.checked || false,
+                Weekly_3: document.getElementById('w3')?.checked || false, Weekly_4: document.getElementById('w4')?.checked || false,
+                Weekly_5: document.getElementById('w5')?.checked || false, Weekly_6: document.getElementById('w6')?.checked || false,
+                Weekly_7: document.getElementById('w7')?.checked || false, Weekly_8: document.getElementById('w8')?.checked || false,
+                Weekly_9: document.getElementById('w9')?.checked || false, Weekly_10: document.getElementById('w10')?.checked || false,
+                
                 Countdown_Settings: JSON.stringify(workSettings)
             };
+            
+            payload.Feedback = generateAutomatedFeedback(payload);
 
             if (!dbData.logs) dbData.logs = [];
-            dbData.logs.push({ 
-                Date: payload.Date, Laundry_Done: payload.Laundry_Done, DeepClean_Done: payload.DeepClean_Done, 
-                HabitCheck_Done: payload.HabitCheck_Done, Savings_KRW: payload.Savings_KRW, Beauty_Done: payload.Beauty_Done,
-                Travel_Cardio: payload.Travel_Cardio, Travel_Film: payload.Travel_Film, Abs_10min: payload.Abs_10min, Countdown_Settings: payload.Countdown_Settings
-            });
+            dbData.logs.push(payload);
             
             try {
                 await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 document.getElementById('loading').innerText = '✨ Saved to the Galaxy! ✨';
                 setTimeout(() => {
                     document.getElementById('loading').style.display = 'none';
+                    checkCompletedCountdowns();
                     const completedDate = activeEntryDate.getTime(); pendingDates = pendingDates.filter(d => d.getTime() !== completedDate);
                     const today = startOfDay(new Date()); activeEntryDate = pendingDates.length ? pendingDates[0] : today;
-                    currentDayType = 'Work'; setupDate(); document.getElementById('startTime').value = '09:00'; document.getElementById('endTime').value = '19:00';
+                    currentDayType = 'Work'; setupDate(); 
+                    
+                    document.getElementById('trackAdult').value = ""; document.getElementById('trackMood').value = ""; 
+                    document.getElementById('trackMeditation').value = document.getElementById('opt_med_1').value; 
+                    document.getElementById('trackAlcohol').value = document.getElementById('opt_alc_1').value;
+                    document.getElementById('trackJournal').value = ""; document.getElementById('feedbackDisplay').innerText = "";
+                    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+                    
                     document.getElementById('btnWork').classList.add('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
-                    document.getElementById('timeInputs').style.display = 'block'; generateMeals(); generateTasks(); checkIfAlreadyCompleted();
+                    document.getElementById('timeInputs').style.display = 'block'; generateTasks(); checkIfAlreadyCompleted();
                     if (pendingDates.length) showToast(`⚠️ Next catch-up day: ${formatEntryDate(activeEntryDate)}`);
                 }, 2000);
             } catch(e) { document.getElementById('loading').innerText = "Error saving. Connection lost in space."; }
         }
 
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWorkSettings(); closeWorkCelebration(); } });
         updateWorkCountdownCard(); setupDate(); setDayType('Work'); fetchDatabase(); 
     </script>
 </body>

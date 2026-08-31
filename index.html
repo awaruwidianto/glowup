@@ -309,8 +309,8 @@
             return `${date.getFullYear()}_W${weekNum}`;
         }
 
-        // 🔴 PASTE YOUR NEW URL HERE 
-        const API_URL = "https://script.google.com/macros/s/AKfycbx3n5AWQVOHUtfEetCr0viTUklESR4C7Cp4szucrj4XSSIRTUO4KgiQHXQdVVuXam31Sg/exec"; 
+        // 🔴 BRAND NEW API URL
+        const API_URL = "https://script.google.com/macros/s/AKfycbzWp1ZQhhMp1mJBz_dQQYlfIyGuIeoQSs636tMAFB0YdkAyVkkfntpEtoy4qlG49kVovQ/exec"; 
         
         let currentDayType = 'Work';
         let dbData = null; 
@@ -557,8 +557,16 @@
             const dateNumber = activeEntryDate.getDate(); const currentMonth = activeEntryDate.getMonth(); const currentYear = activeEntryDate.getFullYear();
             dailyList.innerHTML = ""; weeklyList.innerHTML = "";
 
+            // Pull settings from sheet, fallback to defaults if missing
+            const conf = dbData.config || {};
+            const dSavings = conf.SavingsDate || 12;
+            const dHair = conf.HaircutDate || 17;
+            const dBrows = conf.BrowsDate || 17;
+            const dPotenza = conf.PotenzaDate || 21;
+            const dLaser = conf.LaserDate || 21;
+
             if (currentDayType !== 'Travel') {
-                dailyList.innerHTML += createTaskHTML("gym", "💪 Gym / Cardio (20 minutes)");
+                dailyList.innerHTML += createTaskHTML("gym", "💪 Muscle / Cardio (20 minutes)");
                 dailyList.innerHTML += createTaskHTML("abs", "🍫 Abs Training (10 minutes)");
                 dailyList.innerHTML += createTaskHTML("edit", "💻 Video Editing (5 minutes)");
                 dailyList.innerHTML += createTaskHTML("story", "📝 Story Telling (5 minutes)");
@@ -624,36 +632,36 @@
             let savingsTaskName = "Monthly Savings";
             if (doneSavings) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${savingsTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
             else {
-                if (dateNumber >= 12) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_savings"><input type="checkbox" id="savings" onchange="styleCheckbox(this, 'item_savings')"><span class="task-text">🚨 ${savingsTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${savingsTaskName} (Upcoming on 12th)</span></li>`; weeklyTasksAdded++; }
+                if (dateNumber >= dSavings) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_savings"><input type="checkbox" id="savings" onchange="styleCheckbox(this, 'item_savings')"><span class="task-text">🚨 ${savingsTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${savingsTaskName} (Upcoming on ${dSavings}th)</span></li>`; weeklyTasksAdded++; }
             }
 
             let hairTaskName = "Haircut";
             if (isHairDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${hairTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
             else {
-                if (dateNumber >= 17) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_hair"><input type="checkbox" id="beauty_hair" onchange="styleCheckbox(this, 'item_beauty_hair')"><span class="task-text">🚨 ${hairTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${hairTaskName} (Upcoming on 17th)</span></li>`; weeklyTasksAdded++; }
+                if (dateNumber >= dHair) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_hair"><input type="checkbox" id="beauty_hair" onchange="styleCheckbox(this, 'item_beauty_hair')"><span class="task-text">🚨 ${hairTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${hairTaskName} (Upcoming on ${dHair}th)</span></li>`; weeklyTasksAdded++; }
             }
 
             let browsTaskName = "Eyebrow Waxing & Bleach";
             if (isBrowsDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${browsTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
             else {
-                if (dateNumber >= 17) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_brows"><input type="checkbox" id="beauty_brows" onchange="styleCheckbox(this, 'item_beauty_brows')"><span class="task-text">🚨 ${browsTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${browsTaskName} (Upcoming on 17th)</span></li>`; weeklyTasksAdded++; }
+                if (dateNumber >= dBrows) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_brows"><input type="checkbox" id="beauty_brows" onchange="styleCheckbox(this, 'item_beauty_brows')"><span class="task-text">🚨 ${browsTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${browsTaskName} (Upcoming on ${dBrows}th)</span></li>`; weeklyTasksAdded++; }
             }
 
             let potenzaTaskName = "Potenza";
             if (isPotenzaDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${potenzaTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
             else {
-                if (dateNumber >= 8) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_potenza"><input type="checkbox" id="beauty_potenza" onchange="styleCheckbox(this, 'item_beauty_potenza')"><span class="task-text">🚨 ${potenzaTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${potenzaTaskName} (Upcoming on 8th)</span></li>`; weeklyTasksAdded++; }
+                if (dateNumber >= dPotenza) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_potenza"><input type="checkbox" id="beauty_potenza" onchange="styleCheckbox(this, 'item_beauty_potenza')"><span class="task-text">🚨 ${potenzaTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${potenzaTaskName} (Upcoming on ${dPotenza}th)</span></li>`; weeklyTasksAdded++; }
             }
 
             let laserTaskName = "Laser Hair Removal";
             if (isLaserDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laserTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
             else {
-                if (dateNumber >= 21) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_laser"><input type="checkbox" id="beauty_laser" onchange="styleCheckbox(this, 'item_beauty_laser')"><span class="task-text">🚨 ${laserTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
-                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${laserTaskName} (Upcoming on 21st)</span></li>`; weeklyTasksAdded++; }
+                if (dateNumber >= dLaser) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_laser"><input type="checkbox" id="beauty_laser" onchange="styleCheckbox(this, 'item_beauty_laser')"><span class="task-text">🚨 ${laserTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${laserTaskName} (Upcoming on ${dLaser}th)</span></li>`; weeklyTasksAdded++; }
             }
             
             if (weeklyTasksAdded === 0) { weeklyList.innerHTML = `<li style="text-align:center; color: var(--ink-soft); font-weight:800; font-size:14px; padding: 10px;">✨ All weekly & monthly quests complete! ✨</li>`; }

@@ -209,8 +209,8 @@
                     </div>
 
                     <div class="time-inputs" id="timeInputs">
-                        <label>Work Hours:</label><br><br>
-                        <input type="time" id="startTime" value="09:00"> to 
+                        <label id="ui_work_hours">Work Hours:</label><br><br>
+                        <input type="time" id="startTime" value="09:00"> <span id="ui_time_to">to</span> 
                         <input type="time" id="endTime" value="19:00">
                     </div>
                 </div>
@@ -284,16 +284,16 @@
 
                     <!-- RIGHT COLUMN (Quests) -->
                     <div class="right-col">
-                        <div class="window-label">🏆 Daily Quests</div>
+                        <div class="window-label" id="ui_daily_quests_title">🏆 Daily Quests</div>
                         <ul class="task-list" id="dailyTasks"></ul>
 
                         <div id="weeklyContainer">
-                            <div class="window-label section-label-special">📅 WEEKLY QUESTS</div>
+                            <div class="window-label section-label-special" id="ui_weekly_quests_title">📅 WEEKLY QUESTS</div>
                             <ul class="task-list" id="weeklyTasks"></ul>
                         </div>
 
                         <div id="monthlyContainer">
-                            <div class="window-label section-label-special">🌙 MONTHLY QUESTS</div>
+                            <div class="window-label section-label-special" id="ui_monthly_quests_title">🌙 MONTHLY QUESTS</div>
                             <ul class="task-list" id="monthlyTasks"></ul>
                         </div>
                     </div>
@@ -313,23 +313,23 @@
     <div class="settings-modal" id="workSettingsModal" onclick="if(event.target===this) closeWorkSettings()">
         <div class="settings-card">
             <div class="settings-head">
-                <h2>🌈 Settings & Countdowns</h2>
+                <h2 id="ui_settings_title">🌈 Settings & Countdowns</h2>
                 <button class="settings-close" type="button" onclick="closeWorkSettings()">✕</button>
             </div>
             
             <div style="margin-bottom: 20px; text-align:center;">
                 <label style="font-weight:900; font-size:14px; margin-bottom:8px; display:block;">View Mode</label>
                 <div style="display:flex; gap:10px;">
-                    <button class="game-button" type="button" onclick="toggleLayout(false)">📱 Mobile Mode</button>
-                    <button class="game-button" type="button" onclick="toggleLayout(true)">💻 Designer Desktop</button>
+                    <button class="game-button" type="button" onclick="toggleLayout(false)" id="btn_mobile_mode">📱 Mobile Mode</button>
+                    <button class="game-button" type="button" onclick="toggleLayout(true)" id="btn_desktop_mode">💻 Designer Desktop</button>
                 </div>
             </div>
 
             <div id="chapterEditors"></div>
             <button class="game-button" id="addChapterButton" type="button" onclick="addChapterEditor()">＋ Add countdown</button>
             <div class="settings-actions">
-                <button class="game-button" type="button" onclick="clearWorkSettings()">Clear All</button>
-                <button class="game-button primary-button" type="button" style="margin-top:0" onclick="saveWorkSettings()">Save ✨</button>
+                <button class="game-button" type="button" onclick="clearWorkSettings()" id="btn_clear_all">Clear All</button>
+                <button class="game-button primary-button" type="button" style="margin-top:0" onclick="saveWorkSettings()" id="btn_save_settings">Save ✨</button>
             </div>
         </div>
     </div>
@@ -360,7 +360,6 @@
             const body = document.getElementById('bodyMain');
             if(isDesktop) body.classList.add('desktop-mode'); else body.classList.remove('desktop-mode');
             localStorage.setItem('glowup_layout', isDesktop ? 'desktop' : 'mobile');
-            showToast(isDesktop ? '💻 Desktop Grid Enabled' : '📱 Mobile Layout Restored');
         }
         if(localStorage.getItem('glowup_layout') === 'desktop') document.getElementById('bodyMain').classList.add('desktop-mode');
 
@@ -376,7 +375,7 @@
         let entryLocked = false;
         let toastTimer = null;
 
-        // Settings / Countdowns (Kept intact)
+        // Settings / Countdowns
         const WORK_SETTINGS_KEY = 'glowUpLifeChapterCountdown_v2';
         let workSettings = loadWorkSettings();
         function normalizeChapter(chapter = {}) { return { type: String(chapter.type || 'Work').slice(0,30), name: String(chapter.name || '').slice(0,80), endDate: String(chapter.endDate || '').slice(0,10) }; }
@@ -395,6 +394,11 @@
                         <div class="settings-field"><label>End Date</label><input class="chapter-date" type="date" value="${escapeHTML(chapter.endDate || '')}"></div>
                     </div>
                 </div>`).join('');
+            
+            // Re-apply dynamic text to the Add button if available
+            const c = dbData?.config || {};
+            if(c['UI_Btn_AddCount'] && c['UI_Btn_AddCount'].text) document.getElementById('addChapterButton').innerText = c['UI_Btn_AddCount'].text;
+            
             document.getElementById('addChapterButton').style.display = list.length >= 4 ? 'none' : 'inline-flex';
         }
         function readChapterEditors() { return [...document.querySelectorAll('.chapter-editor')].map(row => normalizeChapter({ type: row.querySelector('.chapter-type')?.value, name: row.querySelector('.chapter-name')?.value.trim(), endDate: row.querySelector('.chapter-date')?.value })).filter(c => c.name || c.endDate); }
@@ -402,8 +406,8 @@
         function removeChapterEditor(index) { workSettings = readChapterEditors(); workSettings.splice(index,1); renderChapterEditors(); }
         function openWorkSettings() { renderChapterEditors(); document.getElementById('workSettingsModal').classList.add('show'); }
         function closeWorkSettings() { document.getElementById('workSettingsModal').classList.remove('show'); }
-        function saveWorkSettings() { workSettings = readChapterEditors(); persistWorkSettings(); updateWorkCountdownCard(); closeWorkSettings(); showToast('☁️ Settings saved locally!'); }
-        function clearWorkSettings() { workSettings = []; persistWorkSettings(); renderChapterEditors(); updateWorkCountdownCard(); showToast('🌱 Countdowns cleared'); }
+        function saveWorkSettings() { workSettings = readChapterEditors(); persistWorkSettings(); updateWorkCountdownCard(); closeWorkSettings(); }
+        function clearWorkSettings() { workSettings = []; persistWorkSettings(); renderChapterEditors(); updateWorkCountdownCard(); }
         function parseLocalDate(dateString) { if (!dateString) return null; const parts = dateString.split('-').map(Number); if (parts.length !== 3 || parts.some(Number.isNaN)) return null; return new Date(parts[0], parts[1]-1, parts[2], 0, 0, 0, 0); }
         
         function getWorkCountdownInfo(referenceDate = new Date()) {
@@ -470,10 +474,8 @@
             document.querySelectorAll('input[type="radio"], select').forEach(el => { el.addEventListener('change', updateLiveFeedback); });
         });
         
-        // Setup Date
         function setupDate() { document.getElementById('dateDisplay').innerText = formatEntryDate(activeEntryDate); updateCatchupUI(); updateWorkCountdownCard(); }
 
-        // Fetch & Config Logic
         async function fetchDatabase() {
             try {
                 const response = await fetch(API_URL + "?t=" + new Date().getTime());
@@ -496,6 +498,28 @@
                 const el = document.getElementById(id); 
                 if(el) { if(isVal) el.value = getT(key, def); else el.innerText = getT(key, def); }
             }
+
+            // Headers & Buttons
+            setUI('appTitle', 'UI_App_Title', 'GLOW UP');
+            setUI('ui_daily_quests_title', 'UI_Daily_Quests', '🏆 Daily Quests');
+            setUI('ui_weekly_quests_title', 'UI_Weekly_Quests', '📅 WEEKLY QUESTS');
+            setUI('ui_monthly_quests_title', 'UI_Monthly_Quests', '🌙 MONTHLY QUESTS');
+            
+            // Settings UI
+            setUI('ui_settings_title', 'UI_Settings_Title', '🌈 Settings & Countdowns');
+            setUI('btn_mobile_mode', 'UI_Btn_Mobile', '📱 Mobile Mode');
+            setUI('btn_desktop_mode', 'UI_Btn_Desktop', '💻 Designer Desktop');
+            setUI('btn_save_settings', 'UI_Btn_Save', 'Save ✨');
+            setUI('btn_clear_all', 'UI_Btn_Clear', 'Clear All');
+            setUI('addChapterButton', 'UI_Btn_AddCount', '＋ Add countdown');
+
+            setUI('ui_work_hours', 'UI_Work_Hours', 'Work Hours:');
+            setUI('ui_time_to', 'UI_Time_To', 'to');
+
+            // Bind the Day Type Buttons
+            setUI('btnWork', 'UI_Day_Work', '💼 Work Day');
+            setUI('btnOff', 'UI_Day_Off', '🌿 Day Off');
+            setUI('btnTravel', 'UI_Day_Travel', '✈️ Travel');
 
             setUI('ui_food_title', 'UI_Food_Title', '🥗 What Food I Eat Today');
             setUI('label_f_opt1', 'UI_Food_Opt1', 'Vegan'); setUI('f_opt1', 'UI_Food_Opt1', 'Vegan', true);
@@ -527,13 +551,21 @@
             setUI('ui_journal_title', 'UI_Journal_Title', 'Highlight of the Day (Journal)');
             const journalArea = document.getElementById('trackJournal');
             if(journalArea) journalArea.placeholder = getT('UI_Journal_Placeholder', 'What\'s your story today?');
+            
+            if(!entryLocked) setUI('btnComplete', 'UI_Btn_Complete', 'Complete My Day! 💖');
         }
 
         function setEntryLocked(locked) {
             entryLocked = locked; const btn = document.getElementById('btnComplete'); btn.disabled = locked;
+            const c = dbData?.config || {};
             document.querySelectorAll('input, select, textarea, button:not(.settings-button):not(.settings-close)').forEach(el => { if(el.id !== 'btnComplete') { el.disabled = locked; el.classList.toggle('locked-control', locked); }});
             document.querySelectorAll('.task-item').forEach(el => el.classList.toggle('locked-control', locked));
-            if (locked) btn.innerText = 'Already Completed This Day! ✨'; else btn.innerText = 'Complete My Day! 💖';
+            
+            if (locked) {
+                btn.innerText = (c['UI_Btn_Completed'] && c['UI_Btn_Completed'].text) ? c['UI_Btn_Completed'].text : 'Already Completed Today! ✨';
+            } else {
+                btn.innerText = (c['UI_Btn_Complete'] && c['UI_Btn_Complete'].text) ? c['UI_Btn_Complete'].text : 'Complete My Day! 💖';
+            }
         }
 
         function checkIfAlreadyCompleted() { if (!dbData) return; setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime())); }
@@ -552,6 +584,12 @@
             const dailyList = document.getElementById('dailyTasks'); 
             const weeklyList = document.getElementById('weeklyTasks');
             const monthlyList = document.getElementById('monthlyTasks');
+            
+            // Fetch dynamic status texts
+            const t_completed = (c['UI_Status_Completed'] && c['UI_Status_Completed'].text) ? c['UI_Status_Completed'].text : "(Completed)";
+            const t_overdue = (c['UI_Status_Overdue'] && c['UI_Status_Overdue'].text) ? c['UI_Status_Overdue'].text : " 🚨(OVERDUE!)";
+            const t_weekend = (c['UI_Status_Weekend'] && c['UI_Status_Weekend'].text) ? c['UI_Status_Weekend'].text : " 🚨(DUE THIS WEEKEND!)";
+            const t_upcoming = (c['UI_Status_Upcoming'] && c['UI_Status_Upcoming'].text) ? c['UI_Status_Upcoming'].text : "⏳ Upcoming on";
             
             dailyList.innerHTML = ""; weeklyList.innerHTML = ""; monthlyList.innerHTML = "";
 
@@ -573,11 +611,12 @@
                 const key = 'Daily_' + i;
                 if(c[key] && c[key].text) { dailyList.innerHTML += createTaskHTML("d"+i, c[key].text); }
             }
-            if(dailyList.innerHTML === "") dailyList.innerHTML = `<li style="padding:10px; color:#555; font-weight:800; font-size:14px; text-align:center;">No daily tasks configured in sheet!</li>`;
 
             // WEEKLIES / MONTHLIES
             let wCount = 0, mCount = 0;
             const dateNumber = activeEntryDate.getDate();
+            const currentDayOfWeek = activeEntryDate.getDay(); 
+            const isLateWeek = (currentDayOfWeek === 6 || currentDayOfWeek === 0);
 
             for(let i=1; i<=10; i++) {
                 const key = 'Weekly_' + i;
@@ -589,32 +628,34 @@
                     if(isMonthly) mCount++; else wCount++;
 
                     if(isCompleted) {
-                        list.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${c[key].text} (Completed)</span></li>`;
+                        list.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${c[key].text} ${t_completed}</span></li>`;
                     } else {
                         let due = parseInt(c[key].dueDate);
                         let isOverdue = false;
                         let dueText = "";
 
-                        // Dynamic Overdue Logic! 🚨
-                        if(!isNaN(due) && isMonthly) {
-                            if(dateNumber >= due) {
-                                isOverdue = true; dueText = " 🚨(OVERDUE!)";
-                            } else { dueText = ` (Upcoming on ${due}th)`; }
+                        if (isMonthly) {
+                            if(!isNaN(due)) {
+                                if(dateNumber >= due) {
+                                    isOverdue = true; dueText = t_overdue;
+                                } else { dueText = ` ${t_upcoming} ${due}`; }
+                            }
+                        } else {
+                            if (isLateWeek) {
+                                isOverdue = true; dueText = t_weekend;
+                            }
                         }
 
                         if(isOverdue) {
                             list.innerHTML += `<li class="task-item overdue" id="item_w${i}"><input type="checkbox" id="w${i}" onchange="styleCheckbox(this, 'item_w${i}')"><span class="task-text">${c[key].text}${dueText}</span></li>`;
                         } else if (!isNaN(due) && isMonthly && dateNumber < due) {
-                            list.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${c[key].text}${dueText}</span></li>`;
+                            list.innerHTML += `<li class="task-item upcoming"><span class="task-text">${dueText}</span></li>`;
                         } else {
                             list.innerHTML += createTaskHTML("w"+i, c[key].text);
                         }
                     }
                 }
             }
-
-            if(wCount === 0) weeklyList.innerHTML = `<li style="padding:10px; color:#555; font-weight:800; font-size:14px; text-align:center;">No weekly tasks configured!</li>`;
-            if(mCount === 0) monthlyList.innerHTML = `<li style="padding:10px; color:#555; font-weight:800; font-size:14px; text-align:center;">No monthly tasks configured!</li>`;
 
             attachSoundEvents(); setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
         }
@@ -625,7 +666,7 @@
             if (entryLocked) { checkbox.checked = !checkbox.checked; return; }
             if(checkbox.checked) {
                 playPixelSound('coin'); document.getElementById(itemId).classList.add('completed');
-                showToast(['✨ Quest cleared!', '🌟 Tiny win unlocked!', '🛸 Cosmic progress!'][Math.floor(Math.random() * 3)]);
+                showToast(['✨!', '🌟!', '🛸!'][Math.floor(Math.random() * 3)]);
             } else { document.getElementById(itemId).classList.remove('completed'); }
         }
 
@@ -656,14 +697,30 @@
                 Alcohol: document.getElementById('trackAlcohol').value
             };
             const msg = generateAutomatedFeedback(payload);
-            document.getElementById('feedbackDisplay').innerText = msg || "✨ Track your day to see magic happen! ✨";
+            document.getElementById('feedbackDisplay').innerText = msg;
         }
 
         async function saveProgress() {
             if (entryLocked) return;
+            const c = dbData.config || {};
             
-            const btn = document.getElementById('btnComplete'); btn.disabled = true; btn.innerText = "Already Completed Today! ✨";
-            playPixelSound('success'); flyUFO(); showToast('🛸 Day complete! Galaxy streak saved!');
+            // "NO EXCUSES" DAILY VALIDATION LOOP
+            let allDailiesChecked = true;
+            const dailyCheckboxes = document.querySelectorAll('#dailyTasks input[type="checkbox"]');
+            dailyCheckboxes.forEach(cb => {
+                if (!cb.checked) allDailiesChecked = false;
+            });
+            
+            if (!allDailiesChecked && dailyCheckboxes.length > 0) {
+                const alertMsg = (c['UI_Alert_Dailies'] && c['UI_Alert_Dailies'].text) ? c['UI_Alert_Dailies'].text : "🌱 Little habits matter! This will shape your future. Discipline is key. Please check off all daily quests! No excuses allowed. 🛑";
+                alert(alertMsg);
+                return;
+            }
+            
+            const btn = document.getElementById('btnComplete'); btn.disabled = true; 
+            btn.innerText = (c['UI_Btn_Completed'] && c['UI_Btn_Completed'].text) ? c['UI_Btn_Completed'].text : 'Already Completed Today! ✨';
+            
+            playPixelSound('success'); flyUFO(); showToast('🛸!');
             confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } });
             document.getElementById('loading').style.display = 'block';
 
@@ -700,7 +757,6 @@
             
             try {
                 await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                document.getElementById('loading').innerText = '✨ Saved to the Galaxy! ✨';
                 setTimeout(() => {
                     document.getElementById('loading').style.display = 'none';
                     checkCompletedCountdowns();
@@ -716,7 +772,6 @@
                     
                     document.getElementById('btnWork').classList.add('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
                     document.getElementById('timeInputs').style.display = 'block'; generateTasks(); checkIfAlreadyCompleted();
-                    if (pendingDates.length) showToast(`⚠️ Next catch-up day: ${formatEntryDate(activeEntryDate)}`);
                 }, 2000);
             } catch(e) { document.getElementById('loading').innerText = "Error saving. Connection lost in space."; }
         }

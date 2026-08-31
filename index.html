@@ -250,6 +250,11 @@
                     <!-- Right Column (Quests) is now FIRST in HTML so it stacks on top on mobile -->
                     <div class="right-col">
                         <div class="window-label" id="ui_daily_quests_title">🏆 Daily Quests</div>
+                        
+                        <a href="https://youtu.be/hWew6ls0Vbs" target="_blank" class="game-button" style="width: 100%; margin-bottom: 15px; text-decoration: none;">
+                            🏋️‍♀️ abs training 10 minutes
+                        </a>
+                        
                         <ul class="task-list" id="dailyTasks"></ul>
 
                         <div id="weeklyContainer">
@@ -473,7 +478,15 @@
         }
         function readChapterEditors() { return [...document.querySelectorAll('.chapter-editor')].map(row => normalizeChapter({ type: row.querySelector('.chapter-type')?.value, name: row.querySelector('.chapter-name')?.value.trim(), endDate: row.querySelector('.chapter-date')?.value })).filter(c => c.name || c.endDate); }
         function addChapterEditor() { workSettings = readChapterEditors(); if (workSettings.length < 4) workSettings.push({type:'School',name:'',endDate:''}); renderChapterEditors(); }
-        function removeChapterEditor(index) { workSettings = readChapterEditors(); workSettings.splice(index,1); renderChapterEditors(); }
+        
+        function removeChapterEditor(index) { 
+            if(confirm("Are you sure you wanna delete the countdown?")) {
+                workSettings = readChapterEditors(); 
+                workSettings.splice(index,1); 
+                renderChapterEditors(); 
+            }
+        }
+        
         function openWorkSettings() { renderChapterEditors(); document.getElementById('workSettingsModal').classList.add('show'); }
         function closeWorkSettings() { document.getElementById('workSettingsModal').classList.remove('show'); }
         function saveWorkSettings() { workSettings = readChapterEditors(); persistWorkSettings(); updateWorkCountdownCard(); closeWorkSettings(); }

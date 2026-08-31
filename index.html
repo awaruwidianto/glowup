@@ -102,8 +102,11 @@
         .radio-btn input[type="radio"]:checked + label { background: #111; color: white; border-color: #111; }
 
         .task-list { list-style: none; padding: 0; margin: 0 0 25px 0; }
-        .task-item { display: flex; align-items: center; background: #f4f4f4; padding: 14px; border-radius: 18px; border: 3px solid #111; margin-bottom: 10px; transition: all 0.3s; box-shadow: inset 0 0 0 3px rgba(255,255,255,.8); }
-        .task-item.completed { background: #e2e2e2; opacity: 0.8; }
+        /* Add slight hover lift for a game-feel */
+        .task-item { display: flex; align-items: center; background: #f4f4f4; padding: 14px; border-radius: 18px; border: 3px solid #111; margin-bottom: 10px; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: inset 0 0 0 3px rgba(255,255,255,.8); cursor: pointer; }
+        .task-item:hover { transform: scale(1.01) translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.08), inset 0 0 0 3px rgba(255,255,255,1); background: #ffffff; }
+        
+        .task-item.completed { background: #e2e2e2; opacity: 0.8; transform: none; box-shadow: inset 0 0 0 3px rgba(255,255,255,.4); }
         .task-item input[type="checkbox"] { margin-right: 15px; width: 22px; height: 22px; accent-color: #ff9aab; cursor: pointer; flex-shrink: 0; }
         .task-text { flex-grow: 1; font-size: 15px; font-weight: 800; color: #111; line-height: 1.3; }
 
@@ -170,8 +173,27 @@
         .work-celebration-big { margin:8px 0; font-family:var(--font-title); font-size:34px; font-weight:900; color:#ff9aab; }
         .work-celebration-card p { margin:8px 0 18px; color:var(--ink-soft); font-weight:800; line-height:1.45; }
 
+        /* 📱 EXTREME MOBILE COMPACTING */
         @media (max-width: 500px) {
-            .galaxy-stage { padding: 10px; } .app-shell { border-width: 3px; border-radius: 26px; padding-bottom: 15px; } .topbar { padding: 15px; gap: 10px; border-radius: 24px 24px 0 0; } h1 { font-size: 20px; } .brand-badge { width: 36px; height: 36px; padding: 4px; border-width: 2px; } .screen-content { padding: 14px; } .date-display { font-size: 13px; margin-bottom: 14px; } .day-selector { gap: 6px; margin-bottom: 15px; } .game-button { min-height: 36px; padding: 6px 4px; font-size: 11px; border-width: 2px; border-radius: 12px; } .window-label { font-size: 10px; padding: 3px 10px; border-width: 2px; } .tracker-box { padding: 10px; border-radius: 14px; border-width: 2px; margin-bottom: 15px; } .task-item { padding: 10px 12px; margin-bottom: 8px; border-radius: 14px; border-width: 2px; } .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; } .task-text { font-size: 14px; } .primary-button { font-size: 15px; padding: 12px; margin-top: 12px; min-height: 44px; }
+            .galaxy-stage { padding: 8px; } 
+            .app-shell { border-width: 2px; border-radius: 20px; padding-bottom: 12px; } 
+            .topbar { padding: 12px; gap: 8px; border-radius: 18px 18px 0 0; border-bottom: 2px solid rgba(17,17,17,.1); } 
+            h1 { font-size: 18px; } 
+            .brand-badge { width: 32px; height: 32px; padding: 4px; border-width: 2px; box-shadow: 0 3px 0 #111; border-radius: 10px; } 
+            .screen-content { padding: 12px; } 
+            .date-display { font-size: 12px; margin-bottom: 12px; } 
+            .day-selector { gap: 5px; margin-bottom: 12px; } 
+            .game-button { min-height: 34px; padding: 6px 8px; font-size: 11px; border-width: 2px; border-radius: 10px; box-shadow: 0 3px 0 #111; } 
+            .window-label { font-size: 10px; padding: 4px 10px; border-width: 2px; margin-bottom: 8px; box-shadow: 0 3px 0 #111; } 
+            .tracker-box { padding: 10px; gap: 8px; border-radius: 12px; border-width: 2px; margin-bottom: 12px; } 
+            .tracker-row label { font-size: 11px; }
+            .tracker-row select, .tracker-row textarea { padding: 8px; font-size: 12px; border-width: 2px; border-radius: 8px; }
+            .radio-btn label { padding: 6px; font-size: 11px; border-width: 2px; border-radius: 8px; }
+            .task-list { margin: 0 0 15px 0; }
+            .task-item { padding: 10px; margin-bottom: 6px; border-radius: 12px; border-width: 2px; } 
+            .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 10px; } 
+            .task-text { font-size: 13px; } 
+            .primary-button { font-size: 14px; padding: 10px; margin-top: 10px; min-height: 40px; }
         }
     </style>
 </head>
@@ -225,7 +247,23 @@
                 </div>
 
                 <div class="content-grid">
-                    <!-- LEFT COLUMN (Food & Trackers) -->
+                    <!-- Right Column (Quests) is now FIRST in HTML so it stacks on top on mobile -->
+                    <div class="right-col">
+                        <div class="window-label" id="ui_daily_quests_title">🏆 Daily Quests</div>
+                        <ul class="task-list" id="dailyTasks"></ul>
+
+                        <div id="weeklyContainer">
+                            <div class="window-label section-label-special" id="ui_weekly_quests_title">📅 WEEKLY QUESTS</div>
+                            <ul class="task-list" id="weeklyTasks"></ul>
+                        </div>
+
+                        <div id="monthlyContainer">
+                            <div class="window-label section-label-special" id="ui_monthly_quests_title">🌙 MONTHLY QUESTS</div>
+                            <ul class="task-list" id="monthlyTasks"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Left Column (Food & Trackers) is now SECOND in HTML so it stacks underneath -->
                     <div class="left-col">
                         <div class="window-label" id="ui_food_title">🥗 What Food I Eat Today</div>
                         <div class="tracker-box">
@@ -246,7 +284,7 @@
                             </div>
                         </div>
 
-                        <div class="window-label">🧠 Daily Trackers</div>
+                        <div class="window-label" id="ui_daily_trackers_title">🧠 Daily Trackers</div>
                         <div class="tracker-box">
                             <div class="tracker-row">
                                 <label id="ui_mood_title">Mood</label>
@@ -288,22 +326,6 @@
                                 <label id="ui_journal_title">Highlight of the Day (Journal)</label>
                                 <textarea id="trackJournal" rows="2" placeholder="What's your story today?"></textarea>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- RIGHT COLUMN (Quests) -->
-                    <div class="right-col">
-                        <div class="window-label" id="ui_daily_quests_title">🏆 Daily Quests</div>
-                        <ul class="task-list" id="dailyTasks"></ul>
-
-                        <div id="weeklyContainer">
-                            <div class="window-label section-label-special" id="ui_weekly_quests_title">📅 WEEKLY QUESTS</div>
-                            <ul class="task-list" id="weeklyTasks"></ul>
-                        </div>
-
-                        <div id="monthlyContainer">
-                            <div class="window-label section-label-special" id="ui_monthly_quests_title">🌙 MONTHLY QUESTS</div>
-                            <ul class="task-list" id="monthlyTasks"></ul>
                         </div>
                     </div>
                 </div> <!-- End Grid -->
@@ -381,7 +403,7 @@
         
         function playVoiceBlip() { playTone(450 + Math.random()*150, 0.03, "square", 0.015); }
 
-        function attachSoundEvents() { document.querySelectorAll(".game-button:not(:disabled), .rpg-btn:not(:disabled), input[type='checkbox']").forEach(el => { if (!el.hasAttribute('data-sound-bound')) { el.addEventListener("mouseenter", () => playPixelSound("hover")); el.addEventListener("click", () => playPixelSound("click")); el.setAttribute('data-sound-bound', 'true'); } }); }
+        function attachSoundEvents() { document.querySelectorAll(".game-button:not(:disabled), .rpg-btn:not(:disabled), input[type='checkbox'], .task-item").forEach(el => { if (!el.hasAttribute('data-sound-bound')) { el.addEventListener("mouseenter", () => playPixelSound("hover")); el.addEventListener("click", () => { if(!el.classList.contains('task-item')) playPixelSound("click"); }); el.setAttribute('data-sound-bound', 'true'); } }); }
         window.addEventListener("click", forceUnlockAudioContext); window.addEventListener("touchstart", forceUnlockAudioContext);
 
         // RPG Typewriter
@@ -415,7 +437,6 @@
 
         function getISOWeekKey(d = new Date()) { const date = new Date(d.getTime()); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7); const week1 = new Date(date.getFullYear(), 0, 4); const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7); return `${date.getFullYear()}_W${weekNum}`; }
 
-        // 🔴 YOUR API URL
         const API_URL = "https://script.google.com/macros/s/AKfycbzD2H4bXmNc3IJSg2IkvP0R84CRitKcoNU1898tReV8QeNdddg483ej09M8tIZBeo_pTQ/exec"; 
         
         let currentDayType = 'Work';
@@ -551,6 +572,7 @@
             setUI('ui_daily_quests_title', 'UI_Daily_Quests', '🏆 Daily Quests');
             setUI('ui_weekly_quests_title', 'UI_Weekly_Quests', '📅 WEEKLY QUESTS');
             setUI('ui_monthly_quests_title', 'UI_Monthly_Quests', '🌙 MONTHLY QUESTS');
+            setUI('ui_daily_trackers_title', 'UI_Trackers_Title', '🧠 Daily Trackers');
             
             setUI('ui_settings_title', 'UI_Settings_Title', '🌈 Settings & Countdowns');
             setUI('btn_mobile_mode', 'UI_Btn_Mobile', '📱 Mobile Mode');

@@ -338,10 +338,10 @@
     <div class="work-celebration-modal" id="workCelebrationModal" onclick="if(event.target===this) closeWorkCelebration()">
         <div class="work-celebration-card">
             <div class="work-celebration-emoji">🌈✨</div>
-            <h3 id="workCelebrationTitle">Chapter Completed!</h3>
+            <h3 id="ui_celeb_title">Chapter Completed!</h3>
             <div class="work-celebration-big" id="workCelebrationBig"></div>
-            <p id="workCelebrationText">This countdown has reached its end. Time for a new beginning! 💖</p>
-            <button class="game-button primary-button" type="button" onclick="closeWorkCelebration()">YAY! ✨</button>
+            <p id="ui_celeb_text">This countdown has reached its end. Time for a new beginning! 💖</p>
+            <button class="game-button primary-button" id="btn_yay" type="button" onclick="closeWorkCelebration()">YAY! ✨</button>
         </div>
     </div>
 
@@ -395,7 +395,6 @@
                     </div>
                 </div>`).join('');
             
-            // Re-apply dynamic text to the Add button if available
             const c = dbData?.config || {};
             if(c['UI_Btn_AddCount'] && c['UI_Btn_AddCount'].text) document.getElementById('addChapterButton').innerText = c['UI_Btn_AddCount'].text;
             
@@ -515,6 +514,11 @@
 
             setUI('ui_work_hours', 'UI_Work_Hours', 'Work Hours:');
             setUI('ui_time_to', 'UI_Time_To', 'to');
+
+            // Celebration UI (The new addition!)
+            setUI('ui_celeb_title', 'UI_Celeb_Title', 'Chapter Completed!');
+            setUI('ui_celeb_text', 'UI_Celeb_Text', 'This countdown has reached its end. Time for a new beginning! 💖');
+            setUI('btn_yay', 'UI_Btn_Yay', 'YAY! ✨');
 
             // Bind the Day Type Buttons
             setUI('btnWork', 'UI_Day_Work', '💼 Work Day');
@@ -666,7 +670,6 @@
             if (entryLocked) { checkbox.checked = !checkbox.checked; return; }
             if(checkbox.checked) {
                 playPixelSound('coin'); document.getElementById(itemId).classList.add('completed');
-                showToast(['✨!', '🌟!', '🛸!'][Math.floor(Math.random() * 3)]);
             } else { document.getElementById(itemId).classList.remove('completed'); }
         }
 
@@ -720,7 +723,7 @@
             const btn = document.getElementById('btnComplete'); btn.disabled = true; 
             btn.innerText = (c['UI_Btn_Completed'] && c['UI_Btn_Completed'].text) ? c['UI_Btn_Completed'].text : 'Already Completed Today! ✨';
             
-            playPixelSound('success'); flyUFO(); showToast('🛸!');
+            playPixelSound('success'); flyUFO();
             confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 } });
             document.getElementById('loading').style.display = 'block';
 

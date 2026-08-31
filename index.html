@@ -251,10 +251,6 @@
                     <div class="right-col">
                         <div class="window-label" id="ui_daily_quests_title">🏆 Daily Quests</div>
                         
-                        <a href="https://youtu.be/hWew6ls0Vbs" target="_blank" class="game-button" style="width: 100%; margin-bottom: 15px; text-decoration: none;">
-                            🏋️‍♀️ abs training 10 minutes
-                        </a>
-                        
                         <ul class="task-list" id="dailyTasks"></ul>
 
                         <div id="weeklyContainer">
@@ -696,7 +692,10 @@
 
             for(let i=1; i<=10; i++) {
                 const key = 'Daily_' + i;
-                if(c[key] && c[key].text) { dailyList.innerHTML += createTaskHTML("d"+i, c[key].text); }
+                if(c[key] && c[key].text) {
+                    let extra = (i === 2) ? `<a href="https://youtu.be/hWew6ls0Vbs" target="_blank" style="text-decoration:none; background:#fff; color:#111; padding:4px 8px; border-radius:10px; font-size:11px; font-weight:900; border:2px solid #111; margin-left:8px; flex-shrink:0; box-shadow:0 3px 0 #111;" onclick="event.stopPropagation()">▶️ Play</a>` : "";
+                    dailyList.innerHTML += createTaskHTML("d"+i, c[key].text, extra);
+                }
             }
 
             let wCount = 0, mCount = 0;
@@ -730,7 +729,7 @@
                         if(isOverdue) {
                             list.innerHTML += `<li class="task-item overdue" id="item_w${i}"><input type="checkbox" id="w${i}" onchange="styleCheckbox(this, 'item_w${i}')"><span class="task-text">${c[key].text}${dueText}</span></li>`;
                         } else if (!isNaN(due) && isMonthly && dateNumber < due) {
-                            list.innerHTML += `<li class="task-item upcoming"><span class="task-text">${dueText}</span></li>`;
+                            list.innerHTML += `<li class="task-item upcoming"><span class="task-text">${c[key].text}${dueText}</span></li>`;
                         } else {
                             list.innerHTML += createTaskHTML("w"+i, c[key].text);
                         }
@@ -741,7 +740,7 @@
             attachSoundEvents(); setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
         }
 
-        function createTaskHTML(id, text) { return `<li class="task-item" id="item_${id}"><input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')"><span class="task-text">${text}</span></li>`; }
+        function createTaskHTML(id, text, extra = "") { return `<li class="task-item" id="item_${id}"><input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')"><span class="task-text">${text}</span>${extra}</li>`; }
 
         function styleCheckbox(checkbox, itemId) {
             if (entryLocked) { checkbox.checked = !checkbox.checked; return; }

@@ -36,10 +36,17 @@
             background-size: 200% 200%; animation: galaxyShift 22s ease-in-out infinite;
         }
 
-        /* 💻 COMPACT DESKTOP DESIGNER MODE */
-        body.desktop-mode { --app-width: min(100%, 950px); }
+        /* 💻 COMPACT DESKTOP DESIGNER MODE (~80% scaled feel) */
+        body.desktop-mode { --app-width: min(100%, 780px); }
         @media (min-width: 768px) {
-            body.desktop-mode .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
+            body.desktop-mode .content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+            body.desktop-mode .app-shell { padding-bottom: 15px; }
+            body.desktop-mode .screen-content { padding: 15px; }
+            body.desktop-mode h1 { font-size: 22px; }
+            body.desktop-mode .tracker-box { padding: 12px; gap: 8px; margin-bottom: 15px; }
+            body.desktop-mode .task-item { padding: 10px 12px; margin-bottom: 8px; }
+            body.desktop-mode .task-text { font-size: 14px; }
+            body.desktop-mode .window-label { font-size: 11px; padding: 3px 10px; margin-bottom: 8px; }
         }
 
         body::before {
@@ -123,8 +130,8 @@
         @keyframes ufoFlyAcross { 0%{left:-170px;top:34%;opacity:0;transform:rotate(-8deg)} 10%{opacity:1} 50%{top:18%;transform:rotate(5deg)} 90%{opacity:1} 100%{left:calc(100vw + 30px);top:30%;opacity:0;transform:rotate(-4deg)} }
 
         .settings-button { margin-left:auto; flex:0 0 auto; width:42px; height:42px; padding:0; border-radius:14px; font-size:20px; }
-        .settings-modal { position:fixed; inset:0; z-index:150; display:none; place-items:center; padding:18px; background:rgba(0,0,0,.46); backdrop-filter:blur(10px); }
-        .settings-modal.show { display:grid; }
+        .settings-modal, .rpg-modal { position:fixed; inset:0; z-index:150; display:none; place-items:center; padding:18px; background:rgba(0,0,0,.46); backdrop-filter:blur(10px); }
+        .settings-modal.show, .rpg-modal.show { display:grid; }
         .settings-card { width:min(100%,500px); max-height:88vh; overflow:auto; border:4px solid #111; border-radius:28px; padding:22px; background:linear-gradient(145deg,#fff,#f9f9f9); box-shadow:0 28px 80px rgba(0,0,0,.15), inset 0 0 0 4px rgba(0,0,0,.05); }
         .settings-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
         .settings-head h2 { margin:0; font-family:var(--font-title); font-size:22px; color:#111; }
@@ -140,6 +147,14 @@
         .chapter-fields { display:grid; grid-template-columns:120px 1fr; gap:8px; }
         .chapter-fields .settings-field:last-child { grid-column:1 / -1; }
         
+        /* 🎮 RPG GAMIFIED BOX */
+        .rpg-box { width:min(100%,450px); border:4px solid #111; border-radius:16px; padding:22px; background:#fff; box-shadow:8px 8px 0 rgba(0,0,0,1); font-family: monospace, sans-serif; font-size: 16px; line-height: 1.6; color: #111; }
+        .rpg-title { font-family: var(--font-title); font-size: 22px; font-weight: 900; color: #ff9aab; text-transform: uppercase; margin: 0 0 10px 0; border-bottom: 2px dashed #111; padding-bottom: 10px;}
+        .rpg-text { min-height: 80px; white-space: pre-wrap; font-weight: 600; margin-bottom: 20px;}
+        .rpg-btn { width: 100%; border: 3px solid #111; background: #111; color: #fff; font-family: var(--font-title); font-weight: 900; font-size: 16px; padding: 12px; cursor: pointer; transition: all 0.1s; }
+        .rpg-btn:hover { background: #ff9aab; color: #111; }
+        .rpg-btn:active { transform: translateY(4px); }
+
         .countdown-card { display:none; margin:0 0 14px; }
         .countdown-card.show { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
         .countdown-mini { min-width:0; padding:10px 11px; border:2px solid #111; border-radius:14px; background:linear-gradient(145deg,#fff,#f4f4f4); box-shadow:0 4px 0 #111; text-align:left; }
@@ -158,12 +173,6 @@
         @media (max-width: 500px) {
             .galaxy-stage { padding: 10px; } .app-shell { border-width: 3px; border-radius: 26px; padding-bottom: 15px; } .topbar { padding: 15px; gap: 10px; border-radius: 24px 24px 0 0; } h1 { font-size: 20px; } .brand-badge { width: 36px; height: 36px; padding: 4px; border-width: 2px; } .screen-content { padding: 14px; } .date-display { font-size: 13px; margin-bottom: 14px; } .day-selector { gap: 6px; margin-bottom: 15px; } .game-button { min-height: 36px; padding: 6px 4px; font-size: 11px; border-width: 2px; border-radius: 12px; } .window-label { font-size: 10px; padding: 3px 10px; border-width: 2px; } .tracker-box { padding: 10px; border-radius: 14px; border-width: 2px; margin-bottom: 15px; } .task-item { padding: 10px 12px; margin-bottom: 8px; border-radius: 14px; border-width: 2px; } .task-item input[type="checkbox"] { width: 18px; height: 18px; margin-right: 12px; } .task-text { font-size: 14px; } .primary-button { font-size: 15px; padding: 12px; margin-top: 12px; min-height: 44px; }
         }
-
-        .cosmic-decoration { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
-        .planet { position: absolute; border-radius: 50%; animation: planetFloat 9s ease-in-out infinite; }
-        .planet.one { width: 86px; height: 86px; left: 7%; top: 10%; background: radial-gradient(circle at 35% 28%, #fff, #ff9aab 48%, #111); box-shadow: 0 16px 28px rgba(0, 0, 0, .1); }
-        .planet.two { width: 60px; height: 60px; right: 9%; top: 18%; background: radial-gradient(circle at 30% 24%, #fff, #e2e2e2 52%, #555); animation-delay: -2.5s; }
-        @keyframes planetFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-14px) rotate(3deg)} }
     </style>
 </head>
 <body id="bodyMain">
@@ -309,6 +318,15 @@
         </div>
     </main>
 
+    <!-- RPG SUMMARY MODAL -->
+    <div class="rpg-modal" id="summaryModal">
+        <div class="rpg-box">
+            <h3 class="rpg-title" id="ui_summary_title">LEVEL CLEARED! 🏆</h3>
+            <div class="rpg-text" id="summaryText"></div>
+            <button class="rpg-btn" id="ui_btn_continue" onclick="closeSummaryAndReset()">[ CONTINUE ]</button>
+        </div>
+    </div>
+
     <!-- SETTINGS MODAL -->
     <div class="settings-modal" id="workSettingsModal" onclick="if(event.target===this) closeWorkSettings()">
         <div class="settings-card">
@@ -351,9 +369,41 @@
         function initAudio() { if (audioState.audioContext) return; const AudioContext = window.AudioContext || window.webkitAudioContext; if (!AudioContext) return; audioState.audioContext = new AudioContext(); audioState.masterGain = audioState.audioContext.createGain(); audioState.masterGain.gain.value = 0.2; audioState.masterGain.connect(audioState.audioContext.destination); }
         function forceUnlockAudioContext() { initAudio(); if (audioState.audioContext && audioState.audioContext.state === "suspended") { audioState.audioContext.resume(); } }
         function playTone(frequency, duration, type = "sine", gain = 0.08, delay = 0) { initAudio(); if (!audioState.audioContext) return; if (audioState.audioContext.state === "suspended") audioState.audioContext.resume(); const now = audioState.audioContext.currentTime + delay; const osc = audioState.audioContext.createOscillator(); const vol = audioState.audioContext.createGain(); osc.type = type; osc.frequency.setValueAtTime(frequency, now); vol.gain.setValueAtTime(gain, now); vol.gain.exponentialRampToValueAtTime(0.001, now + duration); osc.connect(vol).connect(audioState.masterGain); osc.start(now); osc.stop(now + duration + 0.02); }
-        function playPixelSound(name) { const g = 0.07; if (name === "click") playTone(520, .06, "square", g); if (name === "hover") playTone(740, .04, "triangle", 0.025); if (name === "coin") { playTone(880, .08, "triangle", g); playTone(1320, .1, "triangle", g, .06); } if (name === "success") { playTone(659, .12, "sine", g); playTone(988, .18, "sine", g, .1); } }
-        function attachSoundEvents() { document.querySelectorAll(".game-button:not(:disabled), input[type='checkbox']").forEach(el => { if (!el.hasAttribute('data-sound-bound')) { el.addEventListener("mouseenter", () => playPixelSound("hover")); el.addEventListener("click", () => playPixelSound("click")); el.setAttribute('data-sound-bound', 'true'); } }); }
+        
+        function playPixelSound(name) { 
+            const g = 0.07; 
+            if (name === "click") playTone(520, .06, "square", g); 
+            if (name === "hover") playTone(740, .04, "triangle", 0.025); 
+            if (name === "coin") { playTone(880, .08, "triangle", g); playTone(1320, .1, "triangle", g, .06); } 
+            if (name === "success") { playTone(659, .12, "sine", g); playTone(988, .18, "sine", g, .1); } 
+            if (name === "levelup") { playTone(440, .1, "square", g); playTone(554, .1, "square", g, .1); playTone(659, .2, "square", g, .2); }
+        }
+        
+        function playVoiceBlip() { playTone(450 + Math.random()*150, 0.03, "square", 0.015); }
+
+        function attachSoundEvents() { document.querySelectorAll(".game-button:not(:disabled), .rpg-btn:not(:disabled), input[type='checkbox']").forEach(el => { if (!el.hasAttribute('data-sound-bound')) { el.addEventListener("mouseenter", () => playPixelSound("hover")); el.addEventListener("click", () => playPixelSound("click")); el.setAttribute('data-sound-bound', 'true'); } }); }
         window.addEventListener("click", forceUnlockAudioContext); window.addEventListener("touchstart", forceUnlockAudioContext);
+
+        // RPG Typewriter
+        function typeWriter(elementId, text, speed) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = "";
+            let i = 0;
+            document.getElementById('ui_btn_continue').style.opacity = '0.5';
+            document.getElementById('ui_btn_continue').disabled = true;
+            function type() {
+                if (i < text.length) {
+                    el.innerHTML += text.charAt(i);
+                    if (text.charAt(i) !== ' ' && text.charAt(i) !== '\n') playVoiceBlip();
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    document.getElementById('ui_btn_continue').style.opacity = '1';
+                    document.getElementById('ui_btn_continue').disabled = false;
+                }
+            }
+            type();
+        }
 
         // Layout Toggle
         function toggleLayout(isDesktop) {
@@ -365,7 +415,7 @@
 
         function getISOWeekKey(d = new Date()) { const date = new Date(d.getTime()); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7); const week1 = new Date(date.getFullYear(), 0, 4); const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7); return `${date.getFullYear()}_W${weekNum}`; }
 
-        // 🔴 YOUR NEW API URL
+        // 🔴 YOUR API URL
         const API_URL = "https://script.google.com/macros/s/AKfycbzD2H4bXmNc3IJSg2IkvP0R84CRitKcoNU1898tReV8QeNdddg483ej09M8tIZBeo_pTQ/exec"; 
         
         let currentDayType = 'Work';
@@ -489,7 +539,6 @@
             } catch (error) { console.error("Error fetching data", error); }
         }
 
-        // Apply Custom UI Text from Config
         function applyConfigText() {
             const c = dbData.config || {};
             const getT = (key, def) => (c[key] && c[key].text) ? c[key].text : def;
@@ -498,13 +547,11 @@
                 if(el) { if(isVal) el.value = getT(key, def); else el.innerText = getT(key, def); }
             }
 
-            // Headers & Buttons
             setUI('appTitle', 'UI_App_Title', 'GLOW UP');
             setUI('ui_daily_quests_title', 'UI_Daily_Quests', '🏆 Daily Quests');
             setUI('ui_weekly_quests_title', 'UI_Weekly_Quests', '📅 WEEKLY QUESTS');
             setUI('ui_monthly_quests_title', 'UI_Monthly_Quests', '🌙 MONTHLY QUESTS');
             
-            // Settings UI
             setUI('ui_settings_title', 'UI_Settings_Title', '🌈 Settings & Countdowns');
             setUI('btn_mobile_mode', 'UI_Btn_Mobile', '📱 Mobile Mode');
             setUI('btn_desktop_mode', 'UI_Btn_Desktop', '💻 Designer Desktop');
@@ -515,12 +562,15 @@
             setUI('ui_work_hours', 'UI_Work_Hours', 'Work Hours:');
             setUI('ui_time_to', 'UI_Time_To', 'to');
 
-            // Celebration UI (The new addition!)
+            // Celebration Modal
             setUI('ui_celeb_title', 'UI_Celeb_Title', 'Chapter Completed!');
             setUI('ui_celeb_text', 'UI_Celeb_Text', 'This countdown has reached its end. Time for a new beginning! 💖');
             setUI('btn_yay', 'UI_Btn_Yay', 'YAY! ✨');
 
-            // Bind the Day Type Buttons
+            // RPG Summary Modal
+            setUI('ui_summary_title', 'UI_Summary_Title', 'LEVEL CLEARED! 🏆');
+            setUI('ui_btn_continue', 'UI_Btn_Continue', '[ CONTINUE ]');
+
             setUI('btnWork', 'UI_Day_Work', '💼 Work Day');
             setUI('btnOff', 'UI_Day_Off', '🌿 Day Off');
             setUI('btnTravel', 'UI_Day_Travel', '✈️ Travel');
@@ -562,14 +612,14 @@
         function setEntryLocked(locked) {
             entryLocked = locked; const btn = document.getElementById('btnComplete'); btn.disabled = locked;
             const c = dbData?.config || {};
-            document.querySelectorAll('input, select, textarea, button:not(.settings-button):not(.settings-close)').forEach(el => { if(el.id !== 'btnComplete') { el.disabled = locked; el.classList.toggle('locked-control', locked); }});
+            
+            document.querySelectorAll('.screen-content input, .screen-content select, .screen-content textarea, .screen-content button').forEach(el => { 
+                if(el.id !== 'btnComplete') { el.disabled = locked; el.classList.toggle('locked-control', locked); }
+            });
             document.querySelectorAll('.task-item').forEach(el => el.classList.toggle('locked-control', locked));
             
-            if (locked) {
-                btn.innerText = (c['UI_Btn_Completed'] && c['UI_Btn_Completed'].text) ? c['UI_Btn_Completed'].text : 'Already Completed Today! ✨';
-            } else {
-                btn.innerText = (c['UI_Btn_Complete'] && c['UI_Btn_Complete'].text) ? c['UI_Btn_Complete'].text : 'Complete My Day! 💖';
-            }
+            if (locked) btn.innerText = (c['UI_Btn_Completed'] && c['UI_Btn_Completed'].text) ? c['UI_Btn_Completed'].text : 'Already Completed Today! ✨';
+            else btn.innerText = (c['UI_Btn_Complete'] && c['UI_Btn_Complete'].text) ? c['UI_Btn_Complete'].text : 'Complete My Day! 💖';
         }
 
         function checkIfAlreadyCompleted() { if (!dbData) return; setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime())); }
@@ -589,7 +639,6 @@
             const weeklyList = document.getElementById('weeklyTasks');
             const monthlyList = document.getElementById('monthlyTasks');
             
-            // Fetch dynamic status texts
             const t_completed = (c['UI_Status_Completed'] && c['UI_Status_Completed'].text) ? c['UI_Status_Completed'].text : "(Completed)";
             const t_overdue = (c['UI_Status_Overdue'] && c['UI_Status_Overdue'].text) ? c['UI_Status_Overdue'].text : " 🚨(OVERDUE!)";
             const t_weekend = (c['UI_Status_Weekend'] && c['UI_Status_Weekend'].text) ? c['UI_Status_Weekend'].text : " 🚨(DUE THIS WEEKEND!)";
@@ -610,13 +659,11 @@
                 });
             }
 
-            // DAILIES
             for(let i=1; i<=10; i++) {
                 const key = 'Daily_' + i;
                 if(c[key] && c[key].text) { dailyList.innerHTML += createTaskHTML("d"+i, c[key].text); }
             }
 
-            // WEEKLIES / MONTHLIES
             let wCount = 0, mCount = 0;
             const dateNumber = activeEntryDate.getDate();
             const currentDayOfWeek = activeEntryDate.getDay(); 
@@ -640,15 +687,10 @@
 
                         if (isMonthly) {
                             if(!isNaN(due)) {
-                                if(dateNumber >= due) {
-                                    isOverdue = true; dueText = t_overdue;
-                                } else { dueText = ` ${t_upcoming} ${due}`; }
+                                if(dateNumber >= due) { isOverdue = true; dueText = t_overdue; } 
+                                else { dueText = ` ${t_upcoming} ${due}`; }
                             }
-                        } else {
-                            if (isLateWeek) {
-                                isOverdue = true; dueText = t_weekend;
-                            }
-                        }
+                        } else { if (isLateWeek) { isOverdue = true; dueText = t_weekend; } }
 
                         if(isOverdue) {
                             list.innerHTML += `<li class="task-item overdue" id="item_w${i}"><input type="checkbox" id="w${i}" onchange="styleCheckbox(this, 'item_w${i}')"><span class="task-text">${c[key].text}${dueText}</span></li>`;
@@ -703,21 +745,58 @@
             document.getElementById('feedbackDisplay').innerText = msg;
         }
 
+        // Handle RPG Game Summary Modal
+        function triggerGameSummary(payload, exp) {
+            const c = dbData.config || {};
+            let template = (c['UI_Summary_Temp'] && c['UI_Summary_Temp'].text) ? c['UI_Summary_Temp'].text : "Day saved! You fueled up with {health} {food}. Mood: {mood}. Meditation: {meditation}. Alcohol: {alcohol}. Total EXP gained: {exp} ✨";
+            
+            template = template.replace('{health}', payload.Food_Health || "mysterious")
+                               .replace('{food}', payload.Food_Type || "sustenance")
+                               .replace('{mood}', payload.Mood || "neutral")
+                               .replace('{meditation}', payload.Meditation || "unknown")
+                               .replace('{alcohol}', payload.Alcohol || "unknown")
+                               .replace('{exp}', exp);
+
+            document.getElementById('summaryModal').classList.add('show');
+            playPixelSound('levelup');
+            typeWriter('summaryText', template, 35);
+        }
+
+        function closeSummaryAndReset() {
+            document.getElementById('summaryModal').classList.remove('show');
+            checkCompletedCountdowns();
+            const completedDate = activeEntryDate.getTime(); pendingDates = pendingDates.filter(d => d.getTime() !== completedDate);
+            const today = startOfDay(new Date()); activeEntryDate = pendingDates.length ? pendingDates[0] : today;
+            currentDayType = 'Work'; setupDate(); 
+            
+            document.getElementById('trackAdult').value = ""; document.getElementById('trackMood').value = ""; 
+            document.getElementById('trackMeditation').value = document.getElementById('opt_med_1').value; 
+            document.getElementById('trackAlcohol').value = document.getElementById('opt_alc_1').value;
+            document.getElementById('trackJournal').value = ""; document.getElementById('feedbackDisplay').innerText = "";
+            document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+            
+            document.getElementById('btnWork').classList.add('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
+            document.getElementById('timeInputs').style.display = 'block'; generateTasks(); checkIfAlreadyCompleted();
+        }
+
         async function saveProgress() {
             if (entryLocked) return;
             const c = dbData.config || {};
             
-            // "NO EXCUSES" DAILY VALIDATION LOOP
+            // "NO EXCUSES" VALIDATION & EXP CALCULATION
             let allDailiesChecked = true;
+            let totalExp = 0;
             const dailyCheckboxes = document.querySelectorAll('#dailyTasks input[type="checkbox"]');
-            dailyCheckboxes.forEach(cb => {
-                if (!cb.checked) allDailiesChecked = false;
+            dailyCheckboxes.forEach(cb => { 
+                if (!cb.checked) allDailiesChecked = false; 
+                else totalExp += 10; 
             });
+            const extraCheckboxes = document.querySelectorAll('#weeklyContainer input[type="checkbox"], #monthlyContainer input[type="checkbox"]');
+            extraCheckboxes.forEach(cb => { if(cb.checked) totalExp += 50; });
             
             if (!allDailiesChecked && dailyCheckboxes.length > 0) {
                 const alertMsg = (c['UI_Alert_Dailies'] && c['UI_Alert_Dailies'].text) ? c['UI_Alert_Dailies'].text : "🌱 Little habits matter! This will shape your future. Discipline is key. Please check off all daily quests! No excuses allowed. 🛑";
-                alert(alertMsg);
-                return;
+                alert(alertMsg); return;
             }
             
             const btn = document.getElementById('btnComplete'); btn.disabled = true; 
@@ -728,54 +807,34 @@
             document.getElementById('loading').style.display = 'block';
 
             const payload = {
-                Date: formatEntryDate(activeEntryDate),
-                Day_Type: currentDayType, 
+                Date: formatEntryDate(activeEntryDate), Day_Type: currentDayType, 
                 Food_Type: document.querySelector('input[name="foodType"]:checked')?.value || "",
                 Food_Health: document.querySelector('input[name="foodHealth"]:checked')?.value || "",
-                Adult_Track: document.getElementById('trackAdult').value,
-                Mood: document.getElementById('trackMood').value,
-                Meditation: document.getElementById('trackMeditation').value,
-                Alcohol: document.getElementById('trackAlcohol').value,
+                Adult_Track: document.getElementById('trackAdult').value, Mood: document.getElementById('trackMood').value,
+                Meditation: document.getElementById('trackMeditation').value, Alcohol: document.getElementById('trackAlcohol').value,
                 Journal: document.getElementById('trackJournal').value,
-                
                 Daily_1: document.getElementById('d1')?.checked || false, Daily_2: document.getElementById('d2')?.checked || false,
                 Daily_3: document.getElementById('d3')?.checked || false, Daily_4: document.getElementById('d4')?.checked || false,
                 Daily_5: document.getElementById('d5')?.checked || false, Daily_6: document.getElementById('d6')?.checked || false,
                 Daily_7: document.getElementById('d7')?.checked || false, Daily_8: document.getElementById('d8')?.checked || false, 
                 Daily_9: document.getElementById('d9')?.checked || false, Daily_10: document.getElementById('d10')?.checked || false,
-                
                 Weekly_1: document.getElementById('w1')?.checked || false, Weekly_2: document.getElementById('w2')?.checked || false,
                 Weekly_3: document.getElementById('w3')?.checked || false, Weekly_4: document.getElementById('w4')?.checked || false,
                 Weekly_5: document.getElementById('w5')?.checked || false, Weekly_6: document.getElementById('w6')?.checked || false,
                 Weekly_7: document.getElementById('w7')?.checked || false, Weekly_8: document.getElementById('w8')?.checked || false,
                 Weekly_9: document.getElementById('w9')?.checked || false, Weekly_10: document.getElementById('w10')?.checked || false,
-                
                 Countdown_Settings: JSON.stringify(workSettings)
             };
             
             payload.Feedback = generateAutomatedFeedback(payload);
-
-            if (!dbData.logs) dbData.logs = [];
-            dbData.logs.push(payload);
+            if (!dbData.logs) dbData.logs = []; dbData.logs.push(payload);
             
             try {
                 await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 setTimeout(() => {
                     document.getElementById('loading').style.display = 'none';
-                    checkCompletedCountdowns();
-                    const completedDate = activeEntryDate.getTime(); pendingDates = pendingDates.filter(d => d.getTime() !== completedDate);
-                    const today = startOfDay(new Date()); activeEntryDate = pendingDates.length ? pendingDates[0] : today;
-                    currentDayType = 'Work'; setupDate(); 
-                    
-                    document.getElementById('trackAdult').value = ""; document.getElementById('trackMood').value = ""; 
-                    document.getElementById('trackMeditation').value = document.getElementById('opt_med_1').value; 
-                    document.getElementById('trackAlcohol').value = document.getElementById('opt_alc_1').value;
-                    document.getElementById('trackJournal').value = ""; document.getElementById('feedbackDisplay').innerText = "";
-                    document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-                    
-                    document.getElementById('btnWork').classList.add('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
-                    document.getElementById('timeInputs').style.display = 'block'; generateTasks(); checkIfAlreadyCompleted();
-                }, 2000);
+                    triggerGameSummary(payload, totalExp);
+                }, 1500);
             } catch(e) { document.getElementById('loading').innerText = "Error saving. Connection lost in space."; }
         }
 

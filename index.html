@@ -9,12 +9,10 @@
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-title" content="Glow Up">
 
-    <!-- Fonts from AWARU Theme -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
@@ -311,7 +309,8 @@
             return `${date.getFullYear()}_W${weekNum}`;
         }
 
-        const API_URL = "https://script.google.com/macros/s/AKfycbweFv7jDeZCRc7ibqwDF3kxYhwMY9BsOPps_8sHs-b3SLcO8Fj4z7ljeNORvAVhxKf4_Q/exec";
+        // 🔴 PASTE YOUR NEW URL HERE 
+        const API_URL = "https://script.google.com/macros/s/AKfycbx3n5AWQVOHUtfEetCr0viTUklESR4C7Cp4szucrj4XSSIRTUO4KgiQHXQdVVuXam31Sg/exec"; 
         
         let currentDayType = 'Work';
         let dbData = null; 
@@ -351,8 +350,6 @@
         }
         function loadCloudCountdownSettings() {
             const rows = Array.isArray(dbData?.logs) ? dbData.logs : [];
-            // The newest cloud row that contains Countdown_Settings is the shared source of truth.
-            // This makes a newly opened phone / laptop inherit the same countdown list.
             for (let i = rows.length - 1; i >= 0; i--) {
                 const raw = getFieldLoose(rows[i], 'Countdown_Settings');
                 if (raw === undefined || raw === null || raw === '') continue;
@@ -394,33 +391,18 @@
         function openWorkSettings() { renderChapterEditors(); document.getElementById('workSettingsModal').classList.add('show'); }
         function closeWorkSettings() { document.getElementById('workSettingsModal').classList.remove('show'); }
         async function syncCountdownSettingsToCloud() {
-            // Write settings as a normal database row so the existing Galaxy Sheet backend
-            // can return it through dbData.logs on every device.
             const cloudPayload = {
                 Date: formatEntryDate(new Date()),
                 Day_Type: 'SETTINGS',
-                Record_Type: 'Countdown_Settings',
-                Start_Time: 'N/A',
-                End_Time: 'N/A',
-                Lunch: '',
-                Dinner: '',
-                Gym_10min: false,
-                Abs_10min: false,
-                Edit_2min: false,
-                Video_Watched: false,
-                Travel_Cardio: false,
-                Travel_Film: false,
-                Laundry_Done: false,
-                DeepClean_Done: false,
-                HabitCheck_Done: false,
-                Beauty_Done: false,
-                Savings_KRW: false,
-                Countdown_Settings: JSON.stringify(workSettings),
-                Updated_At: new Date().toISOString()
+                Start_Time: 'N/A', End_Time: 'N/A', Lunch: '', Dinner: '',
+                Gym_10min: false, Abs_10min: false, Edit_2min: false,
+                Story_5min: false, Video_Watched: false, Care_Done: false, Message_Sent: false,
+                Travel_Cardio: false, Travel_Film: false, Laundry_Done: false, DeepClean_Done: false,
+                HabitCheck_Done: false, Beauty_Done: false, Savings_KRW: false,
+                Countdown_Settings: JSON.stringify(workSettings)
             };
             try {
                 await fetch(API_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body:JSON.stringify(cloudPayload) });
-                // no-cors cannot expose the POST response, so refresh the shared database copy.
                 setTimeout(() => fetchDatabase(), 650);
                 return true;
             } catch(e) { console.error('Countdown cloud sync failed', e); return false; }
@@ -428,20 +410,12 @@
         async function saveWorkSettings() {
             const chapters = readChapterEditors();
             if (chapters.some(c => !c.name || !c.endDate)) { alert('✨ Please give each countdown a name and end date, or remove the empty one.'); return; }
-            workSettings = chapters;
-            persistWorkSettings();
-            updateWorkCountdownCard();
-            closeWorkSettings();
-            showToast('☁️ Syncing countdowns...');
+            workSettings = chapters; persistWorkSettings(); updateWorkCountdownCard(); closeWorkSettings(); showToast('☁️ Syncing countdowns...');
             const ok = await syncCountdownSettingsToCloud();
             showToast(ok ? '☁️ Countdowns synced!' : '💾 Saved locally — cloud retry later');
         }
         async function clearWorkSettings() {
-            workSettings = [];
-            persistWorkSettings();
-            localStorage.removeItem(OLD_WORK_SETTINGS_KEY);
-            renderChapterEditors();
-            updateWorkCountdownCard();
+            workSettings = []; persistWorkSettings(); localStorage.removeItem(OLD_WORK_SETTINGS_KEY); renderChapterEditors(); updateWorkCountdownCard();
             const ok = await syncCountdownSettingsToCloud();
             showToast(ok ? '🌱 Countdowns cleared & synced' : '🌱 Countdowns cleared locally');
         }
@@ -475,16 +449,13 @@
             card.innerHTML = infos.map(info => `<div class="countdown-mini"><div class="countdown-company">${chapterEmoji(info.type)} ${escapeHTML(info.name)}</div><span class="countdown-number">${countdownHeadline(info.daysLeft)}</span><div class="countdown-sub">${escapeHTML(info.type)} · ${info.endDate}</div></div>`).join('');
             card.classList.add('show');
         }
-        function escapeHTML(value) {
-            return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
-        }
+        function escapeHTML(value) { return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch])); }
         function showWorkCelebration() {
             const infos = getWorkCountdownInfo(new Date());
             if (!infos.length) return;
             const title = document.getElementById('workCelebrationTitle');
             const big = document.getElementById('workCelebrationBig');
             const text = document.getElementById('workCelebrationText');
-
             title.textContent = infos.length === 1 ? `Your countdown reminder ✨` : `Your ${infos.length} countdown reminders ✨`;
             big.innerHTML = infos.map(info => {
                 const headline = countdownHeadline(info.daysLeft);
@@ -499,7 +470,6 @@
 
         function startOfDay(value) { const d = new Date(value); d.setHours(0,0,0,0); return d; }
         function addDays(value, amount) { const d = startOfDay(value); d.setDate(d.getDate() + amount); return d; }
-        function sameDate(a,b) { return startOfDay(a).getTime() === startOfDay(b).getTime(); }
         function parseLogDate(rawLog) {
             const dateKey = Object.keys(rawLog || {}).find(k => k.toLowerCase().trim() === 'date');
             let dateStr = dateKey ? rawLog[dateKey] : null;
@@ -507,45 +477,27 @@
             const parsed = new Date(dateStr);
             return isNaN(parsed) ? null : startOfDay(parsed);
         }
-        function formatEntryDate(date) {
-            return date.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-        }
+        function formatEntryDate(date) { return date.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' }); }
         function currentWeekKey() { return getISOWeekKey(activeEntryDate); }
         function showToast(message) {
             const toast = document.getElementById('gameToast');
-            toast.textContent = message;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => toast.classList.remove('show'), 1450);
+            toast.textContent = message; toast.classList.add('show');
+            clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 1450);
         }
-        function flyUFO() {
-            const ufo = document.getElementById('ufoCelebration');
-            ufo.classList.remove('fly'); void ufo.offsetWidth; ufo.classList.add('fly');
-        }
-        function isSettingsLog(rawLog) {
-            const recordType = String(getFieldLoose(rawLog, 'Record_Type') || '').toLowerCase();
-            const dayType = String(getFieldLoose(rawLog, 'Day_Type') || '').toLowerCase();
-            return recordType === 'countdown_settings' || dayType === 'settings';
-        }
-        function getCompletedDateSet() {
-            return new Set((dbData?.logs || []).filter(log => !isSettingsLog(log)).map(parseLogDate).filter(Boolean).map(d => d.getTime()));
-        }
+        function flyUFO() { const ufo = document.getElementById('ufoCelebration'); ufo.classList.remove('fly'); void ufo.offsetWidth; ufo.classList.add('fly'); }
+        function isSettingsLog(rawLog) { return String(getFieldLoose(rawLog, 'Day_Type') || '').toLowerCase() === 'settings'; }
+        function getCompletedDateSet() { return new Set((dbData?.logs || []).filter(log => !isSettingsLog(log)).map(parseLogDate).filter(Boolean).map(d => d.getTime())); }
         function buildPendingDates() {
             const logs = (dbData?.logs || []).filter(log => !isSettingsLog(log)).map(parseLogDate).filter(Boolean).sort((a,b)=>a-b);
-            const today = startOfDay(new Date());
-            const yesterday = addDays(today,-1);
+            const today = startOfDay(new Date()); const yesterday = addDays(today,-1);
             pendingDates = [];
             if (!logs.length) { activeEntryDate = today; return; }
-            const completed = getCompletedDateSet();
-            const latest = logs[logs.length-1];
-            for (let d = addDays(latest,1); d <= yesterday; d = addDays(d,1)) {
-                if (!completed.has(d.getTime())) pendingDates.push(new Date(d));
-            }
+            const completed = getCompletedDateSet(); const latest = logs[logs.length-1];
+            for (let d = addDays(latest,1); d <= yesterday; d = addDays(d,1)) { if (!completed.has(d.getTime())) pendingDates.push(new Date(d)); }
             activeEntryDate = pendingDates.length ? pendingDates[0] : today;
         }
         function updateCatchupUI() {
-            const banner = document.getElementById('catchupBanner');
-            const today = startOfDay(new Date());
+            const banner = document.getElementById('catchupBanner'); const today = startOfDay(new Date());
             if (activeEntryDate < today) {
                 const remaining = pendingDates.filter(d => d >= activeEntryDate).length;
                 banner.textContent = `⚠️ Catch-up quest: complete ${formatEntryDate(activeEntryDate)} first${remaining > 1 ? ` (${remaining} missed days remaining)` : ''}.`;
@@ -553,29 +505,19 @@
             } else { banner.classList.remove('show'); banner.textContent=''; }
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            setTimeout(() => { document.getElementById("galaxy-loader").classList.add("hidden"); attachSoundEvents(); }, 1800); 
-        });
-
+        document.addEventListener("DOMContentLoaded", () => { setTimeout(() => { document.getElementById("galaxy-loader").classList.add("hidden"); attachSoundEvents(); }, 1800); });
         document.addEventListener("mousemove", event => {
             if (window.innerWidth < 768) return; 
-            const x = (event.clientX / window.innerWidth - .5) * 2;
-            const y = (event.clientY / window.innerHeight - .5) * 2;
+            const x = (event.clientX / window.innerWidth - .5) * 2; const y = (event.clientY / window.innerHeight - .5) * 2;
             document.getElementById("app-shell").style.transform = `rotateY(${x * 3}deg) rotateX(${-y * 3}deg)`;
         });
 
-        function setupDate() {
-            document.getElementById('dateDisplay').innerText = formatEntryDate(activeEntryDate);
-            updateCatchupUI();
-            updateWorkCountdownCard();
-        }
+        function setupDate() { document.getElementById('dateDisplay').innerText = formatEntryDate(activeEntryDate); updateCatchupUI(); updateWorkCountdownCard(); }
 
         async function fetchDatabase() {
             try {
                 const response = await fetch(API_URL + "?t=" + new Date().getTime());
-                dbData = await response.json();
-                loadCloudCountdownSettings();
-                updateWorkCountdownCard();
+                dbData = await response.json(); loadCloudCountdownSettings(); updateWorkCountdownCard();
                 
                 if(dbData.ui) {
                     document.getElementById('appTitle').innerText = dbData.ui['app_title'] || "Glow Up Planner";
@@ -587,33 +529,19 @@
                     document.getElementById('titleWeekly').innerText = "✨ WEEKLY & MONTHLY QUESTS";
                     document.getElementById('btnComplete').innerText = dbData.ui['btn_complete'] || "Complete!";
                 }
-                
-                buildPendingDates();
-                setupDate();
-                checkIfAlreadyCompleted();
-                generateMeals();
-                generateTasks();
+                buildPendingDates(); setupDate(); checkIfAlreadyCompleted(); generateMeals(); generateTasks();
             } catch (error) { console.error("Error fetching data", error); }
         }
 
         function setEntryLocked(locked) {
-            entryLocked = locked;
-            const btn = document.getElementById('btnComplete');
-            btn.disabled = locked;
-            document.querySelectorAll('.day-selector button, #startTime, #endTime, input[type="checkbox"]').forEach(el => {
-                el.disabled = locked;
-                el.classList.toggle('locked-control', locked);
-            });
+            entryLocked = locked; const btn = document.getElementById('btnComplete'); btn.disabled = locked;
+            document.querySelectorAll('.day-selector button, #startTime, #endTime, input[type="checkbox"]').forEach(el => { el.disabled = locked; el.classList.toggle('locked-control', locked); });
             document.querySelectorAll('.task-item').forEach(el => el.classList.toggle('locked-control', locked));
             if (locked) btn.innerText = 'Already Completed This Day! ✨';
             else btn.innerText = dbData?.ui?.['btn_complete'] || 'Complete My Day! 💖';
         }
 
-        function checkIfAlreadyCompleted() {
-            if (!dbData) return;
-            const alreadyCompleted = getCompletedDateSet().has(activeEntryDate.getTime());
-            setEntryLocked(alreadyCompleted);
-        }
+        function checkIfAlreadyCompleted() { if (!dbData) return; setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime())); }
 
         function setDayType(type) {
             if (entryLocked) return;
@@ -636,10 +564,7 @@
         function generateTasks() {
             if (!dbData || !dbData.ui) return;
             const dailyList = document.getElementById('dailyTasks'); const weeklyList = document.getElementById('weeklyTasks');
-            const dateNumber = activeEntryDate.getDate();
-            const currentMonth = activeEntryDate.getMonth();
-            const currentYear = activeEntryDate.getFullYear();
-            
+            const dateNumber = activeEntryDate.getDate(); const currentMonth = activeEntryDate.getMonth(); const currentYear = activeEntryDate.getFullYear();
             dailyList.innerHTML = ""; weeklyList.innerHTML = "";
 
             if (currentDayType !== 'Travel') {
@@ -665,31 +590,19 @@
             if (dbData.logs) {
                 dbData.logs.forEach(rawLog => {
                     if (isSettingsLog(rawLog)) return;
-                    const getVal = (key) => {
-                        const found = Object.keys(rawLog).find(k => k.toLowerCase().trim() === key.toLowerCase());
-                        return found ? rawLog[found] : undefined;
-                    };
-
-                    let dateStr = getVal('Date');
-                    if (!dateStr) return; 
-                    
+                    const getVal = (key) => { const found = Object.keys(rawLog).find(k => k.toLowerCase().trim() === key.toLowerCase()); return found ? rawLog[found] : undefined; };
+                    let dateStr = getVal('Date'); if (!dateStr) return; 
                     if (typeof dateStr === 'string') dateStr = dateStr.replace(/^[A-Za-z]+,\s*/, '');
                     let logDate = new Date(dateStr);
-                    
                     if (!isNaN(logDate)) {
                         if (getISOWeekKey(logDate) === currentWeekKey()) {
                             if (String(getVal('Laundry_Done')).toLowerCase() === "true") doneLaundry = true;
                             if (String(getVal('DeepClean_Done')).toLowerCase() === "true") doneClean = true;
                             if (String(getVal('HabitCheck_Done')).toLowerCase() === "true") doneHabitCheck = true; 
                         }
-                        
                         if (logDate.getMonth() === currentMonth && logDate.getFullYear() === currentYear) {
-                            
                             let savingsVal = getVal('Savings_KRW');
-                            if (String(savingsVal).toLowerCase() === "true" || String(savingsVal).toLowerCase() === "done" || Number(savingsVal) > 0) {
-                                doneSavings = true;
-                            }
-                            
+                            if (String(savingsVal).toLowerCase() === "true" || String(savingsVal).toLowerCase() === "done" || Number(savingsVal) > 0) doneSavings = true;
                             let beautyVal = getVal('Beauty_Done');
                             if (beautyVal && typeof beautyVal === 'string') {
                                 if (beautyVal.includes("HaircutDone")) isHairDone = true;
@@ -704,11 +617,8 @@
 
             let weeklyTasksAdded = 0;
             const laundryTaskName = dbData.ui['task_laundry'] || "Weekly Laundry 🧺";
-            if (doneLaundry) {
-                weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laundryTaskName} (Completed this week)</span></li>`;
-            } else {
-                weeklyList.innerHTML += createTaskHTML("laundry", laundryTaskName);
-            }
+            if (doneLaundry) weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laundryTaskName} (Completed this week)</span></li>`;
+            else weeklyList.innerHTML += createTaskHTML("laundry", laundryTaskName);
             weeklyTasksAdded++;
 
             const cleanTaskName = dbData.ui['task_clean'] || "Deep Clean";
@@ -722,115 +632,51 @@
             weeklyTasksAdded++;
             
             let savingsTaskName = dbData.ui['task_savings'] || "Monthly Savings";
-            if (doneSavings) {
-                weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${savingsTaskName} (Completed)</span></li>`;
-                weeklyTasksAdded++;
-            } else {
-                if (dateNumber >= 12) {
-                    weeklyList.innerHTML += `<li class="task-item overdue" id="item_savings">
-                        <input type="checkbox" id="savings" onchange="styleCheckbox(this, 'item_savings')">
-                        <span class="task-text">🚨 ${savingsTaskName} (OVERDUE!)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                } else {
-                    weeklyList.innerHTML += `<li class="task-item upcoming">
-                        <span class="task-text">⏳ ${savingsTaskName} (Upcoming on 12th)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                }
+            if (doneSavings) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${savingsTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
+            else {
+                if (dateNumber >= 12) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_savings"><input type="checkbox" id="savings" onchange="styleCheckbox(this, 'item_savings')"><span class="task-text">🚨 ${savingsTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${savingsTaskName} (Upcoming on 12th)</span></li>`; weeklyTasksAdded++; }
             }
 
             let hairTaskName = dbData.ui['task_beauty_hair'] || "Haircut";
-            if (isHairDone) {
-                weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${hairTaskName} (Completed)</span></li>`;
-                weeklyTasksAdded++;
-            } else {
-                if (dateNumber >= 17) {
-                    weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_hair">
-                        <input type="checkbox" id="beauty_hair" onchange="styleCheckbox(this, 'item_beauty_hair')">
-                        <span class="task-text">🚨 ${hairTaskName} (OVERDUE!)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                } else {
-                    weeklyList.innerHTML += `<li class="task-item upcoming">
-                        <span class="task-text">⏳ ${hairTaskName} (Upcoming on 17th)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                }
+            if (isHairDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${hairTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
+            else {
+                if (dateNumber >= 17) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_hair"><input type="checkbox" id="beauty_hair" onchange="styleCheckbox(this, 'item_beauty_hair')"><span class="task-text">🚨 ${hairTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${hairTaskName} (Upcoming on 17th)</span></li>`; weeklyTasksAdded++; }
             }
 
             let browsTaskName = dbData.ui['task_beauty_brows'] || "Eyebrow Waxing & Bleach";
-            if (isBrowsDone) {
-                weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${browsTaskName} (Completed)</span></li>`;
-                weeklyTasksAdded++;
-            } else {
-                if (dateNumber >= 17) {
-                    weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_brows">
-                        <input type="checkbox" id="beauty_brows" onchange="styleCheckbox(this, 'item_beauty_brows')">
-                        <span class="task-text">🚨 ${browsTaskName} (OVERDUE!)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                } else {
-                    weeklyList.innerHTML += `<li class="task-item upcoming">
-                        <span class="task-text">⏳ ${browsTaskName} (Upcoming on 17th)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                }
+            if (isBrowsDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${browsTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
+            else {
+                if (dateNumber >= 17) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_brows"><input type="checkbox" id="beauty_brows" onchange="styleCheckbox(this, 'item_beauty_brows')"><span class="task-text">🚨 ${browsTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${browsTaskName} (Upcoming on 17th)</span></li>`; weeklyTasksAdded++; }
             }
 
             let potenzaTaskName = dbData.ui['task_beauty_potenza'] || "Potenza";
-            if (isPotenzaDone) {
-                weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${potenzaTaskName} (Completed)</span></li>`;
-                weeklyTasksAdded++;
-            } else {
-                if (dateNumber >= 8) {
-                    weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_potenza">
-                        <input type="checkbox" id="beauty_potenza" onchange="styleCheckbox(this, 'item_beauty_potenza')">
-                        <span class="task-text">🚨 ${potenzaTaskName} (OVERDUE!)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                } else {
-                    weeklyList.innerHTML += `<li class="task-item upcoming">
-                        <span class="task-text">⏳ ${potenzaTaskName} (Upcoming on 8th)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                }
+            if (isPotenzaDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${potenzaTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
+            else {
+                if (dateNumber >= 8) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_potenza"><input type="checkbox" id="beauty_potenza" onchange="styleCheckbox(this, 'item_beauty_potenza')"><span class="task-text">🚨 ${potenzaTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${potenzaTaskName} (Upcoming on 8th)</span></li>`; weeklyTasksAdded++; }
             }
 
             let laserTaskName = "Laser Hair Removal";
-            if (isLaserDone) {
-                weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laserTaskName} (Completed)</span></li>`;
-                weeklyTasksAdded++;
-            } else {
-                if (dateNumber >= 21) {
-                    weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_laser">
-                        <input type="checkbox" id="beauty_laser" onchange="styleCheckbox(this, 'item_beauty_laser')">
-                        <span class="task-text">🚨 ${laserTaskName} (OVERDUE!)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                } else {
-                    weeklyList.innerHTML += `<li class="task-item upcoming">
-                        <span class="task-text">⏳ ${laserTaskName} (Upcoming on 21st)</span>
-                    </li>`;
-                    weeklyTasksAdded++;
-                }
+            if (isLaserDone) { weeklyList.innerHTML += `<li class="task-item completed"><span class="task-text">✨ ${laserTaskName} (Completed)</span></li>`; weeklyTasksAdded++; }
+            else {
+                if (dateNumber >= 21) { weeklyList.innerHTML += `<li class="task-item overdue" id="item_beauty_laser"><input type="checkbox" id="beauty_laser" onchange="styleCheckbox(this, 'item_beauty_laser')"><span class="task-text">🚨 ${laserTaskName} (OVERDUE!)</span></li>`; weeklyTasksAdded++; }
+                else { weeklyList.innerHTML += `<li class="task-item upcoming"><span class="task-text">⏳ ${laserTaskName} (Upcoming on 21st)</span></li>`; weeklyTasksAdded++; }
             }
             
             if (weeklyTasksAdded === 0) { weeklyList.innerHTML = `<li style="text-align:center; color: var(--ink-soft); font-weight:800; font-size:14px; padding: 10px;">✨ All weekly & monthly quests complete! ✨</li>`; }
             
-            attachSoundEvents();
-            setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
+            attachSoundEvents(); setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
         }
 
-        function createTaskHTML(id, text) {
-            return `<li class="task-item" id="item_${id}"><input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')"><span class="task-text">${text || 'Task'}</span></li>`;
-        }
+        function createTaskHTML(id, text) { return `<li class="task-item" id="item_${id}"><input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')"><span class="task-text">${text || 'Task'}</span></li>`; }
 
         function styleCheckbox(checkbox, itemId) {
             if (entryLocked) { checkbox.checked = !checkbox.checked; return; }
             if(checkbox.checked) {
-                playPixelSound('coin');
-                document.getElementById(itemId).classList.add('completed');
+                playPixelSound('coin'); document.getElementById(itemId).classList.add('completed');
                 const cheers = ['✨ Quest cleared!', '🌟 Tiny win unlocked!', '🛸 Cosmic progress!', '💖 You did that!', '🏆 Level up!'];
                 showToast(cheers[Math.floor(Math.random() * cheers.length)]);
             } else { document.getElementById(itemId).classList.remove('completed'); }
@@ -840,80 +686,52 @@
             if (entryLocked) return;
             
             if (currentDayType !== 'Travel') {
-                const gym = document.getElementById('gym')?.checked;
-                const abs = document.getElementById('abs')?.checked;
-                const edit = document.getElementById('edit')?.checked;
-                const story = document.getElementById('story')?.checked;
-                const motivation = document.getElementById('motivation')?.checked;
-                const care = document.getElementById('care')?.checked;
+                const gym = document.getElementById('gym')?.checked; const abs = document.getElementById('abs')?.checked;
+                const edit = document.getElementById('edit')?.checked; const story = document.getElementById('story')?.checked;
+                const motivation = document.getElementById('motivation')?.checked; const care = document.getElementById('care')?.checked;
                 const message = document.getElementById('message')?.checked;
                 
                 if (!gym || !abs || !edit || !story || !motivation || !care || !message) {
-                    alert("🌱 Little habits matter! This will shape your future. Discipline is key. Please check off all daily quests! No excuses allowed. 🛑");
-                    return;
+                    alert("🌱 Little habits matter! This will shape your future. Discipline is key. Please check off all daily quests! No excuses allowed. 🛑"); return;
                 }
             } else {
-                const walk = document.getElementById('travel_walk')?.checked;
-                const film = document.getElementById('travel_film')?.checked;
-                const message = document.getElementById('message')?.checked;
-                const abs = document.getElementById('abs')?.checked;
-                
+                const walk = document.getElementById('travel_walk')?.checked; const film = document.getElementById('travel_film')?.checked;
+                const message = document.getElementById('message')?.checked; const abs = document.getElementById('abs')?.checked;
                 if (!walk || !film || !message || !abs) {
-                    alert("🌱 Even on vacation, little habits matter! This will shape your future. Discipline is key. No excuses allowed. 🛑");
-                    return;
+                    alert("🌱 Even on vacation, little habits matter! This will shape your future. Discipline is key. No excuses allowed. 🛑"); return;
                 }
             }
 
             if (currentDayType === 'Work') {
-                const now = new Date();
-                const endInput = document.getElementById('endTime').value.split(":");
-                const startInput = document.getElementById('startTime').value.split(":");
-                
-                const endTime = new Date(); endTime.setHours(endInput[0], endInput[1], 0);
-                const startTime = new Date(); startTime.setHours(startInput[0], startInput[1], 0);
-                
+                const now = new Date(); const endInput = document.getElementById('endTime').value.split(":"); const startInput = document.getElementById('startTime').value.split(":");
+                const endTime = new Date(); endTime.setHours(endInput[0], endInput[1], 0); const startTime = new Date(); startTime.setHours(startInput[0], startInput[1], 0);
                 const todayStart = startOfDay(new Date());
 
                 if (activeEntryDate < todayStart) {
-                    const hoursWorked = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(1);
-                    alert(`🎉 Congrats, thank you for working! You worked hard for ${hoursWorked} hours! Time to rest!`);
+                    const hoursWorked = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(1); alert(`🎉 Congrats, thank you for working! You worked hard for ${hoursWorked} hours! Time to rest!`);
                 } else {
                     if (now >= endTime) {
-                        const hoursWorked = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(1);
-                        alert(`🎉 Congrats, thank you for working! You've crushed it and worked ${hoursWorked} hours today. Time to rest!`);
+                        const hoursWorked = ((endTime - startTime) / (1000 * 60 * 60)).toFixed(1); alert(`🎉 Congrats, thank you for working! You've crushed it and worked ${hoursWorked} hours today. Time to rest!`);
                     } else {
-                        const hoursLeft = ((endTime - now) / (1000 * 60 * 60)).toFixed(1);
-                        alert(`💪 You got this! ${hoursLeft} more hours before leaving the office. Keep that main character energy going!`);
+                        const hoursLeft = ((endTime - now) / (1000 * 60 * 60)).toFixed(1); alert(`💪 You got this! ${hoursLeft} more hours before leaving the office. Keep that main character energy going!`);
                     }
                 }
             }
 
             showWorkCelebration();
-
-            const btn = document.getElementById('btnComplete');
-            btn.disabled = true;
-            btn.innerText = "Already Completed Today! ✨";
-
-            playPixelSound('success');
-            flyUFO();
-            showToast('🛸 Day complete! Galaxy streak saved!');
+            const btn = document.getElementById('btnComplete'); btn.disabled = true; btn.innerText = "Already Completed Today! ✨";
+            playPixelSound('success'); flyUFO(); showToast('🛸 Day complete! Galaxy streak saved!');
             confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#ff9aab', '#111111', '#555555', '#cccccc'] });
             document.getElementById('loading').style.display = 'block';
 
-            const isLaundryDone = document.getElementById('laundry') ? document.getElementById('laundry').checked : false;
-            const isCleanDone = document.getElementById('clean') ? document.getElementById('clean').checked : false;
-            const isHabitCheckDone = document.getElementById('habit_check') ? document.getElementById('habit_check').checked : false;
-            const isSavingsDone = document.getElementById('savings') ? document.getElementById('savings').checked : false;
-            const isHairChecked = document.getElementById('beauty_hair') ? document.getElementById('beauty_hair').checked : false;
-            const isBrowsChecked = document.getElementById('beauty_brows') ? document.getElementById('beauty_brows').checked : false;
-            const isLaserChecked = document.getElementById('beauty_laser') ? document.getElementById('beauty_laser').checked : false;
-            const isPotenzaChecked = document.getElementById('beauty_potenza') ? document.getElementById('beauty_potenza').checked : false;
+            const isLaundryDone = document.getElementById('laundry')?.checked; const isCleanDone = document.getElementById('clean')?.checked;
+            const isHabitCheckDone = document.getElementById('habit_check')?.checked; const isSavingsDone = document.getElementById('savings')?.checked;
+            const isHairChecked = document.getElementById('beauty_hair')?.checked; const isBrowsChecked = document.getElementById('beauty_brows')?.checked;
+            const isLaserChecked = document.getElementById('beauty_laser')?.checked; const isPotenzaChecked = document.getElementById('beauty_potenza')?.checked;
 
             let beautyArr = [];
-            if (isLaserChecked) beautyArr.push("LaserDone");
-            if (isPotenzaChecked) beautyArr.push("PotenzaDone"); 
-            if (isHairChecked) beautyArr.push("HaircutDone"); 
-            if (isBrowsChecked) beautyArr.push("BrowsDone");
+            if (isLaserChecked) beautyArr.push("LaserDone"); if (isPotenzaChecked) beautyArr.push("PotenzaDone"); 
+            if (isHairChecked) beautyArr.push("HaircutDone"); if (isBrowsChecked) beautyArr.push("BrowsDone");
             let beautyStatus = beautyArr.length > 0 ? beautyArr.join(", ") : false;
             
             const payload = {
@@ -923,26 +741,22 @@
                 Gym_10min: document.getElementById('gym') ? document.getElementById('gym').checked : false,
                 Abs_10min: document.getElementById('abs') ? document.getElementById('abs').checked : false,
                 Edit_2min: document.getElementById('edit') ? document.getElementById('edit').checked : false,
+                Story_5min: document.getElementById('story') ? document.getElementById('story').checked : false,
                 Video_Watched: document.getElementById('motivation') ? document.getElementById('motivation').checked : false,
+                Care_Done: document.getElementById('care') ? document.getElementById('care').checked : false,
+                Message_Sent: document.getElementById('message') ? document.getElementById('message').checked : false,
                 Travel_Cardio: document.getElementById('travel_walk') ? document.getElementById('travel_walk').checked : false,
                 Travel_Film: document.getElementById('travel_film') ? document.getElementById('travel_film').checked : false,
                 Laundry_Done: isLaundryDone, DeepClean_Done: isCleanDone, HabitCheck_Done: isHabitCheckDone, 
-                Beauty_Done: beautyStatus, 
-                Savings_KRW: isSavingsDone,
+                Beauty_Done: beautyStatus, Savings_KRW: isSavingsDone,
                 Countdown_Settings: JSON.stringify(workSettings)
             };
 
             if (!dbData.logs) dbData.logs = [];
             dbData.logs.push({ 
-                Date: payload.Date, 
-                Laundry_Done: payload.Laundry_Done, 
-                DeepClean_Done: payload.DeepClean_Done, 
-                HabitCheck_Done: payload.HabitCheck_Done,
-                Savings_KRW: payload.Savings_KRW,
-                Beauty_Done: payload.Beauty_Done,
-                Travel_Cardio: payload.Travel_Cardio,
-                Travel_Film: payload.Travel_Film,
-                Abs_10min: payload.Abs_10min
+                Date: payload.Date, Laundry_Done: payload.Laundry_Done, DeepClean_Done: payload.DeepClean_Done, 
+                HabitCheck_Done: payload.HabitCheck_Done, Savings_KRW: payload.Savings_KRW, Beauty_Done: payload.Beauty_Done,
+                Travel_Cardio: payload.Travel_Cardio, Travel_Film: payload.Travel_Film, Abs_10min: payload.Abs_10min, Countdown_Settings: payload.Countdown_Settings
             });
             
             try {
@@ -950,29 +764,18 @@
                 document.getElementById('loading').innerText = '✨ Saved to the Galaxy! ✨';
                 setTimeout(() => {
                     document.getElementById('loading').style.display = 'none';
-                    const completedDate = activeEntryDate.getTime();
-                    pendingDates = pendingDates.filter(d => d.getTime() !== completedDate);
-                    const today = startOfDay(new Date());
-                    activeEntryDate = pendingDates.length ? pendingDates[0] : today;
-                    currentDayType = 'Work';
-                    setupDate();
-                    document.getElementById('startTime').value = '09:00';
-                    document.getElementById('endTime').value = '19:00';
-                    document.getElementById('btnWork').classList.add('active');
-                    document.getElementById('btnOff').classList.remove('active');
-                    document.getElementById('btnTravel').classList.remove('active');
-                    document.getElementById('timeInputs').style.display = 'block';
-                    generateMeals();
-                    generateTasks();
-                    checkIfAlreadyCompleted();
+                    const completedDate = activeEntryDate.getTime(); pendingDates = pendingDates.filter(d => d.getTime() !== completedDate);
+                    const today = startOfDay(new Date()); activeEntryDate = pendingDates.length ? pendingDates[0] : today;
+                    currentDayType = 'Work'; setupDate(); document.getElementById('startTime').value = '09:00'; document.getElementById('endTime').value = '19:00';
+                    document.getElementById('btnWork').classList.add('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
+                    document.getElementById('timeInputs').style.display = 'block'; generateMeals(); generateTasks(); checkIfAlreadyCompleted();
                     if (pendingDates.length) showToast(`⚠️ Next catch-up day: ${formatEntryDate(activeEntryDate)}`);
                 }, 2000);
             } catch(e) { document.getElementById('loading').innerText = "Error saving. Connection lost in space."; }
         }
 
         document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeWorkSettings(); closeWorkCelebration(); } });
-        updateWorkCountdownCard();
-        setupDate(); setDayType('Work'); fetchDatabase(); 
+        updateWorkCountdownCard(); setupDate(); setDayType('Work'); fetchDatabase(); 
     </script>
 </body>
 </html>

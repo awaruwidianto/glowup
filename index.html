@@ -149,6 +149,16 @@
         .section-label-special { background: #fbfbfd; color: var(--ink); }
 
         .tracker-box { background: #fbfbfd; padding: 11px; border-radius: 14px; border: 1px solid var(--line); margin-bottom: 16px; display: grid; gap: 10px; }
+        .travel-trackers { display: none; }
+        .travel-trackers.show { display: grid; }
+        .travel-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+        .travel-check { position: relative; }
+        .travel-check input { position: absolute; opacity: 0; pointer-events: none; }
+        .travel-check label { min-height: 42px; display: flex; align-items: center; justify-content: center; padding: 8px 10px; border: 1px solid var(--line-strong); border-radius: 10px; background: #fff; color: var(--ink); font-family: var(--font-title); font-size: 11px; font-weight: 900; text-align: center; cursor: pointer; transition: all .18s ease; }
+        .travel-check input:checked + label { background: var(--ink); color: #fff; border-color: var(--ink); box-shadow: 0 5px 12px rgba(23,23,27,.12); }
+        .travel-check label:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
+        body.travel-mode .content-grid { grid-template-columns: 1fr !important; }
+        body.travel-mode .right-col { display: none; }
         .tracker-row { display: flex; flex-direction: column; gap: 5px; }
         .tracker-row label { font-weight: 900; font-size: 11px; color: var(--ink); }
         .tracker-row select, .tracker-row textarea { width: 100%; padding: 9px 10px; border: 1px solid var(--line-strong); border-radius: 10px; font-family: var(--font-title); font-size: 12px; font-weight: 700; color: var(--ink); background: white; resize: vertical; outline: none; }
@@ -358,6 +368,22 @@
                                 <div class="food-options">
                                     <div class="radio-btn"><input type="radio" id="h_opt1" name="foodHealth" value="Healthy"><label for="h_opt1" id="label_h_opt1">Healthy</label></div>
                                     <div class="radio-btn"><input type="radio" id="h_opt2" name="foodHealth" value="Processed"><label for="h_opt2" id="label_h_opt2">Processed</label></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="travel-trackers" id="travelTrackers">
+                            <div class="window-label" id="ui_travel_trackers_title">✈️ Travel Trackers</div>
+                            <div class="tracker-box">
+                                <div class="travel-checks">
+                                    <div class="travel-check">
+                                        <input type="checkbox" id="d8" onchange="styleTravelCheckbox(this)">
+                                        <label for="d8" id="travelLabel8">🚶 Aesthetic Walk</label>
+                                    </div>
+                                    <div class="travel-check">
+                                        <input type="checkbox" id="d9" onchange="styleTravelCheckbox(this)">
+                                        <label for="d9" id="travelLabel9">🎥 Aesthetic Filming</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -659,6 +685,12 @@
             setUI('ui_weekly_quests_title', 'UI_Weekly_Quests', '📅 WEEKLY QUESTS');
             setUI('ui_monthly_quests_title', 'UI_Monthly_Quests', '🌙 MONTHLY QUESTS');
             setUI('ui_daily_trackers_title', 'UI_Trackers_Title', '🧠 Daily Trackers');
+            setUI('ui_travel_trackers_title', 'UI_Travel_Trackers', '✈️ Travel Trackers');
+
+            const travel8Text = (c['Daily_8'] && c['Daily_8'].text) ? c['Daily_8'].text : 'Aesthetic Walk';
+            const travel9Text = (c['Daily_9'] && c['Daily_9'].text) ? c['Daily_9'].text : 'Aesthetic Filming';
+            document.getElementById('travelLabel8').innerText = `🚶 ${travel8Text}`;
+            document.getElementById('travelLabel9').innerText = `🎥 ${travel9Text}`;
             
             setUI('ui_settings_title', 'UI_Settings_Title', '🌈 Settings & Countdowns');
             setUI('btn_mobile_mode', 'UI_Btn_Mobile', '📱 Mobile Mode');
@@ -737,6 +769,11 @@
             document.getElementById('btnWork').classList.remove('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
             document.getElementById('btn' + type).classList.add('active');
             document.getElementById('timeInputs').style.display = (type === 'Work') ? 'block' : 'none';
+
+            const isTravel = type === 'Travel';
+            document.getElementById('bodyMain').classList.toggle('travel-mode', isTravel);
+            document.getElementById('travelTrackers').classList.toggle('show', isTravel);
+
             generateTasks();
         }
 
@@ -754,6 +791,14 @@
             
             dailyList.innerHTML = ""; weeklyList.innerHTML = ""; monthlyList.innerHTML = "";
 
+            // Travel mode is tracker-only: no Daily / Weekly / Monthly quests are required.
+            // Daily_8 and Daily_9 are reserved for the travel trackers below.
+            if (currentDayType === 'Travel') {
+                attachSoundEvents();
+                setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
+                return;
+            }
+
             let doneWeekly = {}; let doneMonthly = {};
             if (dbData.logs) {
                 dbData.logs.forEach(log => {
@@ -768,6 +813,8 @@
             }
 
             for(let i=1; i<=10; i++) {
+                // Daily_8 and Daily_9 are used only as Travel trackers.
+                if (i === 8 || i === 9) continue;
                 const key = 'Daily_' + i;
                 if(c[key] && c[key].text) {
                     let extra = (i === 2) ? `<a href="https://youtu.be/hWew6ls0Vbs" target="_blank" style="text-decoration:none; background:#fff; color:#111; padding:4px 8px; border-radius:10px; font-size:11px; font-weight:900; border:2px solid #111; margin-left:8px; flex-shrink:0; box-shadow:0 3px 0 #111;" onclick="event.stopPropagation()">▶️ Play</a>` : "";
@@ -824,6 +871,12 @@
             if(checkbox.checked) {
                 playPixelSound('coin'); document.getElementById(itemId).classList.add('completed');
             } else { document.getElementById(itemId).classList.remove('completed'); }
+        }
+
+        function styleTravelCheckbox(checkbox) {
+            if (entryLocked) { checkbox.checked = !checkbox.checked; return; }
+            if (checkbox.checked) playPixelSound('coin');
+            updateLiveFeedback();
         }
 
         function generateAutomatedFeedback(payload) {
@@ -885,7 +938,10 @@
             document.getElementById('trackAlcohol').value = document.getElementById('opt_alc_1').value;
             document.getElementById('trackJournal').value = ""; document.getElementById('feedbackDisplay').innerText = "";
             document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+            document.getElementById('d8').checked = false; document.getElementById('d9').checked = false;
             
+            document.getElementById('bodyMain').classList.remove('travel-mode');
+            document.getElementById('travelTrackers').classList.remove('show');
             document.getElementById('btnWork').classList.add('active'); document.getElementById('btnOff').classList.remove('active'); document.getElementById('btnTravel').classList.remove('active');
             document.getElementById('timeInputs').style.display = 'block'; generateTasks(); checkIfAlreadyCompleted();
         }
@@ -898,6 +954,7 @@
             let allDailiesChecked = true;
             let totalExp = 0;
             const dailyCheckboxes = document.querySelectorAll('#dailyTasks input[type="checkbox"]');
+            // Travel mode intentionally has zero required quest checkboxes.
             dailyCheckboxes.forEach(cb => { 
                 if (!cb.checked) allDailiesChecked = false; 
                 else totalExp += 10; 

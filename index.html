@@ -74,6 +74,36 @@
         .ufo-loader-body span { width: 7px; height: 7px; border-radius: 50%; background: #f4f4f4; animation: ufoLight 1s ease-in-out infinite alternate; }
         .ufo-loader-beam { position:absolute; left:31px; top:78px; width:54px; height:42px; background: linear-gradient(180deg, rgba(244,154,170,.22), rgba(0,0,0,0)); clip-path: polygon(28% 0,72% 0,100% 100%,0 100%); animation: beamPulse 1.4s ease-in-out infinite; }
 
+        /* Opening UFO animation restored: fly in first, then hover while the database syncs. */
+        .ufo-loader {
+            opacity: 0;
+            animation:
+                ufoOpeningFlight 1.35s cubic-bezier(.22,.78,.24,1) 0s 1 both,
+                ufoLoaderFloat 2.2s ease-in-out 1.35s infinite;
+            will-change: transform, opacity;
+        }
+        .ufo-loader-body span:nth-child(2) { animation-delay: .18s; }
+        .ufo-loader-body span:nth-child(3) { animation-delay: .36s; }
+        @keyframes ufoOpeningFlight {
+            0%   { opacity:0; transform:translate3d(-52vw, 28px, 0) rotate(-12deg) scale(.78); }
+            18%  { opacity:1; }
+            58%  { opacity:1; transform:translate3d(7vw, -12px, 0) rotate(5deg) scale(1.05); }
+            78%  { transform:translate3d(-2vw, 3px, 0) rotate(-2deg) scale(.98); }
+            100% { opacity:1; transform:translate3d(0, 0, 0) rotate(0deg) scale(1); }
+        }
+        @keyframes ufoLoaderFloat {
+            0%,100% { transform:translate3d(0,0,0) rotate(-1.5deg); }
+            50%     { transform:translate3d(0,-10px,0) rotate(1.5deg); }
+        }
+        @keyframes ufoLight {
+            from { opacity:.35; transform:scale(.82); box-shadow:0 0 0 rgba(244,154,170,0); }
+            to   { opacity:1; transform:scale(1.15); box-shadow:0 0 12px rgba(244,154,170,.55); }
+        }
+        @keyframes beamPulse {
+            0%,100% { opacity:.28; transform:scaleX(.84); }
+            50%     { opacity:.82; transform:scaleX(1.08); }
+        }
+
         .galaxy-stage {
             position: relative;
             z-index: 1;
@@ -542,6 +572,12 @@
         function getISOWeekKey(d = new Date()) { const date = new Date(d.getTime()); date.setHours(0, 0, 0, 0); date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7); const week1 = new Date(date.getFullYear(), 0, 4); const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7); return `${date.getFullYear()}_W${weekNum}`; }
 
         const API_URL = "https://script.google.com/macros/s/AKfycbzD2H4bXmNc3IJSg2IkvP0R84CRitKcoNU1898tReV8QeNdddg483ej09M8tIZBeo_pTQ/exec"; 
+        const DB_CACHE_KEY = 'glowUpDatabaseCache_v1';
+        const DB_CACHE_META_KEY = 'glowUpDatabaseCacheMeta_v1';
+        const LIVE_FETCH_TIMEOUT_MS = 9000;
+        const OPENING_UFO_MIN_MS = 1450;
+        const appBootStartedAt = performance.now();
+        let userHasInteracted = false;
         
         let currentDayType = 'Work';
         let dbData = null; 
@@ -652,24 +688,124 @@
         }
 
         document.addEventListener("DOMContentLoaded", () => { 
-            setTimeout(() => { document.getElementById("galaxy-loader").classList.add("hidden"); attachSoundEvents(); }, 1800); 
+            attachSoundEvents();
             document.querySelectorAll('input[type="radio"], select').forEach(el => { el.addEventListener('change', updateLiveFeedback); });
+            document.querySelectorAll('.screen-content input, .screen-content select, .screen-content textarea').forEach(el => {
+                el.addEventListener('input', () => { userHasInteracted = true; }, { passive:true });
+                el.addEventListener('change', () => { userHasInteracted = true; }, { passive:true });
+            });
+            ['btnWork','btnOff','btnTravel'].forEach(id => document.getElementById(id)?.addEventListener('click', () => { userHasInteracted = true; }));
         });
         
         function setupDate() { document.getElementById('dateDisplay').innerText = formatEntryDate(activeEntryDate); updateCatchupUI(); updateWorkCountdownCard(); }
 
-        async function fetchDatabase() {
+        function hideOpeningLoader() {
+            const loader = document.getElementById('galaxy-loader');
+            if (!loader || loader.classList.contains('hidden')) return;
+            const elapsed = performance.now() - appBootStartedAt;
+            const wait = Math.max(0, OPENING_UFO_MIN_MS - elapsed);
+            setTimeout(() => { loader.classList.add('hidden'); attachSoundEvents(); }, wait);
+        }
+
+        function loadCachedDatabase() {
             try {
-                const response = await fetch(API_URL + "?t=" + new Date().getTime());
-                dbData = await response.json(); 
-                
-                if(dbData.logs && dbData.logs.length) {
-                    const lastRow = dbData.logs[dbData.logs.length-1];
-                    if(lastRow.Countdown_Settings) { try { const parsed = JSON.parse(lastRow.Countdown_Settings); if(Array.isArray(parsed)) { workSettings = parsed; persistWorkSettings(); } } catch(e) {} }
+                const raw = localStorage.getItem(DB_CACHE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                return parsed && typeof parsed === 'object' && parsed.config ? parsed : null;
+            } catch (e) {
+                console.warn('Database cache could not be read', e);
+                return null;
+            }
+        }
+
+        function saveCachedDatabase(data) {
+            if (!data || typeof data !== 'object') return;
+            try {
+                localStorage.setItem(DB_CACHE_KEY, JSON.stringify(data));
+                localStorage.setItem(DB_CACHE_META_KEY, String(Date.now()));
+            } catch (e) {
+                console.warn('Database cache could not be saved', e);
+            }
+        }
+
+        function applyDatabaseToUI(data, { allowFullRender = true } = {}) {
+            if (!data || typeof data !== 'object') return;
+            dbData = data;
+
+            if (allowFullRender) {
+                if (dbData.logs && dbData.logs.length) {
+                    const lastRow = dbData.logs[dbData.logs.length - 1];
+                    if (lastRow.Countdown_Settings) {
+                        try {
+                            const parsed = JSON.parse(lastRow.Countdown_Settings);
+                            if (Array.isArray(parsed)) { workSettings = parsed; persistWorkSettings(); }
+                        } catch (e) {}
+                    }
                 }
-                
-                buildPendingDates(); setupDate(); applyConfigText(); generateTasks(); checkIfAlreadyCompleted();
-            } catch (error) { console.error("Error fetching data", error); }
+                buildPendingDates();
+                setupDate();
+                applyConfigText();
+                generateTasks();
+            } else {
+                // A live refresh finished after the user already started filling the page.
+                // Keep the selected date and every current control untouched.
+                updateWorkCountdownCard();
+                checkIfAlreadyCompleted();
+            }
+        }
+
+        async function fetchLiveDatabase() {
+            let lastError = null;
+            for (let attempt = 0; attempt < 2; attempt++) {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), LIVE_FETCH_TIMEOUT_MS);
+                try {
+                    const response = await fetch(API_URL, { cache:'no-store', signal:controller.signal });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const data = await response.json();
+                    if (!data || typeof data !== 'object' || !data.config) throw new Error('Invalid database response');
+                    return data;
+                } catch (error) {
+                    lastError = error;
+                    if (attempt === 0) await new Promise(resolve => setTimeout(resolve, 450));
+                } finally {
+                    clearTimeout(timer);
+                }
+            }
+            throw lastError || new Error('Database request failed');
+        }
+
+        async function fetchDatabase() {
+            const cached = loadCachedDatabase();
+            let renderedCache = false;
+
+            // Cache-first: show the last successful database immediately instead of waiting on Google Sheets.
+            if (cached) {
+                applyDatabaseToUI(cached);
+                renderedCache = true;
+                hideOpeningLoader();
+            }
+
+            try {
+                const fresh = await fetchLiveDatabase();
+                saveCachedDatabase(fresh);
+                applyDatabaseToUI(fresh, { allowFullRender: !(renderedCache && userHasInteracted) });
+                hideOpeningLoader();
+            } catch (error) {
+                console.error('Error fetching live database', error);
+                hideOpeningLoader();
+
+                if (renderedCache) {
+                    showToast('Using saved data - live sync is taking a break.');
+                } else {
+                    const loading = document.getElementById('loading');
+                    loading.style.display = 'block';
+                    loading.innerText = 'Could not reach the Galaxy Sheet. Check your connection and refresh.';
+                    const btn = document.getElementById('btnComplete');
+                    if (btn) btn.disabled = true;
+                }
+            }
         }
 
         function applyConfigText() {
@@ -999,6 +1135,7 @@
             
             try {
                 await fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                saveCachedDatabase(dbData);
                 setTimeout(() => {
                     document.getElementById('loading').style.display = 'none';
                     triggerGameSummary(payload, totalExp);

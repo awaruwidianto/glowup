@@ -13,7 +13,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <!-- Firebase SDK (Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
     
     <style>
         :root {
@@ -74,7 +79,6 @@
         .ufo-loader-body span { width: 7px; height: 7px; border-radius: 50%; background: #f4f4f4; animation: ufoLight 1s ease-in-out infinite alternate; }
         .ufo-loader-beam { position:absolute; left:31px; top:78px; width:54px; height:42px; background: linear-gradient(180deg, rgba(244,154,170,.22), rgba(0,0,0,0)); clip-path: polygon(28% 0,72% 0,100% 100%,0 100%); animation: beamPulse 1.4s ease-in-out infinite; }
 
-        /* Opening UFO animation restored: fly in first, then hover while the database syncs. */
         .ufo-loader {
             opacity: 0;
             animation:
@@ -305,13 +309,6 @@
             .chapter-fields { grid-template-columns:1fr; }
             .chapter-fields .settings-field:last-child { grid-column:auto; }
         }
-
-        @media (max-width: 360px) {
-            .day-selector { flex-direction: column; }
-            .countdown-card.show { grid-template-columns:1fr; }
-            .food-options { gap:5px; }
-            .radio-btn { min-width: calc(50% - 5px); }
-        }
     </style>
 </head>
 <body id="bodyMain">
@@ -326,11 +323,6 @@
 
     <div class="game-toast" id="gameToast"></div>
     <div class="ufo-celebration" id="ufoCelebration"><div class="ufo-mini-dome"></div><div class="ufo-mini-body"></div><div class="ufo-mini-beam"></div></div>
-
-    <div class="cosmic-decoration">
-        <div class="planet one"></div>
-        <div class="planet two"></div>
-    </div>
 
     <main class="galaxy-stage" id="galaxy-stage">
         <div class="app-shell" id="app-shell">
@@ -364,7 +356,6 @@
                 </div>
 
                 <div class="content-grid">
-                    <!-- Right Column (Quests) is now FIRST in HTML so it stacks on top on mobile -->
                     <div class="right-col">
                         <div class="window-label" id="ui_daily_quests_title">🏆 Daily Quests</div>
                         
@@ -381,7 +372,6 @@
                         </div>
                     </div>
 
-                    <!-- Left Column (Food & Trackers) is now SECOND in HTML so it stacks underneath -->
                     <div class="left-col">
                         <div class="window-label" id="ui_food_title">🥗 What Food I Eat Today</div>
                         <div class="tracker-box">
@@ -462,7 +452,7 @@
                             </div>
                         </div>
                     </div>
-                </div> <!-- End Grid -->
+                </div> 
 
                 <div style="grid-column: 1 / -1;">
                     <div class="animated-feedback" id="feedbackDisplay"></div>
@@ -520,6 +510,25 @@
     </div>
 
     <script>
+        // === FIREBASE CONFIGURATION ===
+        const firebaseConfig = {
+            apiKey: "AIzaSyDN8nbjDkdQ4zJhdM_Z5jfyydqqRfYQQsE",
+            authDomain: "glowup-20921.firebaseapp.com",
+            databaseURL: "https://glowup-20921-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "glowup-20921",
+            storageBucket: "glowup-20921.firebasestorage.app",
+            messagingSenderId: "335226476174",
+            appId: "1:335226476174:web:c9e0e6ef0b5d2febde5bdf",
+            measurementId: "G-JJTBR0C41R"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const rtdb = firebase.database();
+        const countdownRef = rtdb.ref('countdowns');
+
+
         // === AUDIO SYNTHESIZER ===
         const audioState = { soundEnabled: true, audioContext: null, masterGain: null };
         function initAudio() { if (audioState.audioContext) return; const AudioContext = window.AudioContext || window.webkitAudioContext; if (!AudioContext) return; audioState.audioContext = new AudioContext(); audioState.masterGain = audioState.audioContext.createGain(); audioState.masterGain.gain.value = 0.2; audioState.masterGain.connect(audioState.audioContext.destination); }
@@ -540,7 +549,6 @@
         function attachSoundEvents() { document.querySelectorAll(".game-button:not(:disabled), .rpg-btn:not(:disabled), input[type='checkbox'], .task-item").forEach(el => { if (!el.hasAttribute('data-sound-bound')) { el.addEventListener("mouseenter", () => playPixelSound("hover")); el.addEventListener("click", () => { if(!el.classList.contains('task-item')) playPixelSound("click"); }); el.setAttribute('data-sound-bound', 'true'); } }); }
         window.addEventListener("click", forceUnlockAudioContext); window.addEventListener("touchstart", forceUnlockAudioContext);
 
-        // RPG Typewriter
         function typeWriter(elementId, text, speed) {
             const el = document.getElementById(elementId);
             el.innerHTML = "";
@@ -561,7 +569,6 @@
             type();
         }
 
-        // Layout Toggle
         function toggleLayout(isDesktop) {
             const body = document.getElementById('bodyMain');
             if(isDesktop) body.classList.add('desktop-mode'); else body.classList.remove('desktop-mode');
@@ -586,12 +593,40 @@
         let entryLocked = false;
         let toastTimer = null;
 
-        // Settings / Countdowns
+        // Settings / Countdowns using Firebase
         const WORK_SETTINGS_KEY = 'glowUpLifeChapterCountdown_v2';
         let workSettings = loadWorkSettings();
+        
         function normalizeChapter(chapter = {}) { return { type: String(chapter.type || 'Work').slice(0,30), name: String(chapter.name || '').slice(0,80), endDate: String(chapter.endDate || '').slice(0,10) }; }
-        function loadWorkSettings() { try { const saved = JSON.parse(localStorage.getItem(WORK_SETTINGS_KEY)); if (Array.isArray(saved)) return saved.map(normalizeChapter).filter(c => c.name || c.endDate); } catch(e) {} return []; }
+        
+        function loadWorkSettings() { 
+            try { 
+                const saved = JSON.parse(localStorage.getItem(WORK_SETTINGS_KEY)); 
+                if (Array.isArray(saved)) return saved.map(normalizeChapter).filter(c => c.name || c.endDate); 
+            } catch(e) {} 
+            return []; 
+        }
+        
         function persistWorkSettings() { localStorage.setItem(WORK_SETTINGS_KEY, JSON.stringify(workSettings)); }
+
+        // Live update from Firebase
+        countdownRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (Array.isArray(data)) {
+                workSettings = data.map(normalizeChapter);
+            } else if (data && typeof data === 'object') {
+                workSettings = Object.values(data).map(normalizeChapter);
+            } else {
+                workSettings = [];
+            }
+            persistWorkSettings();
+            updateWorkCountdownCard();
+            
+            const modal = document.getElementById('workSettingsModal');
+            if (modal && modal.classList.contains('show')) {
+                renderChapterEditors();
+            }
+        });
         
         function renderChapterEditors() {
             const box = document.getElementById('chapterEditors'); if (!box) return;
@@ -611,7 +646,9 @@
             
             document.getElementById('addChapterButton').style.display = list.length >= 4 ? 'none' : 'inline-flex';
         }
+        
         function readChapterEditors() { return [...document.querySelectorAll('.chapter-editor')].map(row => normalizeChapter({ type: row.querySelector('.chapter-type')?.value, name: row.querySelector('.chapter-name')?.value.trim(), endDate: row.querySelector('.chapter-date')?.value })).filter(c => c.name || c.endDate); }
+        
         function addChapterEditor() { workSettings = readChapterEditors(); if (workSettings.length < 4) workSettings.push({type:'School',name:'',endDate:''}); renderChapterEditors(); }
         
         function removeChapterEditor(index) { 
@@ -624,8 +661,25 @@
         
         function openWorkSettings() { renderChapterEditors(); document.getElementById('workSettingsModal').classList.add('show'); }
         function closeWorkSettings() { document.getElementById('workSettingsModal').classList.remove('show'); }
-        function saveWorkSettings() { workSettings = readChapterEditors(); persistWorkSettings(); updateWorkCountdownCard(); closeWorkSettings(); }
-        function clearWorkSettings() { workSettings = []; persistWorkSettings(); renderChapterEditors(); updateWorkCountdownCard(); }
+        
+        // Pushes directly to Firebase
+        function saveWorkSettings() { 
+            workSettings = readChapterEditors(); 
+            persistWorkSettings(); 
+            updateWorkCountdownCard(); 
+            closeWorkSettings(); 
+            countdownRef.set(workSettings).catch(err => console.error(err));
+        }
+        
+        // Clears from Firebase
+        function clearWorkSettings() { 
+            workSettings = []; 
+            persistWorkSettings(); 
+            renderChapterEditors(); 
+            updateWorkCountdownCard(); 
+            countdownRef.set([]).catch(err => console.error(err));
+        }
+        
         function parseLocalDate(dateString) { if (!dateString) return null; const parts = dateString.split('-').map(Number); if (parts.length !== 3 || parts.some(Number.isNaN)) return null; return new Date(parts[0], parts[1]-1, parts[2], 0, 0, 0, 0); }
         
         function getWorkCountdownInfo(referenceDate = new Date()) {
@@ -637,6 +691,7 @@
                 return { ...chapter, quitDate:end, daysLeft };
             }).filter(Boolean);
         }
+        
         function chapterEmoji(type) { return ({Work:'💼',School:'🎓',Project:'🛠️',Other:'✨'})[type] || '✨'; }
         
         function updateWorkCountdownCard() {
@@ -646,7 +701,9 @@
             card.innerHTML = infos.map(info => `<div class="countdown-mini"><div class="countdown-company">${chapterEmoji(info.type)} ${escapeHTML(info.name)}</div><span class="countdown-number">${info.daysLeft > 0 ? info.daysLeft + ' days left' : 'LAST DAY ✨'}</span></div>`).join('');
             card.classList.add('show');
         }
+        
         function escapeHTML(value) { return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch])); }
+        
         function checkCompletedCountdowns() {
             const infos = getWorkCountdownInfo(new Date());
             const finished = infos.filter(info => info.daysLeft <= 0);
@@ -655,10 +712,13 @@
                 big.innerHTML = finished.map(info => `<div style="margin:8px 0;padding:10px;border:2px solid #111;border-radius:14px;background:#fff;">${chapterEmoji(info.type)} ${escapeHTML(info.name)}</div>`).join('');
                 document.getElementById('workCelebrationModal').classList.add('show');
                 playPixelSound('success'); confetti({ particleCount: 120, spread: 80, origin: { y: 0.65 } });
+                
                 workSettings = workSettings.filter(chapter => { const end = parseLocalDate(chapter.endDate); return end && Math.ceil((end - startOfDay(new Date())) / 86400000) > 0; });
                 persistWorkSettings(); updateWorkCountdownCard();
+                countdownRef.set(workSettings).catch(err => console.error(err)); // Push cleared countdown to Firebase
             }
         }
+        
         function closeWorkCelebration() { document.getElementById('workCelebrationModal').classList.remove('show'); }
         function startOfDay(value) { const d = new Date(value); d.setHours(0,0,0,0); return d; }
         function addDays(value, amount) { const d = startOfDay(value); d.setDate(d.getDate() + amount); return d; }
@@ -669,6 +729,7 @@
         function showToast(message) { const toast = document.getElementById('gameToast'); toast.textContent = message; toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove('show'), 1450); }
         function flyUFO() { const ufo = document.getElementById('ufoCelebration'); ufo.classList.remove('fly'); void ufo.offsetWidth; ufo.classList.add('fly'); }
         function getCompletedDateSet() { return new Set((dbData?.logs || []).map(parseLogDate).filter(Boolean).map(d => d.getTime())); }
+        
         function buildPendingDates() {
             const logs = (dbData?.logs || []).map(parseLogDate).filter(Boolean).sort((a,b)=>a-b);
             const today = startOfDay(new Date()); const yesterday = addDays(today,-1);
@@ -678,6 +739,7 @@
             for (let d = addDays(latest,1); d <= yesterday; d = addDays(d,1)) { if (!completed.has(d.getTime())) pendingDates.push(new Date(d)); }
             activeEntryDate = pendingDates.length ? pendingDates[0] : today;
         }
+        
         function updateCatchupUI() {
             const banner = document.getElementById('catchupBanner'); const today = startOfDay(new Date());
             if (activeEntryDate < today) {
@@ -713,10 +775,7 @@
                 if (!raw) return null;
                 const parsed = JSON.parse(raw);
                 return parsed && typeof parsed === 'object' && parsed.config ? parsed : null;
-            } catch (e) {
-                console.warn('Database cache could not be read', e);
-                return null;
-            }
+            } catch (e) { return null; }
         }
 
         function saveCachedDatabase(data) {
@@ -724,9 +783,7 @@
             try {
                 localStorage.setItem(DB_CACHE_KEY, JSON.stringify(data));
                 localStorage.setItem(DB_CACHE_META_KEY, String(Date.now()));
-            } catch (e) {
-                console.warn('Database cache could not be saved', e);
-            }
+            } catch (e) {}
         }
 
         function applyDatabaseToUI(data, { allowFullRender = true } = {}) {
@@ -734,22 +791,11 @@
             dbData = data;
 
             if (allowFullRender) {
-                if (dbData.logs && dbData.logs.length) {
-                    const lastRow = dbData.logs[dbData.logs.length - 1];
-                    if (lastRow.Countdown_Settings) {
-                        try {
-                            const parsed = JSON.parse(lastRow.Countdown_Settings);
-                            if (Array.isArray(parsed)) { workSettings = parsed; persistWorkSettings(); }
-                        } catch (e) {}
-                    }
-                }
                 buildPendingDates();
                 setupDate();
                 applyConfigText();
                 generateTasks();
             } else {
-                // A live refresh finished after the user already started filling the page.
-                // Keep the selected date and every current control untouched.
                 updateWorkCountdownCard();
                 checkIfAlreadyCompleted();
             }
@@ -780,7 +826,6 @@
             const cached = loadCachedDatabase();
             let renderedCache = false;
 
-            // Cache-first: show the last successful database immediately instead of waiting on Google Sheets.
             if (cached) {
                 applyDatabaseToUI(cached);
                 renderedCache = true;
@@ -793,12 +838,9 @@
                 applyDatabaseToUI(fresh, { allowFullRender: !(renderedCache && userHasInteracted) });
                 hideOpeningLoader();
             } catch (error) {
-                console.error('Error fetching live database', error);
                 hideOpeningLoader();
-
-                if (renderedCache) {
-                    showToast('Using saved data - live sync is taking a break.');
-                } else {
+                if (renderedCache) { showToast('Using saved data - live sync is taking a break.'); } 
+                else {
                     const loading = document.getElementById('loading');
                     loading.style.display = 'block';
                     loading.innerText = 'Could not reach the Galaxy Sheet. Check your connection and refresh.';
@@ -838,12 +880,10 @@
             setUI('ui_work_hours', 'UI_Work_Hours', 'Work Hours:');
             setUI('ui_time_to', 'UI_Time_To', 'to');
 
-            // Celebration Modal
             setUI('ui_celeb_title', 'UI_Celeb_Title', 'Chapter Completed!');
             setUI('ui_celeb_text', 'UI_Celeb_Text', 'This countdown has reached its end. Time for a new beginning! 💖');
             setUI('btn_yay', 'UI_Btn_Yay', 'YAY! ✨');
 
-            // RPG Summary Modal
             setUI('ui_summary_title', 'UI_Summary_Title', 'LEVEL CLEARED! 🏆');
             setUI('ui_btn_continue', 'UI_Btn_Continue', '[ CONTINUE ]');
 
@@ -927,8 +967,6 @@
             
             dailyList.innerHTML = ""; weeklyList.innerHTML = ""; monthlyList.innerHTML = "";
 
-            // Travel mode is tracker-only: no Daily / Weekly / Monthly quests are required.
-            // Daily_8 and Daily_9 are reserved for the travel trackers below.
             if (currentDayType === 'Travel') {
                 attachSoundEvents();
                 setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
@@ -949,7 +987,6 @@
             }
 
             for(let i=1; i<=10; i++) {
-                // Daily_8 and Daily_9 are used only as Travel trackers.
                 if (i === 8 || i === 9) continue;
                 const key = 'Daily_' + i;
                 if(c[key] && c[key].text) {
@@ -1045,7 +1082,6 @@
             document.getElementById('feedbackDisplay').innerText = msg;
         }
 
-        // Handle RPG Game Summary Modal
         function triggerGameSummary(payload, exp) {
             const c = dbData.config || {};
             let template = (c['UI_Summary_Temp'] && c['UI_Summary_Temp'].text) ? c['UI_Summary_Temp'].text : "Day saved! You fueled up with {health} {food}. Mood: {mood}. Meditation: {meditation}. Alcohol: {alcohol}. Total EXP gained: {exp} ✨";
@@ -1086,11 +1122,9 @@
             if (entryLocked) return;
             const c = dbData.config || {};
             
-            // "NO EXCUSES" VALIDATION & EXP CALCULATION
             let allDailiesChecked = true;
             let totalExp = 0;
             const dailyCheckboxes = document.querySelectorAll('#dailyTasks input[type="checkbox"]');
-            // Travel mode intentionally has zero required quest checkboxes.
             dailyCheckboxes.forEach(cb => { 
                 if (!cb.checked) allDailiesChecked = false; 
                 else totalExp += 10; 

@@ -309,9 +309,331 @@
             .chapter-fields { grid-template-columns:1fr; }
             .chapter-fields .settings-field:last-child { grid-column:auto; }
         }
+
+
+        /* === 2026 SPACE GAME REDESIGN === */
+        :root {
+            --ink: #f8f7ff;
+            --ink-soft: #aeb3cb;
+            --surface: rgba(19, 22, 39, .82);
+            --surface-soft: rgba(255,255,255,.055);
+            --line: rgba(255,255,255,.10);
+            --line-strong: rgba(255,255,255,.18);
+            --pink: #ff86b7;
+            --pink-deep: #ff5f9d;
+            --pink-soft: rgba(255,95,157,.13);
+            --violet: #a58cff;
+            --cyan: #7de8ff;
+            --mint: #8bf5c2;
+            --yellow: #ffd978;
+            --space: #080a16;
+            --space-2: #10152b;
+            --shadow: 0 24px 70px rgba(0,0,0,.34);
+            --shadow-soft: 0 10px 28px rgba(0,0,0,.22);
+            --app-width: min(100%, 540px);
+        }
+
+        html { background:#080a16; }
+        body {
+            color: var(--ink);
+            background:
+                radial-gradient(circle at 14% 8%, rgba(255,95,157,.22), transparent 24%),
+                radial-gradient(circle at 88% 14%, rgba(125,232,255,.16), transparent 25%),
+                radial-gradient(circle at 50% 90%, rgba(165,140,255,.16), transparent 32%),
+                linear-gradient(180deg, #080a16 0%, #0d1020 48%, #090b16 100%);
+            background-attachment: fixed;
+        }
+
+        body::before {
+            opacity: .58;
+            background-image:
+                radial-gradient(circle, rgba(255,255,255,.76) 0 1px, transparent 1.2px),
+                radial-gradient(circle, rgba(125,232,255,.5) 0 1px, transparent 1.3px),
+                radial-gradient(circle, rgba(255,134,183,.45) 0 1px, transparent 1.2px);
+            background-size: 72px 72px, 117px 117px, 163px 163px;
+            background-position: 0 0, 22px 31px, 49px 18px;
+            animation: starDrift 28s linear infinite;
+        }
+        body::after {
+            content:"";
+            position:fixed;
+            inset:0;
+            pointer-events:none;
+            z-index:0;
+            background:linear-gradient(180deg, transparent 0 74%, rgba(255,95,157,.05) 100%);
+        }
+        @keyframes starDrift { to { background-position:72px 72px, -95px 148px, 212px -145px; } }
+
+        .galaxy-stage { place-items:start center; padding:10px; }
+        .app-shell {
+            position:relative;
+            margin:8px 0 20px;
+            border:1px solid rgba(255,255,255,.11);
+            border-radius:30px;
+            background:linear-gradient(180deg, rgba(19,23,42,.92), rgba(12,15,29,.94));
+            box-shadow: 0 32px 100px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.06);
+            backdrop-filter: blur(22px);
+        }
+        .app-shell::before {
+            content:"";
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            border-radius:inherit;
+            background:linear-gradient(120deg, rgba(255,255,255,.03), transparent 25%, transparent 70%, rgba(125,232,255,.035));
+        }
+
+        .topbar {
+            position:sticky;
+            top:0;
+            z-index:35;
+            padding:12px 13px;
+            background:rgba(11,14,27,.86);
+            border-bottom:1px solid rgba(255,255,255,.09);
+            backdrop-filter: blur(18px);
+        }
+        .brand-badge {
+            width:38px; height:38px; border-radius:13px;
+            background:linear-gradient(145deg,rgba(255,134,183,.2),rgba(125,232,255,.12));
+            border:1px solid rgba(255,255,255,.16);
+            box-shadow:0 0 24px rgba(255,95,157,.16);
+        }
+        h1 { color:#fff; font-size:18px; letter-spacing:.06em; }
+        .settings-button { background:rgba(255,255,255,.06)!important; color:#fff!important; border-color:rgba(255,255,255,.12)!important; }
+
+        .mission-hud {
+            display:grid;
+            grid-template-columns:auto 1fr auto;
+            gap:10px;
+            align-items:center;
+            margin:0 0 12px;
+            padding:10px 11px;
+            border:1px solid rgba(255,255,255,.10);
+            border-radius:16px;
+            background:linear-gradient(135deg, rgba(255,255,255,.065), rgba(255,255,255,.028));
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.05);
+        }
+        .mission-level {
+            width:42px; height:42px; display:grid; place-items:center;
+            border-radius:14px;
+            background:linear-gradient(145deg, #ff6ca8, #9a7cff);
+            box-shadow:0 9px 22px rgba(255,95,157,.2);
+            font-family:var(--font-title); font-weight:900; font-size:11px;
+        }
+        .mission-copy { min-width:0; }
+        .mission-kicker { color:var(--cyan); font-size:8px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+        .mission-title { margin-top:2px; font-size:12px; font-weight:900; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .mission-progress { margin-top:6px; height:6px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; }
+        .mission-progress > span { display:block; width:0%; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--pink),var(--violet),var(--cyan)); box-shadow:0 0 14px rgba(125,232,255,.25); transition:width .35s ease; }
+        .mission-percent { font-family:var(--font-title); font-size:12px; font-weight:900; color:#fff; }
+
+        .date-display { color:#8990ad; margin:2px 0 10px; font-size:9px; letter-spacing:.12em; }
+
+        .day-selector { gap:6px; margin-bottom:12px; padding:4px; border-radius:14px; background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.07); }
+        .game-button {
+            border-color:rgba(255,255,255,.12);
+            background:rgba(255,255,255,.055);
+            color:#eef0fb;
+            box-shadow:none;
+        }
+        .game-button:hover:not(:disabled) { box-shadow:0 8px 20px rgba(0,0,0,.16); background:rgba(255,255,255,.085); }
+        .game-button.active { background:linear-gradient(135deg,#ff6ba7,#9a7dff); color:white; border-color:transparent; box-shadow:0 9px 22px rgba(255,95,157,.16); }
+
+        .countdown-card.show { display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:12px; }
+        .countdown-mini {
+            position:relative;
+            overflow:hidden;
+            min-height:92px;
+            padding:14px 88px 13px 14px;
+            border:1px solid rgba(255,255,255,.12);
+            border-radius:18px;
+            background:
+                radial-gradient(circle at 78% 25%, rgba(125,232,255,.14), transparent 24%),
+                radial-gradient(circle at 18% 90%, rgba(255,95,157,.13), transparent 28%),
+                linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
+            box-shadow:0 14px 30px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.06);
+            text-align:left;
+        }
+        .countdown-mini::before {
+            content:"";
+            position:absolute;
+            width:74px; height:74px; right:13px; top:8px;
+            border-radius:50%;
+            background:radial-gradient(circle at 36% 30%, #fff 0 3%, #b8f5ff 4% 11%, #7c7aff 34%, #ff6aa7 62%, rgba(255,106,167,.08) 64%);
+            box-shadow:0 0 28px rgba(125,232,255,.22), 0 0 54px rgba(255,95,157,.14);
+            animation:planetFloat 4.4s ease-in-out infinite;
+        }
+        .countdown-mini::after {
+            content:"🛸";
+            position:absolute;
+            right:51px; top:5px;
+            font-size:21px;
+            filter:drop-shadow(0 6px 10px rgba(0,0,0,.28));
+            animation:ufoOrbit 5.2s ease-in-out infinite;
+        }
+        @keyframes planetFloat { 50% { transform:translateY(-4px) scale(1.03); } }
+        @keyframes ufoOrbit { 0%,100% { transform:translate(-22px,8px) rotate(-8deg); } 50% { transform:translate(20px,44px) rotate(8deg); } }
+        .countdown-company { color:#c8ccdf; font-size:10px; letter-spacing:.03em; }
+        .countdown-number { margin-top:6px; color:#fff; font-size:24px; letter-spacing:-.04em; text-shadow:0 0 18px rgba(255,134,183,.16); }
+        .countdown-sub { color:#8f96b2; }
+
+        .window-label {
+            border:0;
+            background:transparent;
+            color:#e9ebf6;
+            padding:0 2px;
+            margin:4px 0 8px;
+            font-size:9px;
+            letter-spacing:.12em;
+            box-shadow:none;
+        }
+        .section-label-special { background:transparent; color:#e9ebf6; }
+        .tracker-box {
+            background:rgba(255,255,255,.035);
+            border:1px solid rgba(255,255,255,.085);
+            border-radius:16px;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+        }
+        .tracker-row label { color:#dfe2ef; }
+        .tracker-row select, .tracker-row textarea, .time-inputs input, .settings-field input, .settings-field select {
+            background:rgba(8,10,22,.64);
+            color:#f5f6fb;
+            border-color:rgba(255,255,255,.12);
+        }
+        .tracker-row select option, .settings-field select option { background:#12162a; color:#fff; }
+        .tracker-row textarea::placeholder { color:#727993; }
+        .food-options { gap:6px; }
+        .radio-btn label, .travel-check label {
+            background:rgba(255,255,255,.045);
+            color:#dce0ee;
+            border-color:rgba(255,255,255,.10);
+        }
+        .radio-btn input[type="radio"]:checked + label, .travel-check input:checked + label {
+            background:linear-gradient(135deg,rgba(255,95,157,.95),rgba(154,125,255,.95));
+            border-color:transparent;
+            box-shadow:0 8px 20px rgba(255,95,157,.16);
+        }
+
+        .task-item {
+            position:relative;
+            overflow:hidden;
+            min-height:48px;
+            background:linear-gradient(135deg,rgba(255,255,255,.055),rgba(255,255,255,.028));
+            border-color:rgba(255,255,255,.085);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+        }
+        .task-item::after {
+            content:"+XP";
+            flex:0 0 auto;
+            margin-left:8px;
+            font-size:8px;
+            color:#7de8ff;
+            font-weight:900;
+            letter-spacing:.08em;
+        }
+        .task-item:hover { border-color:rgba(125,232,255,.2); box-shadow:0 10px 24px rgba(0,0,0,.15); }
+        .task-item.completed { background:linear-gradient(135deg,rgba(139,245,194,.10),rgba(125,232,255,.055)); opacity:.84; border-color:rgba(139,245,194,.18); }
+        .task-item.completed .task-text { text-decoration:line-through; text-decoration-color:rgba(255,255,255,.25); }
+        .task-item.completed::after { content:"DONE"; color:var(--mint); }
+        .task-item.upcoming { background:rgba(255,255,255,.025); }
+        .task-item.overdue { border-color:rgba(255,95,157,.35); background:rgba(255,95,157,.08); }
+        .task-text { color:#eef0f7; }
+        .task-item input[type="checkbox"] { accent-color:#ff6ca8; }
+
+        .time-inputs { background:rgba(255,255,255,.035); border-color:rgba(255,255,255,.08); color:#bbc0d6; }
+        .catchup-banner { background:rgba(255,95,157,.08); color:#ffd9e8; border-color:rgba(255,95,157,.22); }
+        #loading { background:rgba(125,232,255,.07); border-color:rgba(125,232,255,.18); color:#c8f7ff; }
+        .animated-feedback { color:#ffc4db; }
+
+        .primary-button {
+            position:relative;
+            overflow:hidden;
+            background:linear-gradient(110deg,#ff639f,#9b7cff 52%,#62d8f4);
+            color:#fff;
+            border:0;
+            box-shadow:0 13px 32px rgba(151,109,255,.25);
+        }
+        .primary-button::before {
+            content:"";
+            position:absolute;
+            inset:-50% auto -50% -32%;
+            width:24%;
+            transform:rotate(20deg);
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);
+            animation:buttonShine 3.8s ease-in-out infinite;
+        }
+        @keyframes buttonShine { 0%,65% { left:-38%; } 100% { left:125%; } }
+        .primary-button:disabled::before { display:none; }
+
+        .settings-modal, .rpg-modal, .work-celebration-modal { background:rgba(4,5,12,.66); }
+        .settings-card, .rpg-box, .work-celebration-card {
+            background:linear-gradient(180deg,#171b32,#101427);
+            color:#f5f6fb;
+            border-color:rgba(255,255,255,.11);
+            box-shadow:0 28px 90px rgba(0,0,0,.52);
+        }
+        .settings-head h2, .work-celebration-card h3 { color:#fff; }
+        .settings-close { background:rgba(255,255,255,.06); color:#fff; border-color:rgba(255,255,255,.12); }
+        .chapter-editor { background:rgba(255,255,255,.035); border-color:rgba(255,255,255,.12); }
+        .chapter-editor-head, .tracker-row label { color:#e9ebf5; }
+        .rpg-title { color:#ff8fbb; border-color:rgba(255,255,255,.12); }
+        .rpg-btn { background:linear-gradient(135deg,#ff649f,#8f7dff); }
+        .work-celebration-card p { color:#aeb3cb; }
+
+        .galaxy-loader { background:radial-gradient(circle at 28% 20%,rgba(255,95,157,.18),transparent 30%),linear-gradient(145deg,#080a16,#10142a,#080a16); }
+        .ufo-loader-dome { background:linear-gradient(145deg,#e9fbff,#8bdff0); border-color:#fff; }
+        .ufo-loader-body { background:linear-gradient(180deg,#fff,#ff81b4 52%,#8b6cff); border-color:#fff; }
+        .ufo-loader-body span { background:#c9fbff; }
+        .ufo-loader-beam { background:linear-gradient(180deg,rgba(125,232,255,.44),rgba(255,95,157,0)); }
+
+        .floating-cosmo {
+            position:fixed;
+            z-index:2;
+            pointer-events:none;
+            opacity:.78;
+            filter:drop-shadow(0 10px 18px rgba(0,0,0,.28));
+        }
+        .floating-cosmo.ufo-one { left:max(2vw,8px); top:14vh; font-size:28px; animation:floatUfoA 9s ease-in-out infinite; }
+        .floating-cosmo.planet-one { right:max(2vw,8px); top:72vh; font-size:24px; animation:floatPlanet 11s ease-in-out infinite; }
+        @keyframes floatUfoA { 0%,100%{transform:translate(0,0) rotate(-8deg)} 50%{transform:translate(12px,-18px) rotate(7deg)} }
+        @keyframes floatPlanet { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-13px) rotate(10deg)} }
+
+        @media (max-width: 500px) {
+            .galaxy-stage { padding:0; }
+            .app-shell { margin:0; width:100%; min-height:100vh; border-left:0; border-right:0; border-radius:0; }
+            .topbar { padding-top:max(11px, env(safe-area-inset-top)); }
+            .screen-content { padding:10px 10px calc(96px + env(safe-area-inset-bottom)); }
+            .brand-badge { width:34px; height:34px; }
+            .mission-hud { padding:9px; gap:8px; border-radius:14px; }
+            .mission-level { width:38px; height:38px; border-radius:12px; }
+            .countdown-mini { min-height:86px; padding:12px 78px 12px 12px; border-radius:16px; }
+            .countdown-mini::before { width:65px; height:65px; right:9px; top:10px; }
+            .countdown-mini::after { right:43px; top:8px; font-size:18px; }
+            .countdown-number { font-size:21px; }
+            .task-item { min-height:45px; padding:9px 10px; }
+            .tracker-box { padding:9px; }
+            #btnComplete {
+                position:fixed;
+                left:10px; right:10px; bottom:max(10px, env(safe-area-inset-bottom));
+                width:auto;
+                z-index:45;
+                margin:0;
+                border-radius:16px;
+                min-height:50px;
+                box-shadow:0 16px 34px rgba(0,0,0,.36), 0 10px 28px rgba(151,109,255,.28);
+            }
+            .floating-cosmo { display:none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; }
+        }
+
     </style>
 </head>
 <body id="bodyMain">
+    <div class="floating-cosmo ufo-one" aria-hidden="true">🛸</div>
+    <div class="floating-cosmo planet-one" aria-hidden="true">🪐</div>
 
     <div class="galaxy-loader" id="galaxy-loader">
         <div class="ufo-loader">
@@ -338,14 +660,23 @@
             <div class="screen-content">
                 
                 <div style="grid-column: 1 / -1;">
+                    <div class="mission-hud" id="missionHud">
+                        <div class="mission-level" id="missionLevel">LV 01</div>
+                        <div class="mission-copy">
+                            <div class="mission-kicker">TODAY'S MISSION</div>
+                            <div class="mission-title" id="missionTitle">Preparing your quest...</div>
+                            <div class="mission-progress"><span id="missionProgressBar"></span></div>
+                        </div>
+                        <div class="mission-percent" id="missionPercent">0%</div>
+                    </div>
                     <div class="date-display" id="dateDisplay">Loading Date...</div>
                     <div class="catchup-banner" id="catchupBanner"></div>
                     <div class="countdown-card" id="workCountdownCard"></div>
 
                     <div class="day-selector">
-                        <button class="game-button active" id="btnWork" onclick="setDayType('Work')">💼 Work Day</button>
-                        <button class="game-button" id="btnOff" onclick="setDayType('Off')">🌿 Day Off</button>
-                        <button class="game-button" id="btnTravel" onclick="setDayType('Travel')">✈️ Travel</button>
+                        <button class="game-button active" id="btnWork" onclick="setDayType('Work')">💼 Work Quest</button>
+                        <button class="game-button" id="btnOff" onclick="setDayType('Off')">🌿 Recovery</button>
+                        <button class="game-button" id="btnTravel" onclick="setDayType('Travel')">✈️ Travel Quest</button>
                     </div>
 
                     <div class="time-inputs" id="timeInputs">
@@ -456,7 +787,7 @@
 
                 <div style="grid-column: 1 / -1;">
                     <div class="animated-feedback" id="feedbackDisplay"></div>
-                    <button class="game-button primary-button" id="btnComplete" onclick="saveProgress()">Complete My Day! 💖</button>
+                    <button class="game-button primary-button" id="btnComplete" onclick="saveProgress()">Finish Mission 🚀</button>
                     <div id="loading">🚀 Sending to your Galaxy Sheet...</div>
                 </div>
 
@@ -698,7 +1029,7 @@
             const card = document.getElementById('workCountdownCard'); if (!card) return;
             const infos = getWorkCountdownInfo(new Date());
             if (!infos.length) { card.classList.remove('show'); card.innerHTML=''; return; }
-            card.innerHTML = infos.map(info => `<div class="countdown-mini"><div class="countdown-company">${chapterEmoji(info.type)} ${escapeHTML(info.name)}</div><span class="countdown-number">${info.daysLeft > 0 ? info.daysLeft + ' days left' : 'LAST DAY ✨'}</span></div>`).join('');
+            card.innerHTML = infos.map(info => `<div class="countdown-mini"><div class="countdown-company">${chapterEmoji(info.type)} ${escapeHTML(info.name)}</div><span class="countdown-number">${info.daysLeft > 0 ? info.daysLeft + ' days left' : 'LAST DAY ✨'}</span><div class="countdown-sub">MISSION COUNTDOWN • KEEP GOING 🚀</div></div>`).join('');
             card.classList.add('show');
         }
         
@@ -757,6 +1088,8 @@
                 el.addEventListener('change', () => { userHasInteracted = true; }, { passive:true });
             });
             ['btnWork','btnOff','btnTravel'].forEach(id => document.getElementById(id)?.addEventListener('click', () => { userHasInteracted = true; }));
+            document.addEventListener('change', (e) => { if (e.target && e.target.matches('input[type="checkbox"]')) updateMissionHUD(); });
+            setTimeout(updateMissionHUD, 50);
         });
         
         function setupDate() { document.getElementById('dateDisplay').innerText = formatEntryDate(activeEntryDate); updateCatchupUI(); updateWorkCountdownCard(); }
@@ -922,7 +1255,7 @@
             const journalArea = document.getElementById('trackJournal');
             if(journalArea) journalArea.placeholder = getT('UI_Journal_Placeholder', 'What\'s your story today?');
             
-            if(!entryLocked) setUI('btnComplete', 'UI_Btn_Complete', 'Complete My Day! 💖');
+            if(!entryLocked) setUI('btnComplete', 'UI_Btn_Complete', 'Finish Mission 🚀');
         }
 
         function setEntryLocked(locked) {
@@ -935,7 +1268,7 @@
             document.querySelectorAll('.task-item').forEach(el => el.classList.toggle('locked-control', locked));
             
             if (locked) btn.innerText = (c['UI_Btn_Completed'] && c['UI_Btn_Completed'].text) ? c['UI_Btn_Completed'].text : 'Already Completed Today! ✨';
-            else btn.innerText = (c['UI_Btn_Complete'] && c['UI_Btn_Complete'].text) ? c['UI_Btn_Complete'].text : 'Complete My Day! 💖';
+            else btn.innerText = (c['UI_Btn_Complete'] && c['UI_Btn_Complete'].text) ? c['UI_Btn_Complete'].text : 'Finish Mission 🚀';
         }
 
         function checkIfAlreadyCompleted() { if (!dbData) return; setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime())); }
@@ -951,6 +1284,7 @@
             document.getElementById('travelTrackers').classList.toggle('show', isTravel);
 
             generateTasks();
+            setTimeout(updateMissionHUD, 0);
         }
 
         function generateTasks() {
@@ -970,6 +1304,7 @@
             if (currentDayType === 'Travel') {
                 attachSoundEvents();
                 setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
+                updateMissionHUD();
                 return;
             }
 
@@ -1035,6 +1370,7 @@
             }
 
             attachSoundEvents(); setEntryLocked(getCompletedDateSet().has(activeEntryDate.getTime()));
+            updateMissionHUD();
         }
 
         function createTaskHTML(id, text, extra = "") { return `<li class="task-item" id="item_${id}"><input type="checkbox" id="${id}" onchange="styleCheckbox(this, 'item_${id}')"><span class="task-text">${text}</span>${extra}</li>`; }
@@ -1044,12 +1380,37 @@
             if(checkbox.checked) {
                 playPixelSound('coin'); document.getElementById(itemId).classList.add('completed');
             } else { document.getElementById(itemId).classList.remove('completed'); }
+            updateMissionHUD();
         }
 
         function styleTravelCheckbox(checkbox) {
             if (entryLocked) { checkbox.checked = !checkbox.checked; return; }
             if (checkbox.checked) playPixelSound('coin');
             updateLiveFeedback();
+            updateMissionHUD();
+        }
+
+        function updateMissionHUD() {
+            const bar = document.getElementById('missionProgressBar');
+            const pct = document.getElementById('missionPercent');
+            const title = document.getElementById('missionTitle');
+            const level = document.getElementById('missionLevel');
+            if (!bar || !pct || !title || !level) return;
+
+            const visibleChecks = [...document.querySelectorAll('#dailyTasks input[type="checkbox"], #weeklyContainer input[type="checkbox"], #monthlyContainer input[type="checkbox"], #travelTrackers input[type="checkbox"]')]
+                .filter(el => el.offsetParent !== null && !el.disabled);
+            const done = visibleChecks.filter(el => el.checked).length;
+            const total = visibleChecks.length;
+            const progress = total ? Math.round((done / total) * 100) : 0;
+            bar.style.width = progress + '%';
+            pct.textContent = progress + '%';
+            level.textContent = 'LV ' + String(Math.max(1, Math.ceil((done + 1) / 3))).padStart(2,'0');
+
+            const dayNames = { Work:'Work Quest', Off:'Recovery Quest', Travel:'Travel Quest' };
+            if (progress >= 100 && total) title.textContent = 'MISSION CLEARED — READY TO SAVE ✨';
+            else if (progress >= 70) title.textContent = `${dayNames[currentDayType] || 'Daily Quest'} • Final stretch!`;
+            else if (progress >= 35) title.textContent = `${dayNames[currentDayType] || 'Daily Quest'} • Momentum unlocked`;
+            else title.textContent = `${dayNames[currentDayType] || 'Daily Quest'} • ${done}/${total || 0} quests complete`;
         }
 
         function generateAutomatedFeedback(payload) {
